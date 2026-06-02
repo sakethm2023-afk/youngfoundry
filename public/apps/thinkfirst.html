@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThinkFirst — Young Foundry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── YOUNG FOUNDRY DESIGN TOKENS ─── */
+:root {
+  --yf-navy: #07111E;
+  --yf-navy-mid: #0D1B2A;
+  --yf-navy-light: #1B2D44;
+  --yf-gold: #C9A84C;
+  --yf-gold-warm: #A07830;
+  --yf-gold-pale: #E8D5A3;
+  --yf-gold-muted: #8B7340;
+  --yf-cream: #F5EFE0;
+  --yf-cream-dark: #D4C9B0;
+  --yf-surface: rgba(201,168,76,0.06);
+  --yf-surface-hover: rgba(201,168,76,0.12);
+  --yf-border: rgba(201,168,76,0.15);
+  --yf-border-strong: rgba(201,168,76,0.3);
+  --yf-text-primary: #F5EFE0;
+  --yf-text-secondary: #8B9AAF;
+  --yf-text-muted: #5A6A80;
+  --yf-coral: #D4836B;
+  --yf-sage: #7BA384;
+  --yf-sky: #6B9FBF;
+  --yf-plum: #9B7BB5;
+  --yf-amber: #D4A54B;
+  --yf-terracotta: #C47A5A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+#yf-thinkfirst {
+  min-height: 100vh;
+  background: linear-gradient(165deg, var(--yf-navy) 0%, var(--yf-navy-mid) 50%, var(--yf-navy-light) 100%);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--yf-text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes yf-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes yf-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes yf-slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes yf-glow { 0%,100% { box-shadow: 0 0 20px rgba(201,168,76,0.2); } 50% { box-shadow: 0 0 40px rgba(201,168,76,0.45); } }
+@keyframes yf-spinStar { from { transform: rotate(0deg) scale(0); } to { transform: rotate(360deg) scale(1); } }
+
+.yf-animate-up { animation: yf-slideUp 0.5s ease both; }
+.yf-animate-up-1 { animation: yf-slideUp 0.5s ease 0.1s both; }
+.yf-animate-up-2 { animation: yf-slideUp 0.5s ease 0.2s both; }
+.yf-animate-up-3 { animation: yf-slideUp 0.5s ease 0.3s both; }
+.yf-animate-pulse { animation: yf-pulse 2s infinite; }
+.yf-animate-glow { animation: yf-slideUp 0.5s ease, yf-glow 2s infinite; }
+
+/* ─── LAYOUT ─── */
+.yf-container { max-width: 900px; margin: 0 auto; padding: 24px 16px; position: relative; z-index: 1; }
+.yf-container-sm { max-width: 800px; margin: 0 auto; padding: 20px 16px; position: relative; z-index: 1; }
+
+/* ─── CARDS ─── */
+.yf-card {
+  background: linear-gradient(145deg, rgba(201,168,76,0.06), rgba(201,168,76,0.02));
+  border: 1px solid var(--yf-border);
+  border-radius: 14px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.yf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15);
+}
+.yf-card.locked {
+  background: rgba(255,255,255,0.02);
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.yf-card.locked:hover { transform: none; box-shadow: none; }
+
+/* ─── PANELS ─── */
+.yf-panel {
+  background: var(--yf-surface);
+  border: 1px solid var(--yf-border);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+/* ─── BUTTONS ─── */
+.yf-btn {
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.yf-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+.yf-btn:active { transform: translateY(0); filter: brightness(0.95); }
+.yf-btn-gold {
+  background: linear-gradient(135deg, var(--yf-gold), var(--yf-gold-warm));
+  color: var(--yf-navy);
+}
+.yf-btn-outline {
+  background: var(--yf-surface);
+  border: 1px solid var(--yf-border);
+  color: var(--yf-cream);
+}
+.yf-btn-step {
+  background: var(--yf-surface-hover);
+  border: 1px solid var(--yf-border-strong);
+  color: var(--yf-cream);
+  padding: 10px 14px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+.yf-btn[disabled] {
+  background: rgba(255,255,255,0.03);
+  color: var(--yf-text-muted);
+  cursor: not-allowed;
+}
+.yf-btn[disabled]:hover { transform: none; filter: none; }
+
+/* ─── PILLS ─── */
+.yf-pill {
+  background: var(--yf-surface);
+  border: 1px solid var(--yf-border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+}
+.yf-pill button { background: none; border: none; color: inherit; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0; }
+
+/* ─── TAGS ─── */
+.yf-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* ─── FLOWCHART ─── */
+.yf-flow-node {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 380px;
+  margin: 0 auto;
+  width: 100%;
+  transition: all 0.3s;
+  color: var(--yf-cream);
+}
+.yf-flow-node.terminal { border-radius: 20px; padding: 9px 18px; }
+.yf-flow-node.process { border-radius: 8px; padding: 11px 16px; }
+.yf-flow-node.decision { border-radius: 8px; padding: 11px 16px; }
+.yf-flow-node.active { animation: yf-pulse 1.5s infinite; }
+.yf-flow-arrow { text-align: center; color: rgba(201,168,76,0.27); font-size: 14px; line-height: 1; margin: 2px 0; }
+
+/* ─── GRID ─── */
+.yf-challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+/* ─── FORM ─── */
+.yf-textarea {
+  width: 100%;
+  min-height: 100px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--yf-border);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--yf-cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+}
+.yf-textarea:focus { border-color: var(--yf-gold); }
+
+/* ─── BACKGROUND ─── */
+.yf-bg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+}
+.yf-bg-shape {
+  position: absolute;
+  border: 1px solid rgba(201,168,76,0.05);
+  animation: yf-float 5s ease-in-out infinite;
+}
+
+/* ─── MODAL ─── */
+.yf-modal-overlay {
+  position: fixed; inset: 0; background: rgba(7,17,30,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px;
+}
+.yf-modal {
+  background: linear-gradient(145deg, var(--yf-navy-mid), var(--yf-navy-light));
+  border-radius: 20px; padding: 32px; max-width: 340px; text-align: center;
+  border: 1px solid var(--yf-border-strong);
+}
+
+/* ─── DONE BADGE ─── */
+.yf-done-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--yf-gold); border-radius: 50%;
+  width: 22px; height: 22px; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; color: var(--yf-navy); font-weight: 700;
+}
+
+/* ─── PROGRESS ─── */
+.yf-progress-bar { display: flex; gap: 3px; margin-bottom: 8px; }
+.yf-progress-seg { flex: 1; height: 3px; border-radius: 2px; transition: background 0.4s; }
+.yf-progress-seg.active { background: linear-gradient(90deg, var(--yf-gold), var(--yf-gold-warm)); }
+.yf-progress-seg.inactive { background: rgba(201,168,76,0.1); }
+
+/* ─── SCROLLBAR ─── */
+#yf-thinkfirst ::-webkit-scrollbar { width: 5px; }
+#yf-thinkfirst ::-webkit-scrollbar-track { background: rgba(201,168,76,0.05); }
+#yf-thinkfirst ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 3px; }
+#yf-thinkfirst ::selection { background: rgba(201,168,76,0.3); color: var(--yf-cream); }
+
+/* ─── MAZE GRID ─── */
+.yf-maze { display: grid; grid-template-columns: repeat(5, 46px); gap: 3px; }
+.yf-maze-cell {
+  width: 46px; height: 46px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: all 0.3s;
+}
+
+/* ─── SORT VIS ─── */
+.yf-sort-bar {
+  border-radius: 10px; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; padding: 8px 0;
+  transition: all 0.3s; width: 54px;
+}
+
+/* ─── SEARCH PERSON ─── */
+.yf-person {
+  border-radius: 12px; padding: 12px 14px; text-align: center;
+  transition: all 0.3s; min-width: 68px;
+}
+
+/* ─── MONO TEXT ─── */
+.yf-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── UTILITY ─── */
+.yf-flex { display: flex; }
+.yf-flex-col { display: flex; flex-direction: column; }
+.yf-flex-center { display: flex; align-items: center; justify-content: center; }
+.yf-flex-wrap { display: flex; flex-wrap: wrap; }
+.yf-gap-4 { gap: 4px; }
+.yf-gap-6 { gap: 6px; }
+.yf-gap-8 { gap: 8px; }
+.yf-gap-10 { gap: 10px; }
+.yf-gap-12 { gap: 12px; }
+.yf-gap-14 { gap: 14px; }
+.yf-text-center { text-align: center; }
+.yf-w-full { width: 100%; }
+.yf-mt-12 { margin-top: 12px; }
+.yf-mt-16 { margin-top: 16px; }
+.yf-mb-4 { margin-bottom: 4px; }
+.yf-mb-6 { margin-bottom: 6px; }
+.yf-mb-8 { margin-bottom: 8px; }
+.yf-mb-10 { margin-bottom: 10px; }
+.yf-mb-12 { margin-bottom: 12px; }
+.yf-mb-16 { margin-bottom: 16px; }
+.yf-mb-20 { margin-bottom: 20px; }
+.yf-hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="yf-thinkfirst">
+  <!-- Background -->
+  <div class="yf-bg">
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.03">
+      <defs><pattern id="yfgrid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#C9A84C" stroke-width="0.5"/>
+      </pattern></defs>
+      <rect width="100%" height="100%" fill="url(#yfgrid)"/>
+    </svg>
+    <div class="yf-bg-shape" style="width:60px;height:60px;border-radius:50%;top:8%;left:3%;animation-duration:4s"></div>
+    <div class="yf-bg-shape" style="width:110px;height:110px;border-radius:16px;top:26%;left:23%;animation-duration:5s;animation-delay:0.7s"></div>
+    <div class="yf-bg-shape" style="width:160px;height:160px;border-radius:50%;top:44%;left:43%;animation-duration:6s;animation-delay:1.4s"></div>
+    <div class="yf-bg-shape" style="width:210px;height:210px;border-radius:16px;top:62%;left:63%;animation-duration:7s;animation-delay:2.1s"></div>
+    <div class="yf-bg-shape" style="width:260px;height:260px;border-radius:50%;top:80%;left:83%;animation-duration:8s;animation-delay:2.8s"></div>
+  </div>
+
+  <!-- Screens get rendered here -->
+  <div id="yf-app"></div>
+
+  <!-- Concept Modal -->
+  <div id="yf-modal" class="yf-modal-overlay yf-hidden" onclick="YF.closeModal()">
+    <div class="yf-modal yf-animate-glow" onclick="event.stopPropagation()">
+      <div id="yf-modal-icon" style="font-size:52px;margin-bottom:12px;animation:yf-spinStar 0.8s ease"></div>
+      <h2 style="font-size:20px;color:var(--yf-gold);margin-bottom:6px;font-weight:700">Concept Unlocked!</h2>
+      <h3 id="yf-modal-name" style="font-size:17px;color:var(--yf-cream);margin-bottom:8px"></h3>
+      <p id="yf-modal-desc" style="color:var(--yf-text-secondary);font-size:14px;line-height:1.5;margin-bottom:20px"></p>
+      <button class="yf-btn yf-btn-gold" onclick="YF.closeModal()">Awesome! 🎉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  THINKFIRST — Young Foundry — Vanilla JS Engine
+// ═══════════════════════════════════════════════════════
+(function() {
+'use strict';
+
+const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
+
+// ─── YF LOGO SVG ───
+const YF_LOGO = (size = 48) => `<svg width="${size}" height="${size}" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="4" y1="8" x2="14" y2="22" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="24" y1="8" x2="14" y2="22" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="14" y1="22" x2="14" y2="36" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="28" y1="8" x2="28" y2="36" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="28" y1="8" x2="40" y2="8" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="28" y1="22" x2="38" y2="22" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="4" y1="42" x2="44" y2="42" stroke="#C9A84C" stroke-width="0.8" opacity="0.35"/>
+</svg>`;
+
+// ─── STATE ───
+const state = {
+  screen: 'home',
+  currentChallenge: null,
+  phase: 'think',
+  completed: [],
+  stars: 0,
+  journalEntries: [],
+  prediction: '',
+  result: null,
+  earnedStars: 0,
+  // Builder states
+  seqAvailable: [],
+  seqPlaced: [],
+  decNode: 'd1',
+  decPath: [],
+  decResult: null,
+  loopStep: 0,
+  loopCount: 0,
+  loopDone: false,
+  searchIdx: 0,
+  searchTallest: null,
+  searchComparisons: [],
+  searchDone: false,
+  sortArr: [],
+  sortJ: 0,
+  sortPass: 0,
+  sortSwaps: 0,
+  sortComparing: [0,1],
+  sortDone: false,
+  mazePos: [0,0],
+  mazePath: [[0,0]],
+  mazePlan: [],
+  mazePlanning: true,
+  mazeRunning: false,
+  mazeDone: false,
+  reflection: '',
+};
+
+// ─── CHALLENGE DATA ───
+const CHALLENGES = [
+  {
+    id:1, title:"Making a Sandwich", emoji:"🥪", difficulty:"Starter", color:"var(--yf-sage)", colorHex:"#7BA384",
+    description:"Break down sandwich-making into steps. What comes first?",
+    concept:"Sequential Thinking",
+    lesson:"Every program runs steps in ORDER. Miss a step or swap two, and you get peanut butter on the outside!",
+    correctOrder:[
+      {id:"s1",text:"Get two slices of bread",icon:"🍞"},
+      {id:"s2",text:"Spread peanut butter on one slice",icon:"🥜"},
+      {id:"s3",text:"Spread jelly on the other slice",icon:"🍇"},
+      {id:"s4",text:"Press both slices together",icon:"🤲"},
+      {id:"s5",text:"Cut the sandwich in half",icon:"🔪"},
+    ],
+    flowchartType:"sequence",
+    thinkPrompt:"What would happen if you tried to spread peanut butter before getting the bread?",
+  },
+  {
+    id:2, title:"Should I Wear a Jacket?", emoji:"🧥", difficulty:"Starter", color:"var(--yf-coral)", colorHex:"#D4836B",
+    description:"Use YES/NO decisions to figure out what to wear!",
+    concept:"Conditional Logic (If/Else)",
+    lesson:"Computers make decisions using IF-THEN-ELSE. 'IF it's cold, THEN wear a jacket, ELSE wear a t-shirt.' Every app you use is full of these!",
+    decisions:[
+      {id:"d1",question:"Is it raining outside?",emoji:"🌧️",yes:"d2",no:"d3"},
+      {id:"d2",question:"Is it also cold?",emoji:"🥶",yes:{result:"Wear a warm raincoat! 🧥☔"},no:{result:"Grab a light rain jacket! 🌂"}},
+      {id:"d3",question:"Is it cold outside?",emoji:"❄️",yes:{result:"Wear a warm jacket! 🧥"},no:{result:"Just a t-shirt is fine! 👕"}},
+    ],
+    flowchartType:"decision",
+    thinkPrompt:"Can you think of MORE conditions? What about wind or snow?",
+  },
+  {
+    id:3, title:"Brushing Your Teeth", emoji:"🪥", difficulty:"Starter", color:"var(--yf-sky)", colorHex:"#6B9FBF",
+    description:"Some steps repeat! Learn about loops.",
+    concept:"Loops (Repetition)",
+    lesson:"Instead of writing 'brush brush brush' 100 times, we say 'REPEAT 100 TIMES: brush'. Loops save us from writing the same thing over and over!",
+    loopSteps:[
+      {id:"l1",text:"Pick up toothbrush",icon:"🪥",type:"once"},
+      {id:"l2",text:"Put toothpaste on brush",icon:"🫧",type:"once"},
+      {id:"l3",text:"Brush top teeth",icon:"😁",type:"loop",count:30},
+      {id:"l4",text:"Brush bottom teeth",icon:"😬",type:"loop",count:30},
+      {id:"l5",text:"Spit and rinse",icon:"💦",type:"once"},
+    ],
+    flowchartType:"loop",
+    thinkPrompt:"What if you didn't have a loop and had to write 'brush' 30 times? That's why programmers love loops!",
+  },
+  {
+    id:4, title:"Find the Tallest Friend", emoji:"📏", difficulty:"Explorer", color:"var(--yf-amber)", colorHex:"#D4A54B",
+    description:"Compare heights one by one — like a computer searches!",
+    concept:"Linear Search Algorithm",
+    lesson:"When a computer looks through a list to find something, it checks ONE item at a time. This is called LINEAR SEARCH — it goes in a line!",
+    searchData:[
+      {name:"Alex",height:120,emoji:"🧒"},
+      {name:"Sam",height:135,emoji:"👧"},
+      {name:"Jordan",height:128,emoji:"🧑"},
+      {name:"Riley",height:142,emoji:"👦"},
+      {name:"Casey",height:131,emoji:"👧"},
+    ],
+    flowchartType:"search",
+    thinkPrompt:"You checked everyone one by one. Is there a faster way if they were already sorted by height?",
+  },
+  {
+    id:5, title:"Sort Your Bookshelf", emoji:"📚", difficulty:"Explorer", color:"var(--yf-gold)", colorHex:"#C9A84C",
+    description:"Put books in order by swapping neighbors — Bubble Sort!",
+    concept:"Bubble Sort Algorithm",
+    lesson:"Bubble Sort compares TWO neighbors at a time and swaps them if they're in the wrong order. The biggest 'bubbles up' to the end!",
+    sortData:[5,2,8,1,9],
+    bookEmojis:["📕","📗","📘","📙","📓"],
+    flowchartType:"sort",
+    thinkPrompt:"Count how many swaps you made. What if the list was already sorted? Would you still need to check?",
+  },
+  {
+    id:6, title:"Robot Maze Navigator", emoji:"🤖", difficulty:"Inventor", color:"var(--yf-plum)", colorHex:"#9B7BB5",
+    description:"Guide a robot through a maze using your own flowchart!",
+    concept:"Algorithm Design",
+    lesson:"Real programmers PLAN their solution as a flowchart BEFORE writing code. You just did what professional developers do every day!",
+    maze:[[0,0,1,0,0],[1,0,1,0,1],[0,0,0,0,0],[0,1,1,1,0],[0,0,0,0,0]],
+    start:[0,0], end:[4,4],
+    flowchartType:"freeform",
+    thinkPrompt:"Your flowchart is your PLAN. A coder writes the plan first, then translates it to code. You're already thinking like a coder!",
+  },
+];
+
+const CONCEPTS = {
+  1:{name:"Sequence",icon:"➡️",desc:"Steps run in order, one after another"},
+  2:{name:"Selection",icon:"🔀",desc:"Make decisions with IF/ELSE"},
+  3:{name:"Iteration",icon:"🔄",desc:"Repeat steps with loops"},
+  4:{name:"Search",icon:"🔍",desc:"Find things by checking one at a time"},
+  5:{name:"Sorting",icon:"📊",desc:"Put things in order by comparing"},
+  6:{name:"Design",icon:"📐",desc:"Plan before you build"},
+};
+
+// ─── HELPERS ───
+function flowNode(type, text, colorHex, active) {
+  const cls = `yf-flow-node ${type}${active ? ' active' : ''}`;
+  const bg = active ? colorHex + '28' : colorHex + '12';
+  const brd = active ? colorHex : colorHex + '44';
+  const label = type === 'decision' ? `<span style="color:${colorHex};font-size:10px;display:block;margin-bottom:2px;font-weight:600;letter-spacing:1px">◆ DECISION</span>` : '';
+  return `<div class="${cls}" style="background:${bg};border:1.5px solid ${brd}">${label}${text}</div>`;
+}
+const flowArrow = () => '<div class="yf-flow-arrow">↓</div>';
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function isLocked(ch) {
+  if (ch.difficulty === 'Explorer') return state.completed.filter(c => c <= 3).length < 2;
+  if (ch.difficulty === 'Inventor') return state.completed.filter(c => c <= 5).length < 4;
+  return false;
+}
+
+// ─── RENDER ENGINE ───
+function render() {
+  const app = $('#yf-app');
+  switch (state.screen) {
+    case 'home': app.innerHTML = renderHome(); break;
+    case 'challenge': app.innerHTML = renderChallenge(); break;
+    case 'journal': app.innerHTML = renderJournal(); break;
+    case 'concepts': app.innerHTML = renderConcepts(); break;
+  }
+}
+
+// ─── HOME SCREEN ───
+function renderHome() {
+  const groups = [
+    {label:'Starter',icon:'🌱',filter:'Starter'},
+    {label:'Explorer',icon:'🗺️',filter:'Explorer'},
+    {label:'Inventor',icon:'🚀',filter:'Inventor'},
+  ];
+
+  return `<div class="yf-container">
+    <div class="yf-text-center yf-mb-20 yf-animate-up" style="margin-bottom:32px">
+      <div class="yf-flex-center yf-mb-12">${YF_LOGO(56)}</div>
+      <div style="font-size:10px;font-weight:300;letter-spacing:4px;color:var(--yf-text-secondary);text-transform:uppercase;margin-bottom:2px">Young Foundry</div>
+      <h1 style="font-size:clamp(28px,5vw,40px);font-weight:700;color:var(--yf-cream);letter-spacing:-0.5px;margin-bottom:4px">Think<span style="color:var(--yf-gold)">First</span></h1>
+      <p style="color:var(--yf-text-secondary);font-size:14px;font-weight:300">Learn to think like a coder — before writing a single line of code</p>
+      <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--yf-gold),transparent);margin:16px auto 0;opacity:0.5"></div>
+    </div>
+
+    <div class="yf-flex yf-flex-wrap yf-gap-10 yf-animate-up-1" style="justify-content:center;margin-bottom:28px">
+      <div class="yf-pill"><span>⭐</span> <span style="font-weight:600;color:var(--yf-gold)">${state.stars}</span> <span style="color:var(--yf-text-secondary);font-size:12px">Stars</span></div>
+      <div class="yf-pill"><span>✅</span> <span style="font-weight:600;color:var(--yf-gold)">${state.completed.length}/${CHALLENGES.length}</span> <span style="color:var(--yf-text-secondary);font-size:12px">Done</span></div>
+      <div class="yf-pill"><button onclick="YF.goTo('concepts')" style="color:var(--yf-gold-pale)">🧩 Concepts</button></div>
+      <div class="yf-pill"><button onclick="YF.goTo('journal')" style="color:var(--yf-gold-pale)">📓 Journal</button></div>
+    </div>
+
+    ${groups.map((g, gi) => {
+      const chs = CHALLENGES.filter(c => c.difficulty === g.filter);
+      return `<div class="yf-animate-up-${Math.min(gi + 2, 3)}" style="margin-bottom:28px">
+        <div class="yf-flex yf-gap-8" style="align-items:center;margin-bottom:12px">
+          <span style="font-size:16px">${g.icon}</span>
+          <h2 style="font-size:13px;color:var(--yf-text-secondary);font-weight:500;letter-spacing:1px;text-transform:uppercase">${g.label}</h2>
+          <div style="flex:1;height:1px;background:var(--yf-border);margin-left:4px"></div>
+        </div>
+        <div class="yf-challenge-grid">
+          ${chs.map(ch => {
+            const done = state.completed.includes(ch.id);
+            const locked = isLocked(ch);
+            return `<div class="yf-card${locked?' locked':''}" ${!locked?`onclick="YF.startChallenge(${ch.id})"`:''} style="${done?`border-color:${ch.colorHex}44`:''}">
+              ${done?'<div class="yf-done-badge">✓</div>':''}
+              <div style="font-size:30px;margin-bottom:8px">${ch.emoji}</div>
+              <h3 style="font-size:15px;font-weight:600;margin-bottom:4px;color:var(--yf-cream)">${ch.title}</h3>
+              <p style="font-size:12px;color:var(--yf-text-secondary);margin-bottom:10px;line-height:1.5">${ch.description}</p>
+              <span class="yf-tag" style="background:${ch.colorHex}18;color:${ch.colorHex};border:1px solid ${ch.colorHex}25">${ch.concept}</span>
+              ${locked?'<div style="margin-top:8px;font-size:11px;color:var(--yf-text-muted)">🔒 Complete more challenges to unlock</div>':''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div class="yf-text-center" style="padding-top:20px;padding-bottom:12px;opacity:0.3">
+      <div style="width:60px;height:1px;background:var(--yf-gold);margin:0 auto 10px;opacity:0.4"></div>
+      <span style="font-size:10px;color:var(--yf-text-muted);letter-spacing:2px">WHERE YOUNG MINDS BUILD</span>
+    </div>
+  </div>`;
+}
+
+// ─── CHALLENGE SCREEN ───
+function renderChallenge() {
+  const ch = state.currentChallenge;
+  const phases = ['think','build','compare','reflect'];
+  const labels = {think:'🤔 Think',build:'🔨 Build',compare:'⚖️ Compare',reflect:'💡 Reflect'};
+  const pi = phases.indexOf(state.phase);
+
+  let content = '';
+  switch (state.phase) {
+    case 'think': content = renderThink(ch); break;
+    case 'build': content = renderBuild(ch); break;
+    case 'compare': content = renderCompare(ch); break;
+    case 'reflect': content = renderReflect(ch); break;
+  }
+
+  return `<div class="yf-container-sm">
+    <div class="yf-flex yf-gap-12 yf-mb-20" style="align-items:center">
+      <button class="yf-btn yf-btn-outline" onclick="YF.goTo('home')" style="font-size:13px;padding:8px 14px">← Back</button>
+      <div>
+        <h2 style="font-size:20px;font-weight:600;color:var(--yf-cream)">${ch.emoji} ${ch.title}</h2>
+        <span class="yf-tag" style="background:${ch.colorHex}18;color:${ch.colorHex};border:1px solid ${ch.colorHex}25">${ch.concept}</span>
+      </div>
+    </div>
+    <div class="yf-progress-bar">
+      ${phases.map((p,i) => `<div class="yf-progress-seg ${i <= pi ? 'active' : 'inactive'}"></div>`).join('')}
+    </div>
+    <div class="yf-flex yf-mb-20" style="justify-content:space-between;font-size:11px;color:var(--yf-text-muted)">
+      ${phases.map(p => `<span style="${state.phase===p?'color:var(--yf-gold);font-weight:600':''}">${labels[p]}</span>`).join('')}
+    </div>
+    <div class="yf-animate-up">${content}</div>
+  </div>`;
+}
+
+function renderThink(ch) {
+  return `<div class="yf-panel" style="padding:24px">
+    <h3 style="font-size:17px;margin-bottom:10px;color:var(--yf-gold-pale);font-weight:600">🤔 Think First!</h3>
+    <p style="color:var(--yf-text-secondary);line-height:1.6;margin-bottom:16px;font-size:14px">Before we start building, take a moment to PREDICT what will happen. Real coders always think about the problem before touching the keyboard!</p>
+    <div style="background:rgba(201,168,76,0.08);border-radius:12px;padding:14px;margin-bottom:16px;border:1px solid rgba(201,168,76,0.15)">
+      <p style="font-size:14px;color:var(--yf-gold);font-weight:500">💭 ${ch.thinkPrompt}</p>
+    </div>
+    <textarea class="yf-textarea" id="yf-prediction" placeholder="Write your prediction here... What do you think will happen?" oninput="YF.state.prediction=this.value">${state.prediction}</textarea>
+    <button class="yf-btn yf-btn-gold yf-w-full yf-mt-16" onclick="YF.setPhase('build')">I've thought about it → Let's Build! 🔨</button>
+  </div>`;
+}
+
+// ─── BUILD RENDERERS ───
+function renderBuild(ch) {
+  switch (ch.flowchartType) {
+    case 'sequence': return renderSequence(ch);
+    case 'decision': return renderDecision(ch);
+    case 'loop': return renderLoop(ch);
+    case 'search': return renderSearch(ch);
+    case 'sort': return renderSort(ch);
+    case 'freeform': return renderMaze(ch);
+  }
+}
+
+function renderSequence(ch) {
+  const placed = state.seqPlaced;
+  const avail = state.seqAvailable;
+  return `<div>
+    <div class="yf-panel yf-mb-12">
+      <h3 style="font-size:15px;margin-bottom:4px;color:var(--yf-gold)">📋 Your Flowchart</h3>
+      <p style="font-size:12px;color:var(--yf-text-muted);margin-bottom:16px">Tap steps below to add them in order. Tap a placed step to remove it.</p>
+      <div class="yf-flex-col yf-gap-6" style="min-height:80px">
+        ${flowNode('terminal','START','#7BA384',false)}
+        ${placed.map((item,i) => flowArrow() + `<div onclick="YF.seqRemove(${i})" style="cursor:pointer">${flowNode('process',item.icon+' '+item.text, ch.colorHex, false)}</div>`).join('')}
+        ${placed.length > 0 ? flowArrow() : ''}
+        ${flowNode('terminal','END','#D4836B',false)}
+      </div>
+    </div>
+    <div class="yf-panel">
+      <h3 style="font-size:13px;margin-bottom:12px;color:var(--yf-text-secondary)">Available Steps (tap to add):</h3>
+      <div class="yf-flex yf-flex-wrap yf-gap-8">
+        ${avail.map((item,i) => `<button class="yf-btn yf-btn-step" onclick="YF.seqAdd(${i})">${item.icon} ${item.text}</button>`).join('')}
+      </div>
+      ${avail.length === 0 ? `<button class="yf-btn yf-btn-gold yf-w-full yf-mt-12 yf-animate-pulse" onclick="YF.seqCheck()">Check My Flowchart! ✨</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderDecision(ch) {
+  const node = ch.decisions.find(d => d.id === state.decNode);
+  return `<div class="yf-panel">
+    <h3 style="font-size:15px;margin-bottom:16px;color:var(--yf-coral)">🌳 Decision Tree</h3>
+    ${flowNode('terminal','START','#7BA384',false)}
+    ${state.decPath.map(p =>
+      flowArrow() +
+      flowNode('decision', p.emoji+' '+p.question, '#C9A84C', false) +
+      `<div style="text-align:center;color:${p.answer==='yes'?'var(--yf-sage)':'var(--yf-coral)'};font-size:12px;font-weight:600;margin:4px 0">${p.answer==='yes'?'✅ YES':'❌ NO'}</div>`
+    ).join('')}
+    ${!state.decResult && node ? flowArrow() + flowNode('decision', node.emoji+' '+node.question, '#C9A84C', true) +
+      `<div class="yf-flex-center yf-gap-14 yf-mt-12">
+        <button class="yf-btn" style="background:rgba(123,163,132,0.15);border:2px solid var(--yf-sage);color:var(--yf-sage);font-weight:600" onclick="YF.decChoose('yes')">✅ YES</button>
+        <button class="yf-btn" style="background:rgba(212,131,107,0.15);border:2px solid var(--yf-coral);color:var(--yf-coral);font-weight:600" onclick="YF.decChoose('no')">❌ NO</button>
+      </div>` : ''}
+    ${state.decResult ? flowArrow() + flowNode('terminal', state.decResult, '#7BA384', false) : ''}
+  </div>`;
+}
+
+function renderLoop(ch) {
+  const step = ch.loopSteps[state.loopStep];
+  const isLoop = step?.type === 'loop';
+  return `<div class="yf-panel">
+    <h3 style="font-size:15px;margin-bottom:16px;color:var(--yf-sky)">🔄 Spot the Loops!</h3>
+    <div class="yf-flex-col yf-gap-6">
+      ${flowNode('terminal','START','#7BA384',false)}
+      ${ch.loopSteps.map((s,i) => {
+        const isActive = i === state.loopStep && !state.loopDone;
+        const isPast = i < state.loopStep || state.loopDone;
+        const col = isActive ? (s.type==='loop'?'#C9A84C':ch.colorHex) : isPast ? '#7BA38466' : '#5A6A80';
+        const loopBadge = isActive && s.type==='loop' ? `<div style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);background:var(--yf-gold);color:var(--yf-navy);border-radius:16px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">🔄 Loop ${state.loopCount+1}/3</div>` : '';
+        return flowArrow() + `<div style="position:relative">${flowNode('process', s.icon+' '+s.text+(s.type==='loop'?' (×'+s.count+')':''), col, isActive)}${loopBadge}</div>`;
+      }).join('')}
+      ${flowArrow()}
+      ${flowNode('terminal','END', state.loopDone?'#7BA384':'#5A6A80', false)}
+    </div>
+    ${!state.loopDone ? `<button class="yf-btn yf-btn-gold yf-w-full yf-mt-16" onclick="YF.loopAdvance()">
+      ${isLoop ? `🔄 Brush again! (${state.loopCount+1}/3)` : `Next Step → ${step?.icon}`}
+    </button>` : ''}
+  </div>`;
+}
+
+function renderSearch(ch) {
+  const current = ch.searchData[state.searchIdx];
+  return `<div class="yf-panel">
+    <h3 style="font-size:15px;margin-bottom:16px;color:var(--yf-amber)">🔍 Linear Search</h3>
+    <div class="yf-flex-center yf-flex-wrap yf-gap-8 yf-mb-20">
+      ${ch.searchData.map((p,i) => {
+        const isCurr = i === state.searchIdx && !state.searchDone;
+        const isTallest = state.searchTallest?.name === p.name;
+        return `<div class="yf-person" style="background:${isCurr?'rgba(201,168,76,0.12)':i<state.searchIdx?'var(--yf-surface)':'rgba(255,255,255,0.02)'};border:2px solid ${isCurr?'var(--yf-gold)':isTallest?'var(--yf-gold)':'transparent'}">
+          <div style="font-size:28px">${p.emoji}</div>
+          <div style="font-size:12px;font-weight:600;margin-top:4px;color:var(--yf-cream)">${p.name}</div>
+          <div style="font-size:11px;color:var(--yf-text-muted)">${i<=state.searchIdx||state.searchDone ? p.height+'cm' : '???'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    ${state.searchTallest ? `<div style="background:rgba(201,168,76,0.08);border-radius:10px;padding:10px;margin-bottom:12px;text-align:center;border:1px solid rgba(201,168,76,0.15)">
+      <span style="color:var(--yf-gold);font-size:13px">👑 Current Tallest: ${state.searchTallest.emoji} ${state.searchTallest.name} (${state.searchTallest.height}cm)</span>
+    </div>` : ''}
+    ${state.searchComparisons.length > 0 ? `<div class="yf-mb-12" style="max-height:110px;overflow-y:auto">
+      ${state.searchComparisons.map((c,i) => `<div class="yf-mono" style="font-size:12px;color:${c.wasNew?'var(--yf-gold)':'var(--yf-text-muted)'};margin-bottom:3px">Step ${i+1}: Checked ${c.checked} → ${c.result}</div>`).join('')}
+    </div>` : ''}
+    ${!state.searchDone ? `<button class="yf-btn yf-btn-gold yf-w-full" onclick="YF.searchStep()">Check ${current.emoji} ${current.name}</button>`
+      : `<div class="yf-text-center" style="color:var(--yf-sage);font-size:14px;font-weight:600">✅ Found the tallest: ${state.searchTallest.emoji} ${state.searchTallest.name}! Checked ${state.searchComparisons.length} people.</div>`}
+  </div>`;
+}
+
+function renderSort(ch) {
+  const arr = state.sortArr;
+  return `<div class="yf-panel">
+    <h3 style="font-size:15px;margin-bottom:4px;color:var(--yf-gold)">🫧 Bubble Sort</h3>
+    <p style="font-size:12px;color:var(--yf-text-muted);margin-bottom:16px">Compare neighbors and swap if needed!</p>
+    <div class="yf-flex-center yf-gap-10 yf-mb-20">
+      ${arr.map((val,idx) => {
+        const isCmp = state.sortComparing.includes(idx) && !state.sortDone;
+        const isSorted = idx >= arr.length - state.sortPass;
+        return `<div class="yf-sort-bar" style="height:${54+val*6}px;background:${isCmp?'linear-gradient(180deg,var(--yf-gold),var(--yf-gold-warm))':isSorted?'linear-gradient(180deg,var(--yf-sage),#7BA38488)':'var(--yf-surface)'};border:2px solid ${isCmp?'var(--yf-gold)':'var(--yf-border)'}">
+          <span style="font-size:18px">${ch.bookEmojis[ch.sortData.indexOf(val)]}</span>
+          <span style="font-size:14px;font-weight:700;margin-top:4px;color:var(--yf-cream)">${val}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="yf-flex-center yf-gap-14 yf-mb-12 yf-mono" style="font-size:12px">
+      <span style="color:var(--yf-gold)">Pass: ${state.sortPass+1}</span>
+      <span style="color:var(--yf-coral)">Swaps: ${state.sortSwaps}</span>
+    </div>
+    ${!state.sortDone ? `<button class="yf-btn yf-btn-gold yf-w-full" onclick="YF.sortStep()">
+      ${state.sortComparing[1] < arr.length - state.sortPass ? `Compare ${arr[state.sortComparing[0]]} and ${arr[state.sortComparing[1]]}` : 'Next Pass →'}
+    </button>` :
+    `<div class="yf-text-center" style="color:var(--yf-sage);font-size:14px;font-weight:600">✅ Sorted! Used ${state.sortSwaps} swaps across ${state.sortPass+1} passes.</div>`}
+  </div>`;
+}
+
+function renderMaze(ch) {
+  return `<div class="yf-panel">
+    <h3 style="font-size:15px;margin-bottom:4px;color:var(--yf-plum)">🤖 Plan Your Route First!</h3>
+    <p style="font-size:12px;color:var(--yf-text-muted);margin-bottom:16px">${state.mazePlanning?'Add directions to your plan, then run it!':state.mazeRunning?'Executing your plan...':'Done!'}</p>
+    <div class="yf-flex-center yf-mb-16">
+      <div class="yf-maze">
+        ${ch.maze.map((row,r) => row.map((cell,c) => {
+          const isPos = state.mazePos[0]===r && state.mazePos[1]===c;
+          const isEnd = r===ch.end[0] && c===ch.end[1];
+          const isPath = state.mazePath.some(p => p[0]===r && p[1]===c);
+          let bg = cell===1?'rgba(201,168,76,0.12)':isPos?'var(--yf-plum)':isEnd?'var(--yf-gold)':isPath?'rgba(155,123,181,0.15)':'rgba(255,255,255,0.03)';
+          let brd = isEnd?'2px solid var(--yf-gold)':cell===1?'1px solid rgba(201,168,76,0.08)':'1px solid transparent';
+          return `<div class="yf-maze-cell" style="background:${bg};border:${brd}">${isPos?'🤖':isEnd?'🏁':cell===1?'🧱':''}</div>`;
+        }).join('')).join('')}
+      </div>
+    </div>
+    ${state.mazePlan.length > 0 ? `<div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--yf-plum);display:flex;flex-wrap:wrap;gap:4px">
+      ${state.mazePlan.map(p => `<span style="background:rgba(155,123,181,0.15);padding:2px 8px;border-radius:6px">${p.label}</span>`).join('')}
+    </div>` : ''}
+    ${state.mazePlanning ? `
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
+        <button class="yf-btn" style="background:rgba(155,123,181,0.1);border:1px solid rgba(155,123,181,0.25);color:var(--yf-plum);padding:10px;font-size:13px" onclick="YF.mazeAdd(-1,0)">⬆️ Up</button>
+        <button class="yf-btn" style="background:rgba(155,123,181,0.1);border:1px solid rgba(155,123,181,0.25);color:var(--yf-plum);padding:10px;font-size:13px" onclick="YF.mazeAdd(1,0)">⬇️ Down</button>
+        <button class="yf-btn" style="background:rgba(155,123,181,0.1);border:1px solid rgba(155,123,181,0.25);color:var(--yf-plum);padding:10px;font-size:13px" onclick="YF.mazeAdd(0,-1)">⬅️ Left</button>
+        <button class="yf-btn" style="background:rgba(155,123,181,0.1);border:1px solid rgba(155,123,181,0.25);color:var(--yf-plum);padding:10px;font-size:13px" onclick="YF.mazeAdd(0,1)">➡️ Right</button>
+      </div>
+      <div class="yf-flex yf-gap-8">
+        <button class="yf-btn" style="flex:1;background:rgba(212,131,107,0.1);border:1px solid rgba(212,131,107,0.25);color:var(--yf-coral)" onclick="YF.mazeClear()">Clear</button>
+        <button class="yf-btn ${state.mazePlan.length>0?'yf-btn-gold':''}" style="flex:2" ${state.mazePlan.length===0?'disabled':''} onclick="YF.mazeRun()">▶️ Run My Plan!</button>
+      </div>
+    ` : ''}
+    ${state.mazeDone ? `<div class="yf-text-center yf-mt-12" style="font-size:14px;font-weight:600;color:${state.mazePos[0]===ch.end[0]&&state.mazePos[1]===ch.end[1]?'var(--yf-sage)':'var(--yf-coral)'}">
+      ${state.mazePos[0]===ch.end[0]&&state.mazePos[1]===ch.end[1] ? '🎉 Your plan worked! Robot reached the goal!' : "🤔 Robot didn't reach the goal. Try planning differently!"}
+    </div>` : ''}
+  </div>`;
+}
+
+// ─── COMPARE ───
+function renderCompare(ch) {
+  const stars = state.earnedStars;
+  const r = state.result;
+  let whatHappened = '';
+  if (r.correct !== undefined) whatHappened = r.correct ? 'You got the sequence perfect!' : "The order wasn't quite right — keep practicing!";
+  if (r.result) whatHappened = 'Decision result: ' + r.result;
+  if (r.tallest) whatHappened = `Found ${r.tallest} as tallest after ${r.comparisons} checks!`;
+  if (r.swaps !== undefined) whatHappened = `Sorted with ${r.swaps} swaps across ${r.passes} passes!`;
+  if (r.reached !== undefined) whatHappened = r.reached ? `Robot reached the goal in ${r.steps} steps!` : "Robot didn't reach the goal this time.";
+  if (r.completed) whatHappened = 'You completed the loop exercise!';
+
+  return `<div class="yf-animate-up">
+    <div class="yf-text-center yf-mb-20">
+      <div style="font-size:36px;margin-bottom:8px">
+        ${[0,1,2].map(i => `<span style="display:inline-block;${i<stars?`animation:yf-spinStar 0.5s ease ${i*0.2}s both`:'opacity:0.2'};font-size:34px">⭐</span>`).join('')}
+      </div>
+      <h3 style="font-size:20px;color:var(--yf-gold);font-weight:700">${stars===3?'Perfect! 🎉':stars===2?'Great job! 👏':'Good try! 💪'}</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="background:rgba(201,168,76,0.06);border-radius:14px;padding:16px;border:1px solid rgba(201,168,76,0.12)">
+        <h4 style="font-size:12px;color:var(--yf-gold);margin-bottom:8px;font-weight:600">🤔 What You Predicted</h4>
+        <p style="font-size:13px;color:var(--yf-text-secondary);line-height:1.5">${state.prediction || "You skipped the prediction — next time, try guessing first!"}</p>
+      </div>
+      <div style="background:rgba(123,163,132,0.06);border-radius:14px;padding:16px;border:1px solid rgba(123,163,132,0.12)">
+        <h4 style="font-size:12px;color:var(--yf-sage);margin-bottom:8px;font-weight:600">🔨 What Actually Happened</h4>
+        <p style="font-size:13px;color:var(--yf-text-secondary);line-height:1.5">${whatHappened}</p>
+      </div>
+    </div>
+    <button class="yf-btn yf-btn-gold yf-w-full" onclick="YF.setPhase('reflect')">Time to Reflect 💡</button>
+  </div>`;
+}
+
+// ─── REFLECT ───
+function renderReflect(ch) {
+  return `<div class="yf-panel yf-animate-up" style="padding:24px">
+    <h3 style="font-size:17px;margin-bottom:12px;color:var(--yf-gold-pale);font-weight:600">💡 What Did You Learn?</h3>
+    <div style="background:${ch.colorHex}0D;border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid ${ch.colorHex}20">
+      <div style="font-size:12px;color:${ch.colorHex};font-weight:600;margin-bottom:6px">🧩 Concept: ${ch.concept}</div>
+      <p style="font-size:14px;color:var(--yf-text-secondary);line-height:1.6">${ch.lesson}</p>
+    </div>
+    <p style="font-size:12px;color:var(--yf-text-muted);margin-bottom:8px">Write what you learned in your own words (this goes in your Thinking Journal!):</p>
+    <textarea class="yf-textarea" style="min-height:80px" id="yf-reflection" placeholder="I learned that..." oninput="YF.state.reflection=this.value">${state.reflection}</textarea>
+    <button class="yf-btn yf-btn-gold yf-w-full yf-mt-16" onclick="YF.completeChallenge()">Complete Challenge ✨</button>
+  </div>`;
+}
+
+// ─── JOURNAL ───
+function renderJournal() {
+  return `<div class="yf-container" style="max-width:700px">
+    <div class="yf-flex yf-gap-12 yf-mb-20" style="align-items:center">
+      <button class="yf-btn yf-btn-outline" onclick="YF.goTo('home')" style="padding:8px 14px">← Back</button>
+      <div class="yf-flex yf-gap-8" style="align-items:center">${YF_LOGO(28)}<h2 style="font-size:20px;font-weight:600">Thinking Journal</h2></div>
+    </div>
+    ${state.journalEntries.length === 0 ?
+      `<div class="yf-text-center" style="padding:40px;color:var(--yf-text-muted)"><div style="font-size:44px;margin-bottom:12px">📝</div><p>Complete challenges and write reflections to fill your journal!</p></div>`
+    : `<div class="yf-flex-col yf-gap-10">
+        ${state.journalEntries.map((e,i) => `<div class="yf-panel yf-animate-up" style="animation-delay:${i*0.1}s;padding:18px;border-radius:14px">
+          <div class="yf-flex" style="justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:14px;font-weight:600;color:var(--yf-gold)">${e.challenge}</span>
+            <span style="font-size:11px;color:var(--yf-text-muted)">${e.time}</span>
+          </div>
+          <div style="font-size:11px;color:var(--yf-plum);margin-bottom:6px">${e.concept}</div>
+          <p style="font-size:13px;color:var(--yf-text-secondary);line-height:1.5">${e.reflection}</p>
+        </div>`).join('')}
+      </div>`}
+  </div>`;
+}
+
+// ─── CONCEPTS ───
+function renderConcepts() {
+  return `<div class="yf-container" style="max-width:700px">
+    <div class="yf-flex yf-gap-12 yf-mb-20" style="align-items:center">
+      <button class="yf-btn yf-btn-outline" onclick="YF.goTo('home')" style="padding:8px 14px">← Back</button>
+      <div class="yf-flex yf-gap-8" style="align-items:center">${YF_LOGO(28)}<h2 style="font-size:20px;font-weight:600">Coding Concepts</h2></div>
+    </div>
+    <p style="color:var(--yf-text-secondary);font-size:14px;margin-bottom:20px;line-height:1.5">These are the building blocks of ALL computer programs. Every app, game, and website uses these ideas!</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+      ${Object.entries(CONCEPTS).map(([id,c]) => {
+        const unlocked = state.completed.includes(Number(id));
+        return `<div style="background:${unlocked?'var(--yf-surface)':'rgba(255,255,255,0.015)'};border-radius:14px;padding:18px;border:1px solid ${unlocked?'var(--yf-border-strong)':'rgba(255,255,255,0.04)'};opacity:${unlocked?1:0.4}">
+          <div style="font-size:30px;margin-bottom:8px">${unlocked?c.icon:'🔒'}</div>
+          <h3 style="font-size:14px;font-weight:600;margin-bottom:4px;color:${unlocked?'var(--yf-cream)':'var(--yf-text-muted)'}">${c.name}</h3>
+          <p style="font-size:12px;color:${unlocked?'var(--yf-text-secondary)':'var(--yf-text-muted)'};line-height:1.4">${unlocked?c.desc:'Complete the challenge to unlock!'}</p>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PUBLIC API — window.YF
+// ═══════════════════════════════════════════════════════
+window.YF = {
+  state,
+  goTo(screen) { state.screen = screen; render(); },
+  startChallenge(id) {
+    const ch = CHALLENGES.find(c => c.id === id);
+    if (!ch || isLocked(ch)) return;
+    state.currentChallenge = ch;
+    state.screen = 'challenge';
+    state.phase = 'think';
+    state.prediction = '';
+    state.result = null;
+    state.earnedStars = 0;
+    state.reflection = '';
+    // Init builders
+    if (ch.flowchartType === 'sequence') { state.seqAvailable = shuffle(ch.correctOrder); state.seqPlaced = []; }
+    if (ch.flowchartType === 'decision') { state.decNode = 'd1'; state.decPath = []; state.decResult = null; }
+    if (ch.flowchartType === 'loop') { state.loopStep = 0; state.loopCount = 0; state.loopDone = false; }
+    if (ch.flowchartType === 'search') { state.searchIdx = 0; state.searchTallest = null; state.searchComparisons = []; state.searchDone = false; }
+    if (ch.flowchartType === 'sort') { state.sortArr = [...ch.sortData]; state.sortJ = 0; state.sortPass = 0; state.sortSwaps = 0; state.sortComparing = [0,1]; state.sortDone = false; }
+    if (ch.flowchartType === 'freeform') { state.mazePos = [...ch.start]; state.mazePath = [[...ch.start]]; state.mazePlan = []; state.mazePlanning = true; state.mazeRunning = false; state.mazeDone = false; }
+    render();
+  },
+  setPhase(p) { state.phase = p; render(); },
+  completeChallenge() {
+    const ch = state.currentChallenge;
+    if (state.reflection.trim()) {
+      state.journalEntries.push({ challenge: ch.title, concept: ch.concept, reflection: state.reflection, time: new Date().toLocaleTimeString() });
+    }
+    if (!state.completed.includes(ch.id)) {
+      state.completed.push(ch.id);
+      state.stars += state.earnedStars;
+      state.screen = 'home';
+      render();
+      // Show concept modal
+      const concept = CONCEPTS[ch.id];
+      if (concept) {
+        $('#yf-modal-icon').textContent = concept.icon;
+        $('#yf-modal-name').textContent = concept.name;
+        $('#yf-modal-desc').textContent = concept.desc;
+        $('#yf-modal').classList.remove('yf-hidden');
+      }
+    } else {
+      state.screen = 'home';
+      render();
+    }
+  },
+  closeModal() { $('#yf-modal').classList.add('yf-hidden'); },
+
+  // Sequence
+  seqAdd(i) { state.seqPlaced.push(state.seqAvailable.splice(i,1)[0]); render(); },
+  seqRemove(i) { state.seqAvailable.push(state.seqPlaced.splice(i,1)[0]); render(); },
+  seqCheck() {
+    const ch = state.currentChallenge;
+    const correct = state.seqPlaced.every((p,i) => p.id === ch.correctOrder[i].id);
+    const s = correct ? 3 : state.seqPlaced.filter((p,i) => p.id === ch.correctOrder[i]?.id).length >= 3 ? 2 : 1;
+    state.result = { correct }; state.earnedStars = s; state.phase = 'compare'; render();
+  },
+
+  // Decision
+  decChoose(answer) {
+    const ch = state.currentChallenge;
+    const node = ch.decisions.find(d => d.id === state.decNode);
+    const next = answer === 'yes' ? node.yes : node.no;
+    state.decPath.push({ question: node.question, answer, emoji: node.emoji });
+    if (typeof next === 'object' && next.result) {
+      state.decResult = next.result;
+      state.result = { path: state.decPath, result: next.result }; state.earnedStars = 3; state.phase = 'compare';
+    } else { state.decNode = next; }
+    render();
+  },
+
+  // Loop
+  loopAdvance() {
+    const ch = state.currentChallenge;
+    const step = ch.loopSteps[state.loopStep];
+    if (step.type === 'loop' && state.loopCount < 3) { state.loopCount++; }
+    else {
+      state.loopCount = 0;
+      if (state.loopStep < ch.loopSteps.length - 1) state.loopStep++;
+      else { state.loopDone = true; state.result = { completed: true }; state.earnedStars = 3; state.phase = 'compare'; }
+    }
+    render();
+  },
+
+  // Search
+  searchStep() {
+    const ch = state.currentChallenge;
+    const current = ch.searchData[state.searchIdx];
+    if (!state.searchTallest || current.height > state.searchTallest.height) {
+      state.searchComparisons.push({ checked: current.name, result: 'New tallest!', wasNew: true });
+      state.searchTallest = current;
+    } else {
+      state.searchComparisons.push({ checked: current.name, result: state.searchTallest.name + ' is still taller', wasNew: false });
+    }
+    if (state.searchIdx < ch.searchData.length - 1) state.searchIdx++;
+    else { state.searchDone = true; state.result = { tallest: state.searchTallest.name, comparisons: state.searchComparisons.length }; state.earnedStars = 3; state.phase = 'compare'; }
+    render();
+  },
+
+  // Sort
+  sortStep() {
+    if (state.sortDone) return;
+    const arr = state.sortArr;
+    const a = state.sortJ, b = state.sortJ + 1;
+    if (b >= arr.length - state.sortPass) {
+      state.sortPass++;
+      if (state.sortPass >= arr.length - 1) { state.sortDone = true; state.result = { swaps: state.sortSwaps, passes: state.sortPass }; state.earnedStars = state.sortSwaps <= 5 ? 3 : 2; state.phase = 'compare'; render(); return; }
+      state.sortJ = 0; state.sortComparing = [0,1]; render(); return;
+    }
+    if (arr[a] > arr[b]) { [arr[a], arr[b]] = [arr[b], arr[a]]; state.sortSwaps++; }
+    state.sortJ++;
+    state.sortComparing = [state.sortJ, state.sortJ + 1];
+    render();
+  },
+
+  // Maze
+  mazeAdd(dx, dy) {
+    const labels = {'-1,0':'⬆️ Up','1,0':'⬇️ Down','0,-1':'⬅️ Left','0,1':'➡️ Right'};
+    state.mazePlan.push({ dx, dy, label: labels[dx+','+dy] }); render();
+  },
+  mazeClear() { state.mazePlan = []; render(); },
+  mazeRun() {
+    const ch = state.currentChallenge;
+    state.mazePlanning = false; state.mazeRunning = true;
+    state.mazePos = [...ch.start]; state.mazePath = [[...ch.start]];
+    render();
+    let stepIdx = 0;
+    const interval = setInterval(() => {
+      if (stepIdx >= state.mazePlan.length) {
+        clearInterval(interval);
+        state.mazeRunning = false;
+        state.mazeDone = true;
+        const reached = state.mazePos[0]===ch.end[0] && state.mazePos[1]===ch.end[1];
+        state.result = { reached, steps: state.mazePlan.length };
+        state.earnedStars = reached ? 3 : 1;
+        state.phase = 'compare';
+        render(); return;
+      }
+      const dir = state.mazePlan[stepIdx];
+      const nr = state.mazePos[0]+dir.dx, nc = state.mazePos[1]+dir.dy;
+      if (nr>=0 && nr<5 && nc>=0 && nc<5 && ch.maze[nr][nc]===0) {
+        state.mazePos = [nr, nc];
+        state.mazePath.push([nr, nc]);
+      }
+      stepIdx++;
+      render();
+    }, 500);
+  },
+};
+
+// ─── BOOT ───
+render();
+
+})();
+</script>
+</body>
+</html>

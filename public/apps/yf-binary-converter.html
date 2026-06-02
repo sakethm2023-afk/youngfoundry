@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Decoder Ring — Young Foundry</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A4A;
+    --navy-light: #263B66;
+    --navy-dark: #111D35;
+    --gold: #E8A838;
+    --gold-light: #F5C76B;
+    --gold-glow: rgba(232, 168, 56, 0.25);
+    --white: #FFFFFF;
+    --off-white: #F0F2F7;
+    --green: #4ADE80;
+    --blue-accent: #60A5FA;
+    --pink: #F472B6;
+    --red: #EF4444;
+    --font-fun: 'Fredoka', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-fun);
+    background: var(--navy-dark);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === FLOATING BINARY BACKGROUND === */
+  .bg-bits {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden; opacity: 0.06;
+  }
+  .bg-bits span {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--gold);
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    from { transform: translateY(110vh) rotate(0deg); opacity: 0.3; }
+    to { transform: translateY(-10vh) rotate(20deg); opacity: 0; }
+  }
+
+  /* === HEADER === */
+  .header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    position: relative; z-index: 1;
+  }
+  .header .brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--navy); border: 2px solid var(--gold);
+    border-radius: 50px; padding: 8px 22px;
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+  .brand-icon {
+    width: 32px; height: 32px;
+  }
+  .brand span {
+    font-weight: 700; font-size: 15px;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .header h1 {
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 700; margin-top: 18px;
+    background: linear-gradient(135deg, var(--white), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header h1 .emoji { -webkit-text-fill-color: initial; }
+  .header p.subtitle {
+    color: var(--gold-light); font-size: 15px; margin-top: 6px;
+    font-weight: 500; opacity: 0.85;
+  }
+
+  /* === MAIN CONTAINER === */
+  .container {
+    max-width: 800px; margin: 20px auto; padding: 0 16px 40px;
+    position: relative; z-index: 1;
+  }
+
+  /* === TAB NAVIGATION === */
+  .tabs {
+    display: flex; gap: 6px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 22px;
+  }
+  .tab-btn {
+    font-family: var(--font-fun);
+    background: var(--navy); border: 2px solid transparent;
+    color: #8899bb; padding: 10px 18px; border-radius: 30px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; gap: 6px;
+  }
+  .tab-btn:hover { color: var(--white); border-color: var(--navy-light); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--gold), #D4922E);
+    color: var(--navy-dark); border-color: var(--gold);
+    box-shadow: 0 4px 15px var(--gold-glow);
+    transform: scale(1.05);
+  }
+  .tab-btn .tab-emoji { font-size: 16px; }
+
+  /* === INPUT PANELS === */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeSlide 0.4s ease; }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .input-card {
+    background: var(--navy);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .input-card label {
+    display: block; font-size: 14px; font-weight: 600;
+    color: var(--gold-light); margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .input-card textarea, .input-card input[type="text"],
+  .input-card input[type="number"] {
+    width: 100%; padding: 14px 16px;
+    background: var(--navy-dark); border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px; color: var(--white);
+    font-family: var(--font-mono); font-size: 16px;
+    outline: none; transition: border-color 0.3s;
+    resize: vertical;
+  }
+  .input-card textarea:focus, .input-card input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px var(--gold-glow);
+  }
+  .input-card textarea { min-height: 80px; }
+
+  /* Color picker area */
+  .color-row {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .color-picker-wrap {
+    width: 70px; height: 70px; border-radius: 16px;
+    overflow: hidden; border: 3px solid var(--gold);
+    box-shadow: 0 0 15px var(--gold-glow); flex-shrink: 0;
+  }
+  .color-picker-wrap input[type="color"] {
+    width: 90px; height: 90px; border: none;
+    cursor: pointer; margin: -10px;
+  }
+  .color-hex {
+    font-family: var(--font-mono); font-size: 20px;
+    color: var(--gold-light); font-weight: 700;
+  }
+
+  /* File / Image drop zone */
+  .drop-zone {
+    border: 3px dashed rgba(232,168,56,0.4);
+    border-radius: 18px; padding: 36px 20px;
+    text-align: center; cursor: pointer;
+    transition: all 0.3s; background: rgba(232,168,56,0.03);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--gold); background: rgba(232,168,56,0.08);
+    box-shadow: 0 0 25px var(--gold-glow);
+  }
+  .drop-zone .dz-emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+  .drop-zone .dz-text { color: #8899bb; font-size: 14px; font-weight: 500; }
+  .drop-zone .dz-text strong { color: var(--gold-light); }
+  .drop-zone input[type="file"] { display: none; }
+
+  .file-info {
+    margin-top: 12px; padding: 10px 14px;
+    background: var(--navy-dark); border-radius: 12px;
+    font-size: 13px; color: var(--gold-light);
+    display: none; align-items: center; gap: 8px;
+  }
+  .file-info.visible { display: flex; }
+
+  /* Convert Button */
+  .convert-btn {
+    display: block; width: 100%; margin-top: 18px;
+    padding: 16px; border: none; border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold), #D4922E);
+    color: var(--navy-dark); font-family: var(--font-fun);
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    letter-spacing: 1px; transition: all 0.3s;
+    box-shadow: 0 4px 20px var(--gold-glow);
+  }
+  .convert-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(232,168,56,0.4);
+  }
+  .convert-btn:active { transform: scale(0.98); }
+
+  /* === RESULTS === */
+  .results {
+    margin-top: 24px; display: none;
+    animation: fadeSlide 0.5s ease;
+  }
+  .results.visible { display: block; }
+
+  .result-card {
+    background: var(--navy);
+    border: 2px solid rgba(232,168,56,0.15);
+    border-radius: 20px; padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .result-card h3 {
+    font-size: 16px; color: var(--gold);
+    margin-bottom: 14px; display: flex;
+    align-items: center; gap: 8px;
+  }
+
+  /* Binary output */
+  .binary-output {
+    background: var(--navy-dark);
+    border-radius: 14px; padding: 16px;
+    font-family: var(--font-mono); font-size: 14px;
+    line-height: 2; word-break: break-all;
+    max-height: 220px; overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .binary-output .bit-0 { color: var(--blue-accent); }
+  .binary-output .bit-1 { color: var(--gold-light); }
+  .binary-output .bit-space { margin: 0 4px; }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px; margin-top: 10px;
+  }
+  .stat-box {
+    background: var(--navy-dark);
+    border-radius: 14px; padding: 14px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s;
+  }
+  .stat-box:hover { transform: scale(1.04); }
+  .stat-box .stat-val {
+    font-size: 26px; font-weight: 700;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-box .stat-label {
+    font-size: 11px; color: #8899bb;
+    margin-top: 4px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* Breakdown table */
+  .breakdown {
+    width: 100%; border-collapse: separate;
+    border-spacing: 0 4px; margin-top: 8px;
+  }
+  .breakdown th {
+    font-size: 11px; color: #8899bb;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 6px 10px; text-align: left; font-weight: 600;
+  }
+  .breakdown td {
+    padding: 8px 10px; background: var(--navy-dark);
+    font-size: 13px;
+  }
+  .breakdown td:first-child { border-radius: 8px 0 0 8px; }
+  .breakdown td:last-child { border-radius: 0 8px 8px 0; }
+  .breakdown .char-col { font-size: 18px; font-weight: 700; color: var(--gold); text-align: center; }
+  .breakdown .type-col { color: #8899bb; font-size: 11px; text-transform: uppercase; }
+  .breakdown .binary-col { font-family: var(--font-mono); font-size: 12px; color: var(--blue-accent); }
+  .breakdown .bits-col { color: var(--gold-light); font-weight: 700; text-align: center; }
+
+  /* Fun fact callout */
+  .fun-fact {
+    background: linear-gradient(135deg, rgba(232,168,56,0.1), rgba(232,168,56,0.03));
+    border-left: 4px solid var(--gold);
+    border-radius: 0 14px 14px 0;
+    padding: 14px 16px; margin-top: 14px;
+    font-size: 13px; line-height: 1.6;
+    color: var(--off-white);
+  }
+  .fun-fact .ff-title {
+    font-weight: 700; color: var(--gold);
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 4px;
+  }
+
+  /* Image preview */
+  .img-preview {
+    max-width: 140px; max-height: 100px;
+    border-radius: 12px; border: 2px solid var(--gold);
+    margin-top: 10px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 3px; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding: 20px;
+    font-size: 12px; color: #556688;
+    position: relative; z-index: 1;
+  }
+  .footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- Floating binary background -->
+<div class="bg-bits" id="bgBits"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">
+    <svg class="brand-icon" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18" stroke="#E8A838" stroke-width="2.5"/>
+      <text x="20" y="26" text-anchor="middle" fill="#E8A838" font-family="Fredoka" font-weight="700" font-size="18">YF</text>
+    </svg>
+    <span>Young Foundry</span>
+  </div>
+  <h1><span class="emoji">🔢</span> Binary Decoder Ring</h1>
+  <p class="subtitle">Turn anything into the 1s and 0s that computers speak!</p>
+</div>
+
+<!-- Main -->
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="text" onclick="switchTab('text')">
+      <span class="tab-emoji">✏️</span> Text
+    </button>
+    <button class="tab-btn" data-tab="number" onclick="switchTab('number')">
+      <span class="tab-emoji">🔢</span> Number
+    </button>
+    <button class="tab-btn" data-tab="color" onclick="switchTab('color')">
+      <span class="tab-emoji">🎨</span> Color
+    </button>
+    <button class="tab-btn" data-tab="image" onclick="switchTab('image')">
+      <span class="tab-emoji">🖼️</span> Image
+    </button>
+    <button class="tab-btn" data-tab="file" onclick="switchTab('file')">
+      <span class="tab-emoji">📁</span> File
+    </button>
+  </div>
+
+  <!-- TEXT PANEL -->
+  <div class="panel active" id="panel-text">
+    <div class="input-card">
+      <label>Type any word, sentence, or emoji!</label>
+      <textarea id="textInput" placeholder="Try typing: Hello World! 🌍" maxlength="200">Hello!</textarea>
+      <button class="convert-btn" onclick="convertText()">⚡ Convert to Binary!</button>
+    </div>
+  </div>
+
+  <!-- NUMBER PANEL -->
+  <div class="panel" id="panel-number">
+    <div class="input-card">
+      <label>Enter a whole number (0 – 99999)</label>
+      <input type="number" id="numberInput" placeholder="42" value="42" min="0" max="99999">
+      <button class="convert-btn" onclick="convertNumber()">⚡ Convert to Binary!</button>
+    </div>
+  </div>
+
+  <!-- COLOR PANEL -->
+  <div class="panel" id="panel-color">
+    <div class="input-card">
+      <label>Pick any color!</label>
+      <div class="color-row">
+        <div class="color-picker-wrap">
+          <input type="color" id="colorInput" value="#E8A838" oninput="updateColorHex()">
+        </div>
+        <div>
+          <div class="color-hex" id="colorHex">#E8A838</div>
+          <div style="color:#8899bb;font-size:12px;margin-top:4px;">Tap to change</div>
+        </div>
+      </div>
+      <button class="convert-btn" onclick="convertColor()">⚡ Convert to Binary!</button>
+    </div>
+  </div>
+
+  <!-- IMAGE PANEL -->
+  <div class="panel" id="panel-image">
+    <div class="input-card">
+      <label>Upload a small image (JPG, PNG, GIF)</label>
+      <div class="drop-zone" id="imgDrop" onclick="document.getElementById('imgFile').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleDrop(event,'imgFile')">
+        <span class="dz-emoji">🖼️</span>
+        <div class="dz-text"><strong>Click to choose</strong> or drag an image here</div>
+        <input type="file" id="imgFile" accept="image/*" onchange="showFileInfo(this,'imgInfo')">
+      </div>
+      <div class="file-info" id="imgInfo"><span></span></div>
+      <button class="convert-btn" onclick="convertImage()">⚡ Convert to Binary!</button>
+    </div>
+  </div>
+
+  <!-- FILE PANEL -->
+  <div class="panel" id="panel-file">
+    <div class="input-card">
+      <label>Upload any small file (max 50 KB recommended)</label>
+      <div class="drop-zone" id="fileDrop" onclick="document.getElementById('fileInput').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleDrop(event,'fileInput')">
+        <span class="dz-emoji">📁</span>
+        <div class="dz-text"><strong>Click to choose</strong> or drag a file here</div>
+        <input type="file" id="fileInput" onchange="showFileInfo(this,'fileInfoBox')">
+      </div>
+      <div class="file-info" id="fileInfoBox"><span></span></div>
+      <button class="convert-btn" onclick="convertFile()">⚡ Convert to Binary!</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results"></div>
+</div>
+
+<div class="footer">
+  Made with 💛 by <a href="#">Young Foundry</a> — Where kids build the future
+</div>
+
+<script>
+// === Background floating bits ===
+(function() {
+  const bg = document.getElementById('bgBits');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('span');
+    s.textContent = Math.random() > 0.5 ? '1' : '0';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.fontSize = (10 + Math.random() * 16) + 'px';
+    s.style.animationDuration = (8 + Math.random() * 18) + 's';
+    s.style.animationDelay = Math.random() * 12 + 's';
+    bg.appendChild(s);
+  }
+})();
+
+// === Tab switching ===
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${id}"]`).classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('results').innerHTML = '';
+}
+
+// === Helpers ===
+function toBin(n, pad = 8) { return n.toString(2).padStart(pad, '0'); }
+
+function colorBinary(binStr) {
+  return binStr.split('').map(b =>
+    `<span class="bit-${b}">${b}</span>`
+  ).join('');
+}
+
+function formatBinaryGroups(groups) {
+  return groups.map(g => colorBinary(g)).join('<span class="bit-space"> </span>');
+}
+
+function charType(c) {
+  if (/[A-Z]/.test(c)) return 'UPPER';
+  if (/[a-z]/.test(c)) return 'lower';
+  if (/[0-9]/.test(c)) return 'digit';
+  if (c === ' ') return 'space';
+  if (c.codePointAt(0) > 127) return 'emoji/special';
+  return 'symbol';
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' bytes';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+function funFactFor(totalBits) {
+  const facts = [
+    `A single light switch is 1 bit — ON or OFF. Your input uses <strong>${totalBits} switches</strong>!`,
+    `An old floppy disk held about 11,468,800 bits. Your input is <strong>${(totalBits / 11468800 * 100).toFixed(4)}%</strong> of a whole floppy disk!`,
+    `Computers send bits at the speed of light through tiny wires — all <strong>${totalBits} bits</strong> would arrive in a blink!`,
+    `Each 0 or 1 is called a <strong>bit</strong> — the tiniest piece of information a computer can hold. You just made <strong>${totalBits}</strong> of them!`,
+  ];
+  return facts[Math.floor(Math.random() * facts.length)];
+}
+
+function renderResults({ title, binaryHtml, stats, breakdownHtml, funFact, previewHtml }) {
+  const r = document.getElementById('results');
+  r.innerHTML = `
+    <div class="result-card">
+      <h3>💡 ${title}</h3>
+      ${previewHtml || ''}
+      <div class="binary-output">${binaryHtml}</div>
+    </div>
+
+    <div class="result-card">
+      <h3>📊 How Big Is It?</h3>
+      <div class="stats-grid">
+        ${stats.map(s => `
+          <div class="stat-box">
+            <div class="stat-val">${s.val}</div>
+            <div class="stat-label">${s.label}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="fun-fact">
+        <div class="ff-title">🧠 Fun Fact</div>
+        ${funFact}
+      </div>
+    </div>
+
+    ${breakdownHtml ? `
+    <div class="result-card">
+      <h3>🔍 Character-by-Character Breakdown</h3>
+      ${breakdownHtml}
+    </div>` : ''}
+  `;
+  r.classList.add('visible');
+  r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// === CONVERTERS ===
+
+function convertText() {
+  const text = document.getElementById('textInput').value;
+  if (!text) return alert('Type something first!');
+
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(text);
+  const groups = Array.from(bytes).map(b => toBin(b));
+  const totalBits = bytes.length * 8;
+
+  // Breakdown per visible character
+  let breakdownRows = '';
+  const chars = [...text]; // handles emoji
+  let byteIdx = 0;
+  chars.forEach(ch => {
+    const chBytes = encoder.encode(ch);
+    const chBins = Array.from(chBytes).map(b => toBin(b)).join(' ');
+    const chBits = chBytes.length * 8;
+    breakdownRows += `<tr>
+      <td class="char-col">${ch === ' ' ? '␣' : ch.replace(/</g,'&lt;')}</td>
+      <td class="type-col">${charType(ch)}</td>
+      <td class="binary-col">${chBins}</td>
+      <td class="bits-col">${chBits} bits (${chBytes.length} byte${chBytes.length>1?'s':''})</td>
+    </tr>`;
+    byteIdx += chBytes.length;
+  });
+
+  const breakdownHtml = `<table class="breakdown">
+    <tr><th>Char</th><th>Type</th><th>Binary</th><th>Size</th></tr>
+    ${breakdownRows}
+  </table>`;
+
+  const letterCount = chars.filter(c => /[a-zA-Z]/.test(c)).length;
+  const digitCount = chars.filter(c => /[0-9]/.test(c)).length;
+  const symbolCount = chars.length - letterCount - digitCount;
+
+  renderResults({
+    title: 'Your Text in Binary',
+    binaryHtml: formatBinaryGroups(groups),
+    stats: [
+      { val: chars.length, label: 'Characters' },
+      { val: bytes.length, label: 'Bytes' },
+      { val: totalBits.toLocaleString(), label: 'Total Bits' },
+      { val: `${letterCount} / ${digitCount} / ${symbolCount}`, label: 'Letters / Digits / Symbols' },
+    ],
+    breakdownHtml,
+    funFact: funFactFor(totalBits),
+  });
+}
+
+function convertNumber() {
+  const num = parseInt(document.getElementById('numberInput').value);
+  if (isNaN(num) || num < 0 || num > 99999) return alert('Enter a number between 0 and 99999!');
+
+  const bin = num.toString(2);
+  const padded = bin.padStart(Math.ceil(bin.length / 8) * 8, '0');
+  const groups = padded.match(/.{8}/g) || [padded];
+  const totalBits = padded.length;
+  const totalBytes = groups.length;
+
+  renderResults({
+    title: `The Number ${num.toLocaleString()} in Binary`,
+    binaryHtml: formatBinaryGroups(groups),
+    stats: [
+      { val: num.toLocaleString(), label: 'Decimal Value' },
+      { val: totalBits, label: 'Bits Needed' },
+      { val: totalBytes, label: 'Bytes Needed' },
+      { val: `2^${bin.length}`, label: 'Power of 2' },
+    ],
+    breakdownHtml: null,
+    funFact: `The number <strong>${num}</strong> needs <strong>${bin.length} bits</strong> to be stored. ` +
+      `That's because the biggest number ${bin.length} bits can hold is <strong>${Math.pow(2, bin.length) - 1}</strong>! ` +
+      (num <= 255 ? `Since ${num} fits in 8 bits (0–255), it needs just <strong>1 byte</strong>.` :
+       num <= 65535 ? `Since ${num} is bigger than 255, it won't fit in 1 byte — it needs <strong>2 bytes</strong>!` :
+       `That's a big number! It needs <strong>${totalBytes} bytes</strong> to store.`),
+  });
+}
+
+function updateColorHex() {
+  document.getElementById('colorHex').textContent = document.getElementById('colorInput').value.toUpperCase();
+}
+
+function convertColor() {
+  const hex = document.getElementById('colorInput').value;
+  const r = parseInt(hex.substr(1,2), 16);
+  const g = parseInt(hex.substr(3,2), 16);
+  const b = parseInt(hex.substr(5,2), 16);
+
+  const rBin = toBin(r), gBin = toBin(g), bBin = toBin(b);
+  const totalBits = 24;
+
+  const breakdownHtml = `<table class="breakdown">
+    <tr><th>Channel</th><th>Value</th><th>Binary</th><th>Size</th></tr>
+    <tr>
+      <td class="char-col" style="color:#ff6b6b">🔴 Red</td>
+      <td style="color:var(--off-white)">${r}</td>
+      <td class="binary-col">${rBin}</td>
+      <td class="bits-col">8 bits (1 byte)</td>
+    </tr>
+    <tr>
+      <td class="char-col" style="color:#51cf66">🟢 Green</td>
+      <td style="color:var(--off-white)">${g}</td>
+      <td class="binary-col">${gBin}</td>
+      <td class="bits-col">8 bits (1 byte)</td>
+    </tr>
+    <tr>
+      <td class="char-col" style="color:#339af0">🔵 Blue</td>
+      <td style="color:var(--off-white)">${b}</td>
+      <td class="binary-col">${bBin}</td>
+      <td class="bits-col">8 bits (1 byte)</td>
+    </tr>
+  </table>`;
+
+  const previewHtml = `<div style="width:100%;height:50px;border-radius:12px;background:${hex};margin-bottom:14px;border:2px solid rgba(255,255,255,0.1)"></div>`;
+
+  renderResults({
+    title: `Color ${hex.toUpperCase()} in Binary`,
+    binaryHtml: `<span style="color:#ff6b6b">${colorBinary(rBin)}</span><span class="bit-space"> </span>` +
+                `<span style="color:#51cf66">${colorBinary(gBin)}</span><span class="bit-space"> </span>` +
+                `<span style="color:#339af0">${colorBinary(bBin)}</span>`,
+    stats: [
+      { val: '3', label: 'Color Channels' },
+      { val: '3', label: 'Bytes (1 per channel)' },
+      { val: '24', label: 'Total Bits' },
+      { val: '16.7M', label: 'Possible Colors' },
+    ],
+    breakdownHtml,
+    funFact: `Every color on your screen is a mix of Red, Green, and Blue — each from 0 to 255. ` +
+      `That's <strong>256 x 256 x 256 = 16,777,216 colors</strong>, all from just <strong>24 bits</strong>! ` +
+      `Your color has R=${r}, G=${g}, B=${b}.`,
+    previewHtml,
+  });
+}
+
+function showFileInfo(input, infoId) {
+  const info = document.getElementById(infoId);
+  if (input.files.length) {
+    info.querySelector('span').textContent = `📄 ${input.files[0].name} (${formatBytes(input.files[0].size)})`;
+    info.classList.add('visible');
+  }
+}
+
+function handleDrop(e, inputId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const input = document.getElementById(inputId);
+  input.files = e.dataTransfer.files;
+  const infoId = inputId === 'imgFile' ? 'imgInfo' : 'fileInfoBox';
+  showFileInfo(input, infoId);
+}
+
+function convertImage() {
+  const input = document.getElementById('imgFile');
+  if (!input.files.length) return alert('Pick an image first!');
+  const file = input.files[0];
+  if (file.size > 500000) return alert('Please use an image under 500 KB so it loads quickly!');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const bytes = new Uint8Array(e.target.result);
+    const totalBytes = bytes.length;
+    const totalBits = totalBytes * 8;
+
+    // Show first 64 bytes as binary
+    const preview = Array.from(bytes.slice(0, 64)).map(b => toBin(b));
+
+    const previewHtml = `<img src="${URL.createObjectURL(file)}" class="img-preview" alt="preview">`;
+
+    // Estimate pixel count from file dimensions
+    const img = new Image();
+    img.onload = function() {
+      const pixels = img.width * img.height;
+      const bitsPerPixel = ((totalBits / pixels) || 0).toFixed(1);
+
+      renderResults({
+        title: `Image "${file.name}" in Binary`,
+        binaryHtml: formatBinaryGroups(preview) +
+          `<div style="margin-top:8px;color:#8899bb;font-size:12px;">⬆ Showing first 64 bytes of ${totalBytes.toLocaleString()} total bytes</div>`,
+        stats: [
+          { val: formatBytes(totalBytes), label: 'File Size' },
+          { val: totalBits.toLocaleString(), label: 'Total Bits' },
+          { val: `${img.width}×${img.height}`, label: 'Dimensions (px)' },
+          { val: pixels.toLocaleString(), label: 'Total Pixels' },
+        ],
+        breakdownHtml: null,
+        funFact: `This image has <strong>${pixels.toLocaleString()} pixels</strong>. ` +
+          `Each pixel can be made of 3 color bytes (24 bits) for Red, Green, and Blue. ` +
+          `The raw image data is compressed into a <strong>${file.type.split('/')[1].toUpperCase()}</strong> file ` +
+          `that only uses about <strong>${bitsPerPixel} bits per pixel</strong> — compression is like magic zipping!`,
+        previewHtml,
+      });
+    };
+    img.src = URL.createObjectURL(file);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function convertFile() {
+  const input = document.getElementById('fileInput');
+  if (!input.files.length) return alert('Pick a file first!');
+  const file = input.files[0];
+  if (file.size > 500000) return alert('Please use a file under 500 KB so it loads quickly!');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const bytes = new Uint8Array(e.target.result);
+    const totalBytes = bytes.length;
+    const totalBits = totalBytes * 8;
+
+    const preview = Array.from(bytes.slice(0, 64)).map(b => toBin(b));
+
+    const ext = file.name.split('.').pop().toUpperCase();
+    const typeMap = {
+      'TXT': 'Plain Text', 'PDF': 'PDF Document', 'DOCX': 'Word Document',
+      'PNG': 'PNG Image', 'JPG': 'JPEG Image', 'MP3': 'Audio File',
+      'MP4': 'Video File', 'ZIP': 'Compressed Archive', 'CSV': 'Spreadsheet Data',
+    };
+    const friendlyType = typeMap[ext] || `${ext} File`;
+
+    renderResults({
+      title: `File "${file.name}" in Binary`,
+      binaryHtml: formatBinaryGroups(preview) +
+        `<div style="margin-top:8px;color:#8899bb;font-size:12px;">⬆ Showing first 64 bytes of ${totalBytes.toLocaleString()} total bytes</div>`,
+      stats: [
+        { val: formatBytes(totalBytes), label: 'File Size' },
+        { val: totalBits.toLocaleString(), label: 'Total Bits' },
+        { val: totalBytes.toLocaleString(), label: 'Total Bytes' },
+        { val: friendlyType, label: 'File Type' },
+      ],
+      breakdownHtml: null,
+      funFact: `Your file is <strong>${formatBytes(totalBytes)}</strong>. ` +
+        `That's <strong>${totalBits.toLocaleString()} tiny 1s and 0s</strong>! ` +
+        (totalBytes < 1024 ?
+          `It's so small it could fit on the tiniest chip imaginable.` :
+          `If you wrote each bit by hand (1 bit per second), it would take you <strong>${(totalBits/3600).toFixed(1)} hours</strong>!`),
+    });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// Auto-convert on load for demo
+window.addEventListener('DOMContentLoaded', () => setTimeout(convertText, 400));
+</script>
+
+</body>
+</html>

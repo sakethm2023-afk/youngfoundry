@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Arrays Quest 🦊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFF7EC; --ink:#3A2E2A; --soft:#7c6f68;
+  --coral:#FF6B5E; --tang:#FF9F40; --sun:#FFD23F; --leaf:#3DD68C;
+  --teal:#2DC4C8; --sky:#4D9BFF; --grape:#9B6BFF; --pink:#FF7AC6;
+  --box:#fff; --line:#efe2d2;
+  --shadow:0 6px 0 rgba(58,46,42,.14);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{
+  font-family:'Nunito',sans-serif; color:var(--ink);
+  background:
+    radial-gradient(1200px 500px at 15% -10%, #FFE7C7 0%, transparent 60%),
+    radial-gradient(900px 500px at 110% 0%, #CFF3FF 0%, transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, #E7E0FF 0%, transparent 60%),
+    var(--cream);
+  overflow-x:hidden;
+}
+h1,h2,h3,.fred{font-family:'Fredoka',sans-serif;font-weight:600;}
+button{font-family:'Fredoka',sans-serif;cursor:pointer;border:none;}
+.wrap{max-width:680px;margin:0 auto;padding:14px 16px 120px;}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;
+  background:rgba(255,247,236,.86);backdrop-filter:blur(8px);
+  padding:10px 14px;border-radius:0 0 22px 22px;box-shadow:0 4px 14px rgba(58,46,42,.07);}
+.coin{display:flex;align-items:center;gap:6px;background:#fff;border:3px solid #fff;
+  box-shadow:var(--shadow);border-radius:30px;padding:5px 12px;font-family:'Fredoka';font-weight:600;}
+.coin .ic{font-size:18px;}
+.bar-track{flex:1;height:16px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08);}
+.bar-fill{height:100%;width:0;border-radius:20px;background:linear-gradient(90deg,var(--leaf),var(--teal));transition:width .6s cubic-bezier(.2,.9,.3,1.3);}
+.snd{margin-left:auto;background:#fff;box-shadow:var(--shadow);border-radius:50%;width:40px;height:40px;font-size:18px;}
+
+/* ---------- home / map ---------- */
+.hero{text-align:center;margin:14px 0 6px;}
+.hero .big{font-size:clamp(34px,9vw,52px);line-height:1;margin:0;
+  background:linear-gradient(90deg,var(--coral),var(--tang),var(--grape));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{margin:6px 0 0;color:var(--soft);font-weight:800;}
+.mascot{font-size:46px;display:inline-block;animation:bob 2.4s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+
+.path{position:relative;margin-top:16px;}
+.node{position:relative;display:flex;align-items:center;gap:14px;margin:0 auto 14px;
+  background:#fff;border-radius:26px;padding:14px;box-shadow:var(--shadow);width:88%;
+  border:3px solid #fff;transition:transform .15s;}
+.node:nth-child(odd){margin-left:0;}
+.node:nth-child(even){margin-right:0;margin-left:auto;}
+.node.locked{filter:grayscale(.6);opacity:.7;}
+.node.done{border-color:var(--leaf);}
+.node:not(.locked):active{transform:scale(.97);}
+.badge-disc{width:66px;height:66px;border-radius:20px;display:grid;place-items:center;font-size:32px;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.12);color:#fff;}
+.node .meta{flex:1;min-width:0;}
+.node .meta .n{font-family:'Fredoka';font-weight:600;font-size:13px;color:var(--soft);}
+.node .meta .t{font-family:'Fredoka';font-weight:600;font-size:20px;line-height:1.1;}
+.node .stars{font-size:15px;letter-spacing:1px;margin-top:2px;}
+.node .go{font-size:26px;flex:none;}
+
+/* ---------- lesson ---------- */
+.lhead{display:flex;align-items:center;gap:10px;margin:8px 0 12px;}
+.lhead .ic{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:28px;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.12);flex:none;}
+.lhead .tt{font-family:'Fredoka';font-weight:600;font-size:24px;line-height:1;}
+.lhead .ph{color:var(--soft);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;}
+.back{margin-left:auto;background:#fff;box-shadow:var(--shadow);border-radius:50%;width:42px;height:42px;font-size:18px;flex:none;}
+
+.steps{display:flex;gap:6px;margin-bottom:12px;}
+.steps .s{flex:1;height:9px;border-radius:8px;background:#fff;box-shadow:inset 0 1px 3px rgba(0,0,0,.08);}
+.steps .s.on{background:linear-gradient(90deg,var(--tang),var(--coral));}
+.steps .s.cur{box-shadow:0 0 0 3px rgba(255,159,64,.35);}
+
+.card{background:#fff;border-radius:28px;padding:18px 16px 20px;box-shadow:0 10px 30px rgba(58,46,42,.10);border:3px solid #fff;}
+.pip{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;}
+.pip .face{font-size:34px;flex:none;animation:bob 2.6s ease-in-out infinite;}
+.bubble{background:#FFF3DD;border:2px solid #FFE3B0;border-radius:16px 16px 16px 4px;padding:10px 14px;font-weight:800;font-size:16px;line-height:1.35;}
+.bubble b{color:var(--coral);}
+.tag{display:inline-block;font-family:'Fredoka';font-weight:600;font-size:12px;color:#fff;background:var(--grape);padding:3px 10px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ---------- array visual ---------- */
+.stage{margin:16px 0;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.arr{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.cell{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.box{width:62px;height:62px;border-radius:16px;background:var(--box);border:3px solid var(--line);
+  display:grid;place-items:center;font-size:30px;position:relative;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s;}
+.box.full{border-color:#ffd9a0;background:#FFFBF3;box-shadow:0 4px 0 #ffe6c0;}
+.box.glow{border-color:var(--tang);box-shadow:0 0 0 4px rgba(255,159,64,.35),0 6px 0 #ffd28f;transform:translateY(-6px) scale(1.06);}
+.box.found{border-color:var(--leaf);box-shadow:0 0 0 4px rgba(61,214,140,.4);background:#EAFBF2;}
+.box.checking{border-color:var(--sky);box-shadow:0 0 0 4px rgba(77,155,255,.3);}
+.box.dim{opacity:.45;}
+.box.pop{animation:pop .4s cubic-bezier(.2,.9,.3,1.5);}
+.box.shake{animation:shake .4s;}
+.box.empty{border-style:dashed;background:#fafafa;}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.idx{font-family:'Fredoka';font-weight:600;font-size:15px;color:var(--sky);
+  background:#EAF3FF;border-radius:10px;min-width:26px;text-align:center;padding:1px 4px;transition:.2s;}
+.idx.hot{background:var(--sky);color:#fff;transform:scale(1.15);}
+.lbl{font-family:'Fredoka';font-size:11px;color:var(--grape);font-weight:600;opacity:0;transition:.3s;}
+.lbl.show{opacity:1;}
+.robot{font-size:30px;position:absolute;top:-38px;left:0;transition:left .35s cubic-bezier(.2,.9,.3,1.4);}
+
+/* trays + chips */
+.tray{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.chip{width:56px;height:56px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.12);border:3px solid #fff;
+  display:grid;place-items:center;font-size:28px;touch-action:none;transition:transform .12s;user-select:none;}
+.chip:active{transform:scale(1.12);}
+.chip.used{opacity:.25;pointer-events:none;}
+.ghost{position:fixed;width:56px;height:56px;border-radius:16px;background:#fff;box-shadow:0 10px 20px rgba(0,0,0,.25);
+  display:grid;place-items:center;font-size:30px;transform:translate(-50%,-50%) scale(1.2);z-index:999;pointer-events:none;}
+.drop-ok{border-color:var(--leaf)!important;box-shadow:0 0 0 4px rgba(61,214,140,.4)!important;}
+
+/* number bars (sort) */
+.bar{border-radius:12px 12px 6px 6px;width:42px;background:linear-gradient(180deg,var(--teal),var(--sky));
+  color:#fff;font-family:'Fredoka';font-weight:600;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:6px;font-size:18px;box-shadow:0 4px 0 rgba(0,0,0,.12);transition:height .3s,transform .2s,filter .2s;}
+.bar.sel{filter:brightness(1.15);transform:translateY(-6px) scale(1.05);box-shadow:0 0 0 4px rgba(255,159,64,.4);}
+.bar.sorted{background:linear-gradient(180deg,var(--leaf),#2bbf78);}
+.barrow{display:flex;gap:10px;align-items:flex-end;height:150px;}
+
+/* controls + answers */
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.btn{background:linear-gradient(180deg,#fff,#fff);color:var(--ink);border-radius:16px;padding:12px 18px;font-size:16px;font-weight:600;
+  box-shadow:0 4px 0 rgba(0,0,0,.12);border:3px solid #fff;transition:transform .1s,box-shadow .1s;}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.12);}
+.btn.c1{background:linear-gradient(180deg,#5fd6ff,var(--sky));color:#fff;box-shadow:0 5px 0 #2f78d6;}
+.btn.c2{background:linear-gradient(180deg,#ffd36b,var(--tang));color:#fff;box-shadow:0 5px 0 #e07d1f;}
+.btn.c3{background:linear-gradient(180deg,#7ee6b3,var(--leaf));color:#fff;box-shadow:0 5px 0 #1fae6a;}
+.btn.c4{background:linear-gradient(180deg,#b79bff,var(--grape));color:#fff;box-shadow:0 5px 0 #7a48e0;}
+.btn:disabled{opacity:.4;}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--line);border-radius:18px;
+  padding:14px 16px;margin:8px 0;font-size:17px;font-weight:800;color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.06);transition:.12s;}
+.opt:active{transform:translateY(2px);}
+.opt.right{border-color:var(--leaf);background:#EAFBF2;box-shadow:0 4px 0 #b8ecd0;}
+.opt.wrong{border-color:var(--coral);background:#FFEEEC;box-shadow:0 4px 0 #f7c9c4;}
+.opt .em{margin-right:8px;}
+
+.fb{margin-top:14px;border-radius:18px;padding:13px 16px;font-weight:800;font-size:16px;display:none;animation:pop .35s;}
+.fb.good{background:#EAFBF2;color:#1a8f5a;border:2px solid #bdeccf;display:block;}
+.fb.bad{background:#FFF1EF;color:#c54436;border:2px solid #f6cfc9;display:block;}
+
+.foot{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(0deg,var(--cream) 60%,transparent);z-index:30;}
+.cta{display:block;max-width:680px;margin:0 auto;width:100%;background:linear-gradient(180deg,#7ee6b3,var(--leaf));
+  color:#fff;font-size:20px;font-weight:600;padding:16px;border-radius:20px;box-shadow:0 6px 0 #1fae6a;}
+.cta:disabled{background:#e8e1d6;color:#b3a89d;box-shadow:0 6px 0 #d6cdc0;}
+.cta:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 #1fae6a;}
+
+/* celebration overlay */
+.over{position:fixed;inset:0;z-index:200;display:none;place-items:center;background:rgba(58,46,42,.45);backdrop-filter:blur(3px);padding:20px;}
+.over.show{display:grid;}
+.modal{background:#fff;border-radius:30px;padding:26px 22px;text-align:center;max-width:340px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:pop .45s;}
+.modal .em{font-size:64px;animation:bob 2s ease-in-out infinite;}
+.modal h2{margin:6px 0;font-size:28px;}
+.modal .st{font-size:34px;letter-spacing:4px;margin:6px 0;}
+.modal .xpgain{display:inline-block;background:#FFF3DD;border:2px solid #FFE3B0;border-radius:20px;padding:6px 16px;font-family:'Fredoka';font-weight:600;color:var(--tang);margin:6px 0 14px;}
+.badge-pop{background:#F3ECFF;border:2px solid #d9c6ff;border-radius:18px;padding:10px;margin:6px 0 14px;font-weight:800;color:var(--grape);}
+
+.confetti{position:fixed;top:-20px;width:12px;height:16px;z-index:300;border-radius:3px;pointer-events:none;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+.hint{text-align:center;color:var(--soft);font-weight:800;font-size:14px;margin-top:8px;}
+.count{font-family:'Fredoka';font-weight:600;font-size:18px;color:var(--soft);}
+.count b{color:var(--coral);font-size:24px;}
+.flyout{animation:fly .6s forwards;}
+@keyframes fly{0%{transform:translateY(0)}40%{transform:translateY(-40px) scale(1.2)}100%{transform:translateY(-40px) scale(1.2)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="coin"><span class="ic">⭐</span><span id="xp">0</span></div>
+  <div class="bar-track"><div class="bar-fill" id="topbar-fill"></div></div>
+  <button class="snd" id="sndBtn" title="Sound">🔊</button>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<div class="foot" id="foot"></div>
+
+<div class="over" id="over"><div class="modal" id="modal"></div></div>
+
+<script>
+/* ============================ STATE ============================ */
+const ITEMS = ['🍎','🍌','🍒','🍇','🍊','🍓','🥝','🍉','🍍','🥥'];
+const PHASES = ['observe','interact','predict','practice','quiz'];
+const PHASE_LABEL = {observe:'Observe 👀',interact:'Interact ✋',predict:'Predict 🔮',practice:'Practice 💪',quiz:'Quiz ⭐'};
+
+let S = { xp:0, unlocked:1, stars:{}, badges:[], sound:true };
+let L = null; // active lesson runtime
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function el(tag,cls,html){const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
+
+/* persistence (best-effort, degrades to memory) */
+async function save(){ try{ if(window.storage) await window.storage.set('arrayquest', JSON.stringify(S), false);}catch(e){} }
+async function load(){ try{ if(window.storage){ const r=await window.storage.get('arrayquest'); if(r&&r.value) S=Object.assign(S,JSON.parse(r.value)); } }catch(e){} }
+
+/* ============================ SOUND ============================ */
+let AC=null;
+function tone(freq,dur,type='sine',vol=.13,delay=0){
+  if(!S.sound) return;
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.type=type;o.frequency.value=freq;o.connect(g);g.connect(AC.destination);
+    const t=AC.currentTime+delay;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+const SFX={
+  pop:()=>tone(620,.12,'triangle',.12),
+  good:()=>{[523,659,784].forEach((f,i)=>tone(f,.18,'triangle',.12,i*.07));},
+  bad:()=>{tone(200,.22,'sawtooth',.1);tone(150,.25,'sawtooth',.1,.08);},
+  win:()=>{[523,659,784,1046,1318].forEach((f,i)=>tone(f,.3,'triangle',.14,i*.1));},
+  click:()=>tone(440,.07,'square',.07),
+  step:()=>tone(520,.07,'sine',.09),
+};
+
+/* ============================ CONFETTI ============================ */
+function confetti(n=70){
+  const cols=['#FF6B5E','#FF9F40','#FFD23F','#3DD68C','#2DC4C8','#4D9BFF','#9B6BFF','#FF7AC6'];
+  for(let i=0;i<n;i++){
+    const c=el('div','confetti');
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=cols[i%cols.length];
+    c.style.animationDuration=(1.6+Math.random()*1.4)+'s';
+    c.style.animationDelay=(Math.random()*.4)+'s';
+    if(Math.random()>.5)c.style.borderRadius='50%';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3200);
+  }
+}
+
+/* ============================ DRAG & DROP (pointer = touch+mouse) ============================ */
+function makeDraggable(srcEl, getPayload){
+  // tap and drag both work: drag only starts after the finger/mouse moves a bit
+  srcEl.addEventListener('click', e=>{ if(srcEl._suppress){ e.stopImmediatePropagation(); e.preventDefault(); srcEl._suppress=false; } }, true);
+  srcEl.addEventListener('pointerdown', e=>{
+    if(srcEl.classList.contains('used')) return;
+    const sx=e.clientX, sy=e.clientY;
+    let ghost=null, lastDrop=null, dragging=false;
+    const start=()=>{ dragging=true; ghost=el('div','ghost',srcEl.innerHTML); document.body.appendChild(ghost); };
+    const at=ev=>{
+      if(!dragging){ if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>9) start(); else return; }
+      ev.preventDefault();
+      ghost.style.left=ev.clientX+'px'; ghost.style.top=ev.clientY+'px';
+      const under=document.elementFromPoint(ev.clientX,ev.clientY);
+      const tgt=under&&under.closest('.drop');
+      if(tgt!==lastDrop){ if(lastDrop)lastDrop.classList.remove('drop-ok'); if(tgt)tgt.classList.add('drop-ok'); lastDrop=tgt; }
+    };
+    const up=ev=>{
+      window.removeEventListener('pointermove',at);
+      if(dragging){
+        if(ghost)ghost.remove();
+        const under=document.elementFromPoint(ev.clientX,ev.clientY);
+        const tgt=under&&under.closest('.drop');
+        if(tgt){ tgt.classList.remove('drop-ok'); if(tgt.__onDrop) tgt.__onDrop(getPayload(), tgt); }
+        if(lastDrop)lastDrop.classList.remove('drop-ok');
+        srcEl._suppress=true; // swallow the click that follows a drag so we don't place twice
+        setTimeout(()=>{ srcEl._suppress=false; }, 350);
+      }
+    };
+    window.addEventListener('pointermove',at,{passive:false});
+    window.addEventListener('pointerup',up,{once:true});
+  });
+}
+function makeDrop(e,fn){ e.classList.add('drop'); e.__onDrop=fn; return e; }
+
+/* ============================ ARRAY VISUAL ============================ */
+function arrayView(items,opt={}){
+  const c=el('div','arr');
+  items.forEach((v,i)=>{
+    const cell=el('div','cell');
+    if(opt.label){ const l=el('div','lbl'+(opt.label==='show'?' show':''),'element'); cell.appendChild(l); }
+    const b=el('div','box'+(v?' full':' empty'));
+    b.textContent=v||'';
+    b.dataset.i=i;
+    cell.appendChild(b);
+    if(opt.indices){ const x=el('div','idx',i); cell.appendChild(x); }
+    c.appendChild(cell);
+  });
+  return c;
+}
+const boxes = c => [...c.querySelectorAll('.box')];
+const idxs  = c => [...c.querySelectorAll('.idx')];
+
+/* ============================ LESSON CONTENT ============================ */
+const C={array:'var(--coral)',element:'var(--tang)',index:'var(--sky)',length:'var(--grape)',access:'var(--teal)',
+  update:'var(--pink)',add:'var(--leaf)',delete:'#ff7a59',traverse:'var(--sun)',search:'var(--sky)',sort:'var(--grape)'};
+
+const LESSONS=[
+ {id:'array',icon:'📦',color:C.array,title:'Array',say:'An <b>Array</b> is a row of boxes that holds things — all in a neat line!'},
+ {id:'element',icon:'🍎',color:C.element,title:'Element',say:'Each thing inside the array is called an <b>Element</b>.'},
+ {id:'index',icon:'🔢',color:C.index,title:'Index',say:'Every box has a number called its <b>Index</b>. Surprise — it starts at <b>0</b>!'},
+ {id:'length',icon:'📏',color:C.length,title:'Length',say:'<b>Length</b> = how many elements are in the array.'},
+ {id:'access',icon:'🎯',color:C.access,title:'Access',say:'<b>Access</b> means grabbing one element using its index, like <b>arr[2]</b>.'},
+ {id:'update',icon:'✏️',color:C.update,title:'Update',say:'<b>Update</b> means changing what is inside a box. arr[1] = 🐶 !'},
+ {id:'add',icon:'➕',color:C.add,title:'Add',say:'<b>Add</b> puts a brand-new element at the <b>end</b> of the array.'},
+ {id:'delete',icon:'🗑️',color:C.delete,title:'Delete',say:'<b>Delete</b> removes an element — then the others slide over!'},
+ {id:'traverse',icon:'🤖',color:C.traverse,title:'Traverse',say:'<b>Traverse</b> means visiting every box, one by one, from start to end.'},
+ {id:'search',icon:'🔍',color:C.search,title:'Search',say:'<b>Search</b> checks boxes until it finds what you are looking for.'},
+ {id:'sort',icon:'📊',color:C.sort,title:'Sort',say:'<b>Sort</b> puts the elements in order — small to big!'},
+];
+const BADGES={1:['📦','Box Builder'],3:['🔢','Index Explorer'],6:['✏️','Array Editor'],9:['🤖','Loop Walker'],11:['🏆','Array Master']};
+
+/* ============================ HOME SCREEN ============================ */
+function showHome(){
+  L=null;
+  const a=$('app'); a.innerHTML='';
+  $('foot').innerHTML='';
+  const hero=el('div','hero');
+  hero.innerHTML=`<div class="mascot">🦊</div><h1 class="big">Arrays Quest</h1><p>Become an Array Master in 11 fun levels!</p>`;
+  a.appendChild(hero);
+
+  if(S.badges.length){
+    const br=el('div','row'); br.style.marginTop='4px';
+    S.badges.forEach(b=>{const t=el('div','badge-pop',`${b[0]} ${b[1]}`);t.style.margin='4px';br.appendChild(t);});
+    a.appendChild(br);
+  }
+
+  const path=el('div','path');
+  LESSONS.forEach((les,i)=>{
+    const locked=i+1>S.unlocked;
+    const stars=S.stars[les.id]||0;
+    const n=el('div','node'+(locked?' locked':'')+(stars?' done':''));
+    n.innerHTML=`
+      <div class="badge-disc" style="background:${les.color}">${locked?'🔒':les.icon}</div>
+      <div class="meta">
+        <div class="n">Level ${i+1}</div>
+        <div class="t">${les.title}</div>
+        <div class="stars">${stars?'⭐'.repeat(stars)+'☆'.repeat(3-stars):(locked?'🔒 Locked':'▶ Start')}</div>
+      </div>
+      <div class="go">${locked?'':'➜'}</div>`;
+    if(!locked) n.onclick=()=>{SFX.click();openLesson(i);};
+    path.appendChild(n);
+  });
+  a.appendChild(path);
+  refreshTop();
+}
+
+/* ============================ LESSON RUNTIME ============================ */
+function openLesson(i){
+  L={i, les:LESSONS[i], phase:0, mistakes:0, ready:false};
+  renderPhase();
+}
+function refreshTop(){
+  $('xp').textContent=S.xp;
+  const done=Object.keys(S.stars).length;
+  $('topbar-fill').style.width=(done/LESSONS.length*100)+'%';
+}
+function setReady(v){ L.ready=v; const c=$('ctaBtn'); if(c) c.disabled=!v; }
+
+function renderPhase(){
+  const les=L.les, ph=PHASES[L.phase];
+  const a=$('app'); a.innerHTML='';
+  // header
+  const h=el('div','lhead');
+  h.innerHTML=`<div class="ic" style="background:${les.color}">${les.icon}</div>
+    <div><div class="tt">${les.title}</div><div class="ph">${PHASE_LABEL[ph]}</div></div>`;
+  const back=el('button','back','‹'); back.onclick=()=>{SFX.click();showHome();}; h.appendChild(back);
+  a.appendChild(h);
+  // step pips
+  const steps=el('div','steps');
+  PHASES.forEach((p,k)=>{steps.appendChild(el('div','s'+(k<L.phase?' on':'')+(k===L.phase?' cur':'')));});
+  a.appendChild(steps);
+  // card
+  const card=el('div','card'); a.appendChild(card);
+  setReady(false);
+
+  // footer CTA
+  const isLast = L.phase===PHASES.length-1;
+  $('foot').innerHTML='';
+  const cta=el('button','cta'); cta.id='ctaBtn';
+  cta.textContent = isLast?'Finish Level 🎉':'Continue ➜';
+  cta.disabled=true;
+  cta.onclick=()=>{ SFX.click(); if(isLast) finishLesson(); else { L.phase++; renderPhase(); } };
+  $('foot').appendChild(cta);
+
+  BUILD[les.id][ph](card);
+  refreshTop();
+}
+
+function finishLesson(){
+  const les=L.les;
+  const stars=Math.max(1,3-L.mistakes);
+  const prev=S.stars[les.id]||0;
+  S.stars[les.id]=Math.max(prev,stars);
+  if(L.i+1>=S.unlocked && L.i+1<LESSONS.length) S.unlocked=L.i+2;
+  if(L.i+1===LESSONS.length) S.unlocked=LESSONS.length;
+  S.xp += 40 + stars*10 - (prev?0:0);
+  let newBadge=null;
+  const bk=BADGES[L.i+1];
+  if(bk && !S.badges.some(b=>b[1]===bk[1])){ S.badges.push(bk); newBadge=bk; }
+  save(); refreshTop(); SFX.win(); confetti(90);
+  celebrate(stars,40+stars*10,newBadge);
+}
+
+function celebrate(stars,xp,badge){
+  const m=$('modal');
+  const final = L.i+1===LESSONS.length;
+  m.innerHTML=`
+    <div class="em">${final?'🏆':'🎉'}</div>
+    <h2>${final?'You did it!':'Level Complete!'}</h2>
+    <div class="st">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+    <div class="xpgain">+${xp} XP</div>
+    ${badge?`<div class="badge-pop">New badge unlocked!<br>${badge[0]} ${badge[1]}</div>`:''}
+    <div>${final?'You are officially an <b>Array Master</b>! 🦊':'Next level unlocked!'}</div>`;
+  const b=el('button','cta', final?'Back to Map 🗺️':'Keep going ➜');
+  b.style.marginTop='16px';
+  b.onclick=()=>{ $('over').classList.remove('show'); if(final||L.i+1>=LESSONS.length) showHome(); else openLesson(L.i+1); };
+  m.appendChild(b);
+  $('over').classList.add('show');
+}
+
+/* ---------- shared phase helpers ---------- */
+function pip(card,text){ const p=el('div','pip'); p.innerHTML=`<div class="face">🦊</div><div class="bubble">${text}</div>`; card.prepend(p); }
+function tagit(card,t){ card.appendChild(el('span','tag',t)); }
+function feedback(card,ok,msg){
+  let f=card.querySelector('.fb'); if(!f){f=el('div','fb');card.appendChild(f);}
+  f.className='fb '+(ok?'good':'bad'); f.innerHTML=msg;
+}
+
+// generic Predict / Quiz from config
+function buildChoices(card,cfg,{isQuiz=false,onDone}={}){
+  const wrap=el('div'); wrap.style.marginTop='8px';
+  const q=el('div','bubble'); q.style.borderRadius='16px'; q.style.fontSize='17px'; q.innerHTML=cfg.q; wrap.appendChild(q);
+  if(cfg.visual){ const v=el('div','stage'); v.style.minHeight='80px'; v.appendChild(cfg.visual()); wrap.appendChild(v); }
+  const opts=el('div'); opts.style.marginTop='10px';
+  let answered=false;
+  cfg.choices.forEach((ch,i)=>{
+    const o=el('button','opt',`<span class="em">${ch.em||''}</span>${ch.t}`);
+    o.onclick=()=>{
+      if(answered) return; answered=true;
+      const correct = i===cfg.answer;
+      if(correct){ o.classList.add('right'); SFX.good(); }
+      else{ o.classList.add('wrong'); SFX.bad(); L.mistakes++; opts.children[cfg.answer].classList.add('right'); }
+      feedback(card, correct, correct? (cfg.yes||'Correct! 🎉') : (cfg.no||'Not quite — see the green one!'));
+      [...opts.children].forEach(x=>x.style.pointerEvents='none');
+      onDone&&onDone(correct);
+    };
+    opts.appendChild(o);
+  });
+  wrap.appendChild(opts);
+  card.appendChild(wrap);
+}
+
+function quizPhase(card, questions){
+  tagit(card,'Quiz ⭐'); pip(card,'Last step! Answer to earn your stars. ⭐');
+  let qi=0;
+  const host=el('div'); card.appendChild(host);
+  const counter=el('div','hint'); card.appendChild(counter);
+  function render(){
+    host.innerHTML=''; counter.textContent=`Question ${qi+1} of ${questions.length}`;
+    buildChoices(host, questions[qi], {isQuiz:true, onDone:()=>{
+      setTimeout(()=>{ qi++; if(qi<questions.length){ render(); } else { setReady(true); counter.textContent='All done! 🎉'; } },900);
+    }});
+  }
+  render();
+}
+
+function predictPhase(card,cfg){
+  tagit(card,'Predict 🔮'); pip(card,cfg.pip||'What will happen? Make your best guess! 🔮');
+  buildChoices(card,cfg,{onDone:()=>setReady(true)});
+}
+
+/* helper: tap a chip-tray to fill next empty drop box; also draggable */
+function fillInteraction(card, arr, goalLen, opt={}){
+  const stage=el('div','stage'); card.appendChild(stage);
+  const cont=el('div'); stage.appendChild(cont);
+  const counter=el('div','count'); counter.innerHTML=`Filled: <b>0</b> / ${goalLen}`; stage.appendChild(counter);
+  const tray=el('div','tray'); card.appendChild(tray);
+  const data=new Array(goalLen).fill(null);
+
+  function draw(){
+    cont.innerHTML='';
+    const view=arrayView(data,{indices:opt.indices});
+    cont.appendChild(view);
+    boxes(view).forEach((b,i)=>{
+      if(!data[i]){ makeDrop(b,(payload,tgt)=>place(i,payload)); b.classList.add('empty'); }
+    });
+    const filled=data.filter(Boolean).length;
+    counter.innerHTML=`Filled: <b>${filled}</b> / ${goalLen}`;
+    if(filled>=goalLen){ setReady(true); feedback(card,true,'Your array is complete! 🎉'); }
+  }
+  function place(i,emoji){
+    if(data[i]) return;
+    data[i]=emoji; SFX.pop();
+    const used=arr.find(x=>x.em===emoji&&!x.done); if(used)used.done=true;
+    drawTray(); draw();
+    const b=boxes(cont)[i]; if(b){b.classList.add('pop');}
+  }
+  function drawTray(){
+    tray.innerHTML='';
+    arr.forEach(x=>{
+      const ch=el('div','chip'+(x.done?' used':''),x.em);
+      ch.onclick=()=>{ const next=data.indexOf(null); if(next>=0&&!x.done) place(next,x.em); };
+      makeDraggable(ch,()=>x.em);
+      tray.appendChild(ch);
+    });
+  }
+  drawTray(); draw();
+  card.appendChild(el('div','hint','Tap a fruit, or drag it into a box! ✋'));
+}
+
+/* ============================ PER-CONCEPT BUILDERS ============================ */
+const BUILD={};
+
+/* ---------- L1 ARRAY ---------- */
+BUILD.array={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[0].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['','','',''];
+    const v=arrayView(data); stage.appendChild(v);
+    const fruits=['🍎','🍌','🍒','🍇'];
+    (async()=>{ await sleep(400);
+      for(let i=0;i<4;i++){ const b=boxes(v)[i]; b.textContent=fruits[i]; b.classList.add('full','pop'); SFX.pop(); await sleep(520); }
+      feedback(card,true,'See? A tidy row of boxes — that is an <b>array</b>! 📦');
+    })();
+    setReady(true); card.appendChild(el('div','hint','Watch the array fill up, then tap Continue.'));
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Your turn! Build an array by filling these boxes.');
+    fillInteraction(card,[{em:'🍎'},{em:'🍌'},{em:'🍒'},{em:'🍇'}],4);
+  },
+  predict(card){ predictPhase(card,{
+    pip:'A row of boxes that holds things in order is called a...?',
+    q:'Pick the right name 👇',
+    choices:[{em:'📦',t:'Array'},{em:'🎒',t:'Backpack'},{em:'🗑️',t:'Trash pile'}], answer:0,
+    yes:'Yes! A neat row of boxes = an array.', no:'It is an Array — a neat row of boxes!'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Build a BIGGER array — fill all 5 boxes! 💪');
+    fillInteraction(card,[{em:'🍓'},{em:'🍊'},{em:'🥝'},{em:'🍉'},{em:'🍍'}],5);
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'What is an array?',choices:[{t:'A single number'},{t:'A row of boxes holding things in order'},{t:'A color'}],answer:1},
+    {q:'Do the items in an array stay in order?',choices:[{em:'✅',t:'Yes, in a line'},{em:'❌',t:'No, all jumbled'}],answer:0},
+  ]);}
+};
+
+/* ---------- L2 ELEMENT ---------- */
+BUILD.element={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[1].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🐶','🐱','🐰','🦊'];
+    const v=arrayView(data,{label:true}); stage.appendChild(v);
+    (async()=>{ await sleep(300);
+      const bs=boxes(v), ls=v.querySelectorAll('.lbl');
+      for(let i=0;i<bs.length;i++){ bs[i].classList.add('glow'); ls[i].classList.add('show'); SFX.step(); await sleep(550); bs[i].classList.remove('glow'); }
+      feedback(card,true,'Each animal in a box is one <b>element</b>! 🐾');
+    })();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap every element to wake it up! ✋');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇','🍊']; const v=arrayView(data); stage.appendChild(v);
+    let n=0; const c=el('div','count'); c.innerHTML='Tapped: <b>0</b> / 5'; stage.appendChild(c);
+    boxes(v).forEach(b=>{ b.onclick=()=>{ if(b.dataset.t)return; b.dataset.t=1; b.classList.add('glow','pop'); SFX.pop(); n++; c.innerHTML=`Tapped: <b>${n}</b> / 5`; if(n===5){setReady(true);feedback(card,true,'You found all 5 elements! 🎉');} }; });
+  },
+  predict(card){ predictPhase(card,{
+    q:'How many <b>elements</b> are in this array?',
+    visual:()=>arrayView(['⚽','🏀','🎾']),
+    choices:[{t:'2'},{t:'3'},{t:'4'}], answer:1, yes:'Right — 3 elements!', no:'Count them: ⚽🏀🎾 = 3 elements.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Tap ONLY the banana element 🍌');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍇','🍓']; const v=arrayView(data); stage.appendChild(v);
+    boxes(v).forEach(b=>{ b.onclick=()=>{ if(b.textContent==='🍌'){b.classList.add('glow','pop');SFX.good();setReady(true);feedback(card,true,'That is the banana element! 🍌');} else {b.classList.add('shake');SFX.bad();feedback(card,false,'Oops! Find the 🍌 element.');setTimeout(()=>b.classList.remove('shake'),400);} }; });
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'What do we call ONE item inside an array?',choices:[{t:'An element'},{t:'An index'},{t:'A length'}],answer:0},
+    {q:'In [🐶,🐱,🐭], how many elements?',choices:[{t:'1'},{t:'3'},{t:'5'}],answer:1},
+  ]);}
+};
+
+/* ---------- L3 INDEX ---------- */
+BUILD.index={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[2].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇','🍊']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    (async()=>{ await sleep(300);
+      const xs=idxs(v);
+      for(let i=0;i<xs.length;i++){ xs[i].classList.add('hot'); boxes(v)[i].classList.add('glow'); SFX.step(); await sleep(500); xs[i].classList.remove('hot'); boxes(v)[i].classList.remove('glow'); }
+      feedback(card,true,'The FIRST box is index <b>0</b>, not 1! 🤯');
+    })();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap any box to light up its index number! ✋');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🐶','🐱','🐰','🦊','🐼']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    let seen=new Set();
+    boxes(v).forEach((b,i)=>{ b.onclick=()=>{ idxs(v).forEach(x=>x.classList.remove('hot')); boxes(v).forEach(x=>x.classList.remove('glow')); idxs(v)[i].classList.add('hot'); b.classList.add('glow'); SFX.step(); seen.add(i); feedback(card,true,`That box is at index <b>${i}</b>!`); if(seen.size>=3)setReady(true); }; });
+    card.appendChild(el('div','hint','Tap at least 3 boxes to continue.'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'What is the index of the <b>first</b> box?',
+    visual:()=>arrayView(['🌟','🎈','🎁'],{indices:true}),
+    choices:[{t:'0'},{t:'1'},{t:'First!'}], answer:0, yes:'Yes! Arrays start counting at 0.', no:'Tricky! Arrays start at index 0.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Tap the box at <b>index 3</b>! 🎯');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇','🍊']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    boxes(v).forEach((b,i)=>{ b.onclick=()=>{ if(i===3){b.classList.add('glow','pop');idxs(v)[i].classList.add('hot');SFX.good();setReady(true);feedback(card,true,'Index 3 = the 4th box (🍇). Nice! 🎉');} else {b.classList.add('shake');SFX.bad();feedback(card,false,`That was index ${i}. Remember: start at 0!`);setTimeout(()=>b.classList.remove('shake'),400);} }; });
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'Arrays start counting indexes at...',choices:[{t:'0'},{t:'1'},{t:'10'}],answer:0},
+    {q:'The 5th box has which index?',choices:[{t:'5'},{t:'4'},{t:'6'}],answer:1},
+  ]);}
+};
+
+/* ---------- L4 LENGTH ---------- */
+BUILD.length={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[3].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🍎']; const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data)); lab.innerHTML=`length = <b>${data.length}</b>`; }
+    draw();
+    (async()=>{ const add=['🍌','🍒','🍇']; for(const f of add){ await sleep(650); data.push(f); draw(); boxes(wrap).slice(-1)[0].classList.add('pop'); SFX.pop(); }
+      await sleep(700); feedback(card,true,'More elements = bigger <b>length</b>! 📏');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Use + and − and watch the length change! ✋');
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🍎','🍌']; const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    const row=el('div','row'); const minus=el('button','btn c1','−'); const plus=el('button','btn c3','+'); row.append(minus,plus); card.appendChild(row);
+    const pool=['🍒','🍇','🍊','🍓','🥝','🍉'];
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data)); lab.innerHTML=`length = <b>${data.length}</b>`; }
+    let changes=0;
+    plus.onclick=()=>{ if(data.length>=8)return; data.push(pool[data.length%pool.length]); draw(); boxes(wrap).slice(-1)[0].classList.add('pop'); SFX.pop(); if(++changes>=3)setReady(true); };
+    minus.onclick=()=>{ if(data.length<=0)return; data.pop(); draw(); SFX.step(); if(++changes>=3)setReady(true); };
+    draw(); card.appendChild(el('div','hint','Make at least 3 changes to continue.'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'What is the <b>length</b> of this array?',
+    visual:()=>arrayView(['🍎','🍌','🍒','🍇']),
+    choices:[{t:'3'},{t:'4'},{t:'5'}], answer:1, yes:'Yes — 4 elements, length 4!', no:'Count: 4 elements means length 4.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Make the array length exactly <b>5</b>! 🎯');
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🍎','🍌']; const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    const row=el('div','row'); const minus=el('button','btn c1','−'); const plus=el('button','btn c3','+'); row.append(minus,plus); card.appendChild(row);
+    const pool=['🍒','🍇','🍊','🍓','🥝'];
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data)); lab.innerHTML=`length = <b>${data.length}</b>`; if(data.length===5){setReady(true);feedback(card,true,'Length is exactly 5! Perfect 🎉');} else {feedback(card,data.length<5,data.length<5?'Keep adding! 👆':'Too many — remove some!');} }
+    plus.onclick=()=>{ if(data.length>=8)return; data.push(pool[data.length%pool.length]); draw(); boxes(wrap).slice(-1)[0].classList.add('pop'); SFX.pop(); };
+    minus.onclick=()=>{ if(data.length<=0)return; data.pop(); draw(); SFX.step(); };
+    draw();
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'"Length" of an array tells you...',choices:[{t:'How many elements it has'},{t:'The first element'},{t:'The color'}],answer:0},
+    {q:'Array [🐶,🐱,🐭,🐹] has length...',choices:[{t:'3'},{t:'4'},{t:'5'}],answer:1},
+  ]);}
+};
+
+/* ---------- L5 ACCESS ---------- */
+BUILD.access={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[4].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    const code=el('div','count'); stage.appendChild(code);
+    (async()=>{ for(const i of [2,0,3]){ await sleep(800); boxes(v).forEach(b=>b.classList.remove('glow')); idxs(v).forEach(x=>x.classList.remove('hot')); boxes(v)[i].classList.add('glow','pop'); idxs(v)[i].classList.add('hot'); code.innerHTML=`arr[${i}] → <b>${data[i]}</b>`; SFX.step(); }
+      await sleep(700); feedback(card,true,'Give an index, get that element! 🎯');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap an index button to ACCESS that element! ✋');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🐶','🐱','🐰','🦊']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    const out=el('div','count'); out.innerHTML='arr[?] → ?'; stage.appendChild(out);
+    const row=el('div','row'); card.appendChild(row);
+    let tried=new Set();
+    data.forEach((_,i)=>{ const b=el('button','btn c1',`arr[${i}]`); b.onclick=()=>{ boxes(v).forEach(x=>x.classList.remove('glow'));idxs(v).forEach(x=>x.classList.remove('hot')); boxes(v)[i].classList.add('glow','pop');idxs(v)[i].classList.add('hot'); out.innerHTML=`arr[${i}] → <b>${data[i]}</b>`; SFX.step(); tried.add(i); if(tried.size>=2)setReady(true); }; row.appendChild(b); });
+    card.appendChild(el('div','hint','Try at least 2 buttons.'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'What is <b>arr[1]</b>?',
+    visual:()=>arrayView(['🍎','🍌','🍒'],{indices:true}),
+    choices:[{em:'🍎',t:'arr[1] = 🍎'},{em:'🍌',t:'arr[1] = 🍌'},{em:'🍒',t:'arr[1] = 🍒'}], answer:1, yes:'Yes! Index 1 is the 2nd box 🍌.', no:'Index 1 is the SECOND box = 🍌.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Access <b>arr[3]</b> — tap the correct box! 🎯');
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍓','🍊','🥝','🍉','🍍']; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    boxes(v).forEach((b,i)=>{ b.onclick=()=>{ if(i===3){b.classList.add('glow','pop');idxs(v)[i].classList.add('hot');SFX.good();setReady(true);feedback(card,true,'arr[3] = 🍉. You accessed it! 🎉');} else {b.classList.add('shake');SFX.bad();feedback(card,false,`That is arr[${i}]. We want arr[3]!`);setTimeout(()=>b.classList.remove('shake'),400);} }; });
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'"Accessing" an element means...',choices:[{t:'Grabbing it by its index'},{t:'Deleting it'},{t:'Counting them'}],answer:0},
+    {q:'For [🚗,🚕,🚙], what is arr[0]?',choices:[{em:'🚗',t:'🚗'},{em:'🚕',t:'🚕'},{em:'🚙',t:'🚙'}],answer:0},
+  ]);}
+};
+
+/* ---------- L6 UPDATE ---------- */
+BUILD.update={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[5].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🐶','🐱','🐰']; const wrap=el('div'); stage.appendChild(wrap);
+    const code=el('div','count'); stage.appendChild(code);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data,{indices:true})); }
+    draw();
+    (async()=>{ await sleep(800); code.innerHTML='arr[1] = 🦄'; boxes(wrap)[1].classList.add('glow'); SFX.step(); await sleep(700); data[1]='🦄'; draw(); boxes(wrap)[1].classList.add('glow','pop'); SFX.pop(); feedback(card,true,'Box 1 changed — same spot, new element! ✨');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Drag a new sticker onto a box to UPDATE it! ✋');
+    let data=['🍎','🍌','🍒']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    const tray=el('div','tray'); card.appendChild(tray);
+    let updates=0;
+    function draw(){ wrap.innerHTML=''; const v=arrayView(data,{indices:true}); wrap.appendChild(v);
+      boxes(v).forEach((b,i)=>makeDrop(b,(em)=>{ data[i]=em; SFX.pop(); draw(); boxes(wrap)[i].classList.add('glow','pop'); feedback(card,true,`arr[${i}] = ${em} ✨`); if(++updates>=2)setReady(true); })); }
+    draw();
+    ['⭐','🦄','🌈','🍕'].forEach(em=>{ const ch=el('div','chip',em); makeDraggable(ch,()=>em); ch.onclick=()=>{ const i=0; data[i]=em;SFX.pop();draw();boxes(wrap)[i].classList.add('glow','pop'); feedback(card,true,`arr[0] = ${em} ✨`); if(++updates>=2)setReady(true); }; tray.appendChild(ch); });
+    card.appendChild(el('div','hint','Drag onto any box (or tap to update box 0). Do 2 updates!'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'Start: [🍎,🍌,🍒]. Do <b>arr[0] = 🍕</b>. What is the array now?',
+    choices:[{t:'[🍕,🍌,🍒]'},{t:'[🍎,🍌,🍒,🍕]'},{t:'[🍕,🍕,🍕]'}], answer:0, yes:'Yes! Only box 0 changed.', no:'Update changes ONE box: [🍕,🍌,🍒].'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Update <b>index 2</b> to a 🌟! Drag it on. 💪');
+    let data=['🍇','🍊','🥝','🍓']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    function draw(){ wrap.innerHTML=''; const v=arrayView(data,{indices:true}); wrap.appendChild(v);
+      boxes(v).forEach((b,i)=>makeDrop(b,(em)=>{ if(i===2){data[i]=em;SFX.good();draw();boxes(wrap)[i].classList.add('glow','pop');setReady(true);feedback(card,true,'arr[2] = 🌟. Done! 🎉');} else {SFX.bad();b.classList.add('shake');feedback(card,false,`That is index ${i}. Update index 2!`);setTimeout(()=>b.classList.remove('shake'),400);} })); }
+    draw();
+    const tray=el('div','tray'); const ch=el('div','chip','🌟'); makeDraggable(ch,()=>'🌟'); ch.onclick=()=>{data[2]='🌟';SFX.good();draw();boxes(wrap)[2].classList.add('glow','pop');setReady(true);feedback(card,true,'arr[2] = 🌟. Done! 🎉');}; tray.appendChild(ch); card.appendChild(tray);
+    card.appendChild(el('div','hint','Drag the 🌟 onto index 2 (or tap it).'));
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'Updating arr[2] changes...',choices:[{t:'Only the box at index 2'},{t:'Every box'},{t:'The length'}],answer:0},
+    {q:'[A,B,C] then arr[1]=Z gives...',choices:[{t:'[Z,B,C]'},{t:'[A,Z,C]'},{t:'[A,B,Z]'}],answer:1},
+  ]);}
+};
+
+/* ---------- L7 ADD ---------- */
+BUILD.add={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[6].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🍎','🍌']; const wrap=el('div'); stage.appendChild(wrap);
+    const code=el('div','count'); stage.appendChild(code);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data,{indices:true})); }
+    draw();
+    (async()=>{ for(const f of ['🍒','🍇']){ await sleep(800); code.innerHTML=`add(${f})`; SFX.step(); await sleep(500); data.push(f); draw(); boxes(wrap).slice(-1)[0].classList.add('glow','pop'); SFX.pop(); }
+      await sleep(600); feedback(card,true,'New elements join at the <b>end</b>! ➕');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap a fruit to ADD it to the end! ✋');
+    let data=['🍎']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data,{indices:true})); lab.innerHTML=`length = <b>${data.length}</b>`; }
+    draw(); let adds=0;
+    const tray=el('div','tray'); ['🍌','🍒','🍇','🍊','🍓'].forEach(f=>{ const ch=el('div','chip',f); ch.onclick=()=>{ if(data.length>=8)return; data.push(f);draw();boxes(wrap).slice(-1)[0].classList.add('glow','pop');SFX.pop(); if(++adds>=2)setReady(true);}; tray.appendChild(ch); }); card.appendChild(tray);
+    card.appendChild(el('div','hint','Add at least 2 fruits.'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'Start: [🍎,🍌]. Then <b>add(🍇)</b>. Result?',
+    choices:[{t:'[🍇,🍎,🍌]'},{t:'[🍎,🍌,🍇]'},{t:'[🍎,🍇,🍌]'}], answer:1, yes:'Yes — new items go to the END.', no:'Add goes to the end: [🍎,🍌,🍇].'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Add fruits until the array length is <b>6</b>! 💪');
+    let data=['🍎','🍌']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data,{indices:true})); lab.innerHTML=`length = <b>${data.length}</b>`; if(data.length===6){setReady(true);feedback(card,true,'Length 6 — great adding! 🎉');} }
+    draw();
+    const tray=el('div','tray'); ['🍒','🍇','🍊','🍓','🥝'].forEach(f=>{ const ch=el('div','chip',f); ch.onclick=()=>{ if(data.length>=6)return; data.push(f);draw();boxes(wrap).slice(-1)[0].classList.add('glow','pop');SFX.pop(); }; tray.appendChild(ch); }); card.appendChild(tray);
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'When you ADD an element, it goes to the...',choices:[{t:'Start'},{t:'End'},{t:'Middle'}],answer:1},
+    {q:'Adding makes the length...',choices:[{t:'Bigger'},{t:'Smaller'},{t:'Same'}],answer:0},
+  ]);}
+};
+
+/* ---------- L8 DELETE ---------- */
+BUILD.delete={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[7].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    let data=['🍎','🍌','🍒','🍇']; const wrap=el('div'); stage.appendChild(wrap);
+    const code=el('div','count'); stage.appendChild(code);
+    function draw(){ wrap.innerHTML=''; wrap.appendChild(arrayView(data,{indices:true})); }
+    draw();
+    (async()=>{ await sleep(800); code.innerHTML='delete index 1 (🍌)'; boxes(wrap)[1].classList.add('glow'); SFX.step(); await sleep(700); boxes(wrap)[1].classList.add('shake'); SFX.bad(); await sleep(400); data.splice(1,1); draw(); boxes(wrap).forEach(b=>b.classList.add('pop')); SFX.pop();
+      await sleep(700); feedback(card,true,'🍌 gone — and everyone slid over! Indexes changed! 😮');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap a box to DELETE it. Watch them slide! ✋');
+    let data=['🍎','🍌','🍒','🍇','🍊']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    const lab=el('div','count'); stage.appendChild(lab);
+    let dels=0;
+    function draw(){ wrap.innerHTML=''; const v=arrayView(data,{indices:true}); wrap.appendChild(v); lab.innerHTML=`length = <b>${data.length}</b>`;
+      boxes(v).forEach((b,i)=>b.onclick=()=>{ const g=b.textContent; data.splice(i,1); SFX.pop(); draw(); feedback(card,true,`Deleted ${g}! Boxes slid over. 👈`); if(++dels>=1&&data.length>=1)setReady(true); }); }
+    draw(); card.appendChild(el('div','hint','Delete at least one element.'));
+  },
+  predict(card){ predictPhase(card,{
+    q:'Start: [🍎,🍌,🍒]. <b>Delete index 0</b>. Result?',
+    choices:[{t:'[🍌,🍒]'},{t:'[🍎,🍒]'},{t:'[🍎,🍌]'}], answer:0, yes:'Right! 🍎 leaves, the rest shift left.', no:'Remove index 0 (🍎): you get [🍌,🍒].'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Delete the 🐸 from the array! 💪');
+    let data=['🐶','🐸','🐱','🐰']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap);
+    function draw(){ wrap.innerHTML=''; const v=arrayView(data,{indices:true}); wrap.appendChild(v);
+      boxes(v).forEach((b,i)=>b.onclick=()=>{ if(b.textContent==='🐸'){data.splice(i,1);SFX.good();draw();setReady(true);feedback(card,true,'🐸 deleted! Others slid over. 🎉');} else {b.classList.add('shake');SFX.bad();feedback(card,false,'That is not the frog — find 🐸!');setTimeout(()=>b.classList.remove('shake'),400);} }); }
+    draw();
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'After you DELETE an element, the other elements...',choices:[{t:'Slide over to fill the gap'},{t:'Disappear too'},{t:'Stay with a hole'}],answer:0},
+    {q:'Deleting makes the length...',choices:[{t:'Bigger'},{t:'Smaller'},{t:'Same'}],answer:1},
+  ]);}
+};
+
+/* ---------- L9 TRAVERSE ---------- */
+BUILD.traverse={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[8].say);
+    const stage=el('div','stage'); stage.style.position='relative'; card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇']; const v=arrayView(data,{indices:true}); v.style.position='relative'; stage.appendChild(v);
+    const robot=el('div','robot','🤖'); v.appendChild(robot);
+    const code=el('div','count'); stage.appendChild(code);
+    (async()=>{ await sleep(500);
+      for(let i=0;i<data.length;i++){ const b=boxes(v)[i]; robot.style.left=b.offsetLeft+'px'; boxes(v).forEach(x=>x.classList.remove('glow')); b.classList.add('glow'); code.innerHTML=`Visiting index ${i} → <b>${data[i]}</b>`; SFX.step(); await sleep(750); }
+      feedback(card,true,'The robot visited EVERY box, in order! 🤖');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Press STEP to move the robot box by box! ✋');
+    const stage=el('div','stage'); stage.style.position='relative'; card.appendChild(stage);
+    const data=['🐶','🐱','🐰','🦊','🐼']; const v=arrayView(data,{indices:true}); v.style.position='relative'; stage.appendChild(v);
+    const robot=el('div','robot','🤖'); v.appendChild(robot);
+    const code=el('div','count'); code.innerHTML='Press STEP ➜'; stage.appendChild(code);
+    let i=-1;
+    const row=el('div','row'); const step=el('button','btn c2','👣 Step'); const run=el('button','btn c3','▶ Run'); row.append(step,run); card.appendChild(row);
+    function go(){ i++; if(i>=data.length){ code.innerHTML='Done — visited all! 🎉'; setReady(true); SFX.good(); return false;} const b=boxes(v)[i]; robot.style.left=b.offsetLeft+'px'; boxes(v).forEach(x=>x.classList.remove('glow')); b.classList.add('glow','pop'); code.innerHTML=`index ${i} → <b>${data[i]}</b>`; SFX.step(); return true; }
+    step.onclick=()=>go();
+    run.onclick=async()=>{ run.disabled=true;step.disabled=true; while(go()){await sleep(600);} };
+  },
+  predict(card){ predictPhase(card,{
+    q:'When we <b>traverse</b>, which box do we visit FIRST?',
+    visual:()=>arrayView(['🥇','🥈','🥉'],{indices:true}),
+    choices:[{t:'Index 0 (🥇)'},{t:'The last box'},{t:'A random box'}], answer:0, yes:'Yes — start at index 0 and go in order!', no:'Traverse starts at index 0 and moves in order.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Traverse the whole array — step through ALL boxes! 💪');
+    const stage=el('div','stage'); stage.style.position='relative'; card.appendChild(stage);
+    const data=['🍓','🍊','🥝','🍉']; const v=arrayView(data,{indices:true}); v.style.position='relative'; stage.appendChild(v);
+    const robot=el('div','robot','🤖'); v.appendChild(robot);
+    const lab=el('div','count'); lab.innerHTML='Visited: <b>0</b> / 4'; stage.appendChild(lab);
+    let i=-1,seen=0;
+    const step=el('button','btn c2','👣 Step'); card.appendChild(step);
+    step.onclick=()=>{ i++; if(i>=data.length){ step.disabled=true; return;} const b=boxes(v)[i]; robot.style.left=b.offsetLeft+'px'; boxes(v).forEach(x=>x.classList.remove('glow')); b.classList.add('glow','pop'); seen++; lab.innerHTML=`Visited: <b>${seen}</b> / 4`; SFX.step(); if(seen===4){setReady(true);feedback(card,true,'You traversed the whole array! 🎉');} };
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'To "traverse" an array means to...',choices:[{t:'Visit every element one by one'},{t:'Delete it'},{t:'Sort it'}],answer:0},
+    {q:'Traversing usually goes from...',choices:[{t:'First to last'},{t:'Random spots'},{t:'Only the middle'}],answer:0},
+  ]);}
+};
+
+/* ---------- L10 SEARCH ---------- */
+BUILD.search={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[9].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    const data=['🍎','🍌','🍒','🍇']; const target='🍒'; const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    const code=el('div','count'); code.innerHTML=`Searching for <b>${target}</b>...`; stage.appendChild(code);
+    (async()=>{ await sleep(600);
+      for(let i=0;i<data.length;i++){ const b=boxes(v)[i]; b.classList.add('checking'); SFX.step(); code.innerHTML=`Is index ${i} (${data[i]}) = ${target}?`; await sleep(700); if(data[i]===target){ b.classList.remove('checking'); b.classList.add('found','pop'); code.innerHTML=`Found ${target} at index <b>${i}</b>! 🎉`; SFX.good(); break;} b.classList.remove('checking'); b.classList.add('dim'); }
+      feedback(card,true,'Check each box until we find it! 🔍');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Pick a target, then press Search! ✋');
+    const data=['🐶','🐱','🐰','🦊','🐼']; const stage=el('div','stage'); card.appendChild(stage);
+    const wrap=el('div'); stage.appendChild(wrap); wrap.appendChild(arrayView(data,{indices:true}));
+    const code=el('div','count'); code.innerHTML='Pick a target ➜'; stage.appendChild(code);
+    let target=null,searches=0;
+    const tray=el('div','tray'); data.forEach(em=>{ const ch=el('div','chip',em); ch.onclick=()=>{ target=em; [...tray.children].forEach(c=>c.classList.remove('used')); ch.classList.add('used'); code.innerHTML=`Target: <b>${em}</b> — press Search!`; }; tray.appendChild(ch); }); card.appendChild(tray);
+    const btn=el('button','btn c1','🔍 Search'); card.appendChild(btn);
+    btn.onclick=async()=>{ if(!target)return; btn.disabled=true; const v=wrap.querySelector('.arr'); boxes(v).forEach(b=>b.className='box full');
+      for(let i=0;i<data.length;i++){ const b=boxes(v)[i]; b.classList.add('checking'); SFX.step(); await sleep(450); if(data[i]===target){ b.classList.remove('checking'); b.classList.add('found','pop'); code.innerHTML=`Found at index <b>${i}</b>! 🎉`; SFX.good(); break;} b.classList.remove('checking'); b.classList.add('dim'); }
+      if(++searches>=1)setReady(true); btn.disabled=false; };
+  },
+  predict(card){ predictPhase(card,{
+    q:'Search for <b>🍒</b>. At which index is it found?',
+    visual:()=>arrayView(['🍎','🍌','🍒'],{indices:true}),
+    choices:[{t:'index 0'},{t:'index 1'},{t:'index 2'}], answer:2, yes:'Yes — 🍒 is at index 2!', no:'🍒 is the 3rd box = index 2.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Find 🦊 — tap the box it is hiding in! 💪');
+    const data=['🐶','🐱','🦊','🐰','🐼']; const stage=el('div','stage'); card.appendChild(stage);
+    const v=arrayView(data,{indices:true}); stage.appendChild(v);
+    const code=el('div','count'); code.innerHTML='Where is 🦊?'; stage.appendChild(code);
+    boxes(v).forEach((b,i)=>b.onclick=()=>{ if(b.textContent==='🦊'){b.classList.add('found','pop');SFX.good();setReady(true);code.innerHTML=`Found 🦊 at index <b>${i}</b>! 🎉`;feedback(card,true,'Great searching! 🔍');} else {b.classList.add('shake');SFX.bad();feedback(card,false,'Not here — keep searching for 🦊!');setTimeout(()=>b.classList.remove('shake'),400);} });
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'Searching an array means...',choices:[{t:'Looking through it to find something'},{t:'Adding to it'},{t:'Sorting it'}],answer:0},
+    {q:'In [🍎,🍌,🍒], 🍌 is found at index...',choices:[{t:'0'},{t:'1'},{t:'2'}],answer:1},
+  ]);}
+};
+
+/* ---------- L11 SORT ---------- */
+function makeBars(nums,host,opt={}){
+  host.innerHTML=''; const row=el('div','barrow');
+  const max=Math.max(...nums);
+  nums.forEach((n,i)=>{ const b=el('div','bar',String(n)); b.style.height=(40+n/max*100)+'px'; b.dataset.i=i; row.appendChild(b); });
+  host.appendChild(row); return [...row.children];
+}
+BUILD.sort={
+  observe(card){ tagit(card,'Observe 👀'); pip(card,LESSONS[10].say);
+    const stage=el('div','stage'); card.appendChild(stage);
+    let nums=[5,2,4,1,3]; const host=el('div'); stage.appendChild(host); makeBars(nums,host);
+    const code=el('div','count'); code.innerHTML='Sorting smallest → biggest...'; stage.appendChild(code);
+    (async()=>{ await sleep(600);
+      for(let i=0;i<nums.length;i++) for(let j=0;j<nums.length-1-i;j++){ const bars=[...host.querySelectorAll('.bar')]; bars[j].classList.add('sel'); bars[j+1].classList.add('sel'); SFX.step(); await sleep(380);
+        if(nums[j]>nums[j+1]){ [nums[j],nums[j+1]]=[nums[j+1],nums[j]]; makeBars(nums,host); SFX.pop(); }
+        else bars.forEach(b=>b.classList.remove('sel')); await sleep(180); [...host.querySelectorAll('.bar')].forEach(b=>b.classList.remove('sel')); }
+      [...host.querySelectorAll('.bar')].forEach(b=>b.classList.add('sorted')); code.innerHTML='Sorted! 1,2,3,4,5 🎉'; SFX.good();
+      feedback(card,true,'Smallest to biggest — that is <b>sorting</b>! 📊');})();
+    setReady(true);
+  },
+  interact(card){ tagit(card,'Interact ✋'); pip(card,'Tap TWO bars to swap them. Sort small → big! ✋');
+    let nums=[3,1,2]; const stage=el('div','stage'); card.appendChild(stage);
+    const host=el('div'); stage.appendChild(host);
+    const code=el('div','count'); code.innerHTML='Tap two bars to swap'; stage.appendChild(code);
+    let sel=-1;
+    function check(){ const ok=nums.every((n,i)=>i===0||nums[i-1]<=n); if(ok){[...host.querySelectorAll('.bar')].forEach(b=>b.classList.add('sorted'));code.innerHTML='Sorted! 🎉';SFX.good();setReady(true);feedback(card,true,'You sorted it! 📊');} }
+    function draw(){ const bars=makeBars(nums,host); bars.forEach((b,i)=>b.onclick=()=>{ if(sel===-1){sel=i;b.classList.add('sel');SFX.click();} else if(sel===i){b.classList.remove('sel');sel=-1;} else {[nums[sel],nums[i]]=[nums[i],nums[sel]];sel=-1;SFX.pop();draw();check();} }); }
+    draw();
+  },
+  predict(card){ predictPhase(card,{
+    q:'Sort <b>[3, 1, 2]</b> from small to big. Result?',
+    choices:[{t:'1, 2, 3'},{t:'3, 2, 1'},{t:'2, 1, 3'}], answer:0, yes:'Yes! 1, 2, 3 — smallest first.', no:'Small to big means 1, 2, 3.'});
+  },
+  practice(card){ tagit(card,'Practice 💪'); pip(card,'Sort all of these small → big by swapping! 💪');
+    let nums=[4,2,5,1,3]; const stage=el('div','stage'); card.appendChild(stage);
+    const host=el('div'); stage.appendChild(host);
+    const code=el('div','count'); code.innerHTML='Tap two bars to swap'; stage.appendChild(code);
+    let sel=-1;
+    function check(){ const ok=nums.every((n,i)=>i===0||nums[i-1]<=n); if(ok){[...host.querySelectorAll('.bar')].forEach(b=>b.classList.add('sorted'));code.innerHTML='Perfectly sorted! 🎉';SFX.good();setReady(true);feedback(card,true,'Array Master move! 📊');} }
+    function draw(){ const bars=makeBars(nums,host); bars.forEach((b,i)=>b.onclick=()=>{ if(sel===-1){sel=i;b.classList.add('sel');SFX.click();} else if(sel===i){b.classList.remove('sel');sel=-1;} else {[nums[sel],nums[i]]=[nums[i],nums[sel]];sel=-1;SFX.pop();draw();check();} }); }
+    draw();
+  },
+  quiz(card){ quizPhase(card,[
+    {q:'Sorting an array means putting it...',choices:[{t:'In order (like small→big)'},{t:'In a random mess'},{t:'In a circle'}],answer:0},
+    {q:'Sorted small→big: [9,1,5] becomes...',choices:[{t:'1,5,9'},{t:'9,5,1'},{t:'5,1,9'}],answer:0},
+  ]);}
+};
+
+/* ============================ BOOT ============================ */
+$('sndBtn').onclick=()=>{ S.sound=!S.sound; $('sndBtn').textContent=S.sound?'🔊':'🔇'; if(S.sound)SFX.good(); save(); };
+(async()=>{ await load(); $('sndBtn').textContent=S.sound?'🔊':'🔇'; showHome(); })();
+</script>
+</body>
+</html>

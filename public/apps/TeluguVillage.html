@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Young Foundry — Telugu</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
+:root{--cream:#EEF3FA;--sand:#D7E1EE;--ink:#14253F;--soft:#5B7088;--marigold:#D4A828;--terracotta:#1F4E79;--leaf:#2E9E6B;--sky:#2E6FB0;--temple:#B8860B;--plum:#9C7A1E;--green:#2E9E6B;--yellow:#E6B73C;--red:#D9534F;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--cream);-webkit-tap-highlight-color:transparent}
+button{font:inherit;border:none;background:none;cursor:pointer;color:inherit;padding:0}
+img{display:block;max-width:100%}
+select{font:inherit;border:none;border-radius:12px;padding:10px 12px;background:#fff;color:var(--ink);font-weight:700;font-family:'Nunito',sans-serif;box-shadow:0 3px 0 var(--sand);outline:none}
+.disp{font-family:'Baloo Tammudu 2',system-ui,sans-serif}
+.bodyf{font-family:'Nunito',system-ui,sans-serif}
+.te{font-family:'Baloo Tammudu 2','Noto Sans Telugu',serif}
+.app{min-height:100vh;width:100%;display:flex;justify-content:center;background:var(--cream)}
+.wrap{width:100%;max-width:28rem;padding:18px 16px 48px}
+.row{display:flex;align-items:center}.between{justify-content:space-between}.center{justify-content:center}
+.col{display:flex;flex-direction:column}.wrapw{flex-wrap:wrap}
+.full{width:100%}.flex1{flex:1}.shrink0{flex-shrink:0}.minw0{min-width:0}
+.g1{gap:4px}.g2{gap:8px}.g3{gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.scrollx{overflow-x:auto;padding-bottom:4px}
+.tac{text-align:center}.tal{text-align:left}
+.rxl{border-radius:12px}.r2xl{border-radius:16px}.r3xl{border-radius:24px}.rfull{border-radius:9999px}
+.trunc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pre{white-space:pre-wrap}
+.pop{animation:pop .35s ease-out both}.float{animation:floaty 3s ease-in-out infinite}
+.tap{transition:transform .1s ease}.tap:active{transform:scale(.92)}
+.cardanim{transition:transform .15s ease, box-shadow .15s ease}.cardanim:active{transform:scale(.97)}
+.spin{width:18px;height:18px;border:3px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;display:inline-block;animation:rot .8s linear infinite;vertical-align:middle}
+@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:50;padding:12px 20px;border-radius:16px;font-weight:800;color:#fff;text-align:center;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const C={cream:"#EEF3FA",sand:"#D7E1EE",ink:"#14253F",soft:"#5B7088",marigold:"#D4A828",terracotta:"#1F4E79",leaf:"#2E9E6B",sky:"#2E6FB0",temple:"#B8860B",plum:"#9C7A1E",white:"#fff",green:"#2E9E6B",yellow:"#E6B73C",red:"#D9534F",navy:"#14253F",gold:"#D4A828"};
+
+/* ============================ THEMES ============================ */
+const THEMES=[
+  {k:"All",e:"🌈",t:"All"},{k:"animals",e:"🐾",t:"Animals"},{k:"nature",e:"🌳",t:"Nature"},
+  {k:"food",e:"🍎",t:"Food"},{k:"family",e:"👨‍👩‍👧",t:"Family & Home"},{k:"school",e:"🏫",t:"School"},
+  {k:"festival",e:"🎉",t:"Festivals"},{k:"body",e:"🖐️",t:"Body & Colors"},
+];
+
+/* ============================ CONTENT BANKS ============================ */
+const WORDS=[
+  // animals
+  {w:"పులి",en:"tiger",e:"🐅",lvl:"easy",th:"animals"},{w:"ఆవు",en:"cow",e:"🐄",lvl:"easy",th:"animals"},
+  {w:"కాకి",en:"crow",e:"🐦",lvl:"easy",th:"animals"},{w:"నక్క",en:"fox",e:"🦊",lvl:"easy",th:"animals"},
+  {w:"చేప",en:"fish",e:"🐟",lvl:"easy",th:"animals"},{w:"పిల్లి",en:"cat",e:"🐈",lvl:"easy",th:"animals"},
+  {w:"కుక్క",en:"dog",e:"🐕",lvl:"easy",th:"animals"},{w:"కోతి",en:"monkey",e:"🐒",lvl:"easy",th:"animals"},
+  {w:"కప్ప",en:"frog",e:"🐸",lvl:"easy",th:"animals"},{w:"చీమ",en:"ant",e:"🐜",lvl:"easy",th:"animals"},
+  {w:"ఏనుగు",en:"elephant",e:"🐘",lvl:"med",th:"animals"},{w:"ఉడుత",en:"squirrel",e:"🐿️",lvl:"med",th:"animals"},
+  {w:"చిలుక",en:"parrot",e:"🦜",lvl:"med",th:"animals"},{w:"తాబేలు",en:"turtle",e:"🐢",lvl:"med",th:"animals"},
+  {w:"గుర్రం",en:"horse",e:"🐎",lvl:"med",th:"animals"},{w:"సింహం",en:"lion",e:"🦁",lvl:"med",th:"animals"},
+  {w:"పాము",en:"snake",e:"🐍",lvl:"med",th:"animals"},{w:"నెమలి",en:"peacock",e:"🦚",lvl:"hard",th:"animals"},
+  {w:"మొసలి",en:"crocodile",e:"🐊",lvl:"hard",th:"animals"},
+  // nature
+  {w:"పూవు",en:"flower",e:"🌸",lvl:"easy",th:"nature"},{w:"ఆకు",en:"leaf",e:"🍃",lvl:"easy",th:"nature"},
+  {w:"చెట్టు",en:"tree",e:"🌳",lvl:"easy",th:"nature"},{w:"నీరు",en:"water",e:"💧",lvl:"easy",th:"nature"},
+  {w:"గాలి",en:"wind",e:"🌬️",lvl:"easy",th:"nature"},{w:"సూర్యుడు",en:"sun",e:"☀️",lvl:"med",th:"nature"},
+  {w:"చంద్రుడు",en:"moon",e:"🌙",lvl:"med",th:"nature"},{w:"నది",en:"river",e:"🏞️",lvl:"med",th:"nature"},
+  {w:"మేఘం",en:"cloud",e:"☁️",lvl:"med",th:"nature"},{w:"వర్షం",en:"rain",e:"🌧️",lvl:"med",th:"nature"},
+  {w:"నక్షత్రం",en:"star",e:"⭐",lvl:"hard",th:"nature"},{w:"ఆకాశం",en:"sky",e:"🌌",lvl:"hard",th:"nature"},
+  {w:"పర్వతం",en:"mountain",e:"⛰️",lvl:"hard",th:"nature"},{w:"సముద్రం",en:"sea",e:"🌊",lvl:"hard",th:"nature"},
+  // food
+  {w:"పండు",en:"fruit",e:"🍎",lvl:"easy",th:"food"},{w:"అరటి",en:"banana",e:"🍌",lvl:"easy",th:"food"},
+  {w:"పాలు",en:"milk",e:"🥛",lvl:"easy",th:"food"},{w:"అన్నం",en:"rice",e:"🍚",lvl:"easy",th:"food"},
+  {w:"రొట్టె",en:"bread",e:"🍞",lvl:"easy",th:"food"},{w:"మామిడి",en:"mango",e:"🥭",lvl:"med",th:"food"},
+  {w:"టమాట",en:"tomato",e:"🍅",lvl:"med",th:"food"},{w:"నిమ్మ",en:"lemon",e:"🍋",lvl:"med",th:"food"},
+  {w:"మిఠాయి",en:"sweet",e:"🍬",lvl:"med",th:"food"},{w:"తేనె",en:"honey",e:"🍯",lvl:"med",th:"food"},
+  {w:"కూరగాయ",en:"vegetable",e:"🥕",lvl:"hard",th:"food"},{w:"కొబ్బరి",en:"coconut",e:"🥥",lvl:"hard",th:"food"},
+  // family & home
+  {w:"అమ్మ",en:"mother",e:"👩",lvl:"easy",th:"family"},{w:"నాన్న",en:"father",e:"👨",lvl:"easy",th:"family"},
+  {w:"ఇల్లు",en:"house",e:"🏠",lvl:"easy",th:"family"},{w:"అన్న",en:"brother",e:"👦",lvl:"easy",th:"family"},
+  {w:"అక్క",en:"sister",e:"👧",lvl:"easy",th:"family"},{w:"తాత",en:"grandpa",e:"👴",lvl:"easy",th:"family"},
+  {w:"బామ్మ",en:"grandma",e:"👵",lvl:"easy",th:"family"},{w:"బిడ్డ",en:"baby",e:"👶",lvl:"easy",th:"family"},
+  {w:"తలుపు",en:"door",e:"🚪",lvl:"med",th:"family"},{w:"కిటికీ",en:"window",e:"🪟",lvl:"med",th:"family"},
+  // school
+  {w:"బడి",en:"school",e:"🏫",lvl:"easy",th:"school"},{w:"కలం",en:"pen",e:"🖊️",lvl:"easy",th:"school"},
+  {w:"బ్యాగ్",en:"bag",e:"🎒",lvl:"easy",th:"school"},{w:"బొమ్మ",en:"toy",e:"🧸",lvl:"easy",th:"school"},
+  {w:"పుస్తకం",en:"book",e:"📖",lvl:"med",th:"school"},{w:"బల్ల",en:"desk",e:"🪑",lvl:"med",th:"school"},
+  {w:"గురువు",en:"teacher",e:"🧑‍🏫",lvl:"med",th:"school"},{w:"విద్యార్థి",en:"student",e:"🧑‍🎓",lvl:"hard",th:"school"},
+  {w:"పాఠశాల",en:"school",e:"🏫",lvl:"hard",th:"school"},{w:"స్నేహితుడు",en:"friend",e:"🤝",lvl:"hard",th:"school"},
+  // festival
+  {w:"దీపం",en:"lamp",e:"🪔",lvl:"easy",th:"festival"},{w:"డప్పు",en:"drum",e:"🥁",lvl:"med",th:"festival"},
+  {w:"పండుగ",en:"festival",e:"🎉",lvl:"med",th:"festival"},{w:"రంగులు",en:"colors",e:"🎨",lvl:"med",th:"festival"},
+  {w:"గాలిపటం",en:"kite",e:"🪁",lvl:"med",th:"festival"},{w:"దీపావళి",en:"Diwali",e:"🪔",lvl:"hard",th:"festival"},
+  {w:"సంక్రాంతి",en:"Sankranti",e:"🪁",lvl:"hard",th:"festival"},
+  // body & colors
+  {w:"కన్ను",en:"eye",e:"👁️",lvl:"easy",th:"body"},{w:"చెయ్యి",en:"hand",e:"✋",lvl:"easy",th:"body"},
+  {w:"కాలు",en:"leg",e:"🦵",lvl:"easy",th:"body"},{w:"తల",en:"head",e:"🧑",lvl:"easy",th:"body"},
+  {w:"ముక్కు",en:"nose",e:"👃",lvl:"easy",th:"body"},{w:"చెవి",en:"ear",e:"👂",lvl:"easy",th:"body"},
+  {w:"ఎరుపు",en:"red",e:"🔴",lvl:"easy",th:"body"},{w:"నీలం",en:"blue",e:"🔵",lvl:"easy",th:"body"},
+  {w:"పసుపు",en:"yellow",e:"🟡",lvl:"easy",th:"body"},{w:"ఆకుపచ్చ",en:"green",e:"🟢",lvl:"med",th:"body"},
+];
+const SENTENCES=[
+  {t:"అమ్మ వంట చేస్తుంది",en:"Mother cooks food",lvl:"easy",th:"family"},
+  {t:"నేను బడికి వెళతాను",en:"I go to school",lvl:"easy",th:"school"},
+  {t:"పిల్లి పాలు తాగింది",en:"The cat drank milk",lvl:"easy",th:"animals"},
+  {t:"పువ్వు ఎర్రగా ఉంది",en:"The flower is red",lvl:"easy",th:"nature"},
+  {t:"కుక్క పరుగెత్తింది",en:"The dog ran",lvl:"easy",th:"animals"},
+  {t:"నాన్న పని చేస్తాడు",en:"Father works",lvl:"easy",th:"family"},
+  {t:"పక్షి ఎగిరింది",en:"The bird flew",lvl:"easy",th:"animals"},
+  {t:"సూర్యుడు ప్రకాశిస్తాడు",en:"The sun shines",lvl:"easy",th:"nature"},
+  {t:"రాము బడికి వెళ్ళాడు",en:"Ramu went to school",lvl:"med",th:"school"},
+  {t:"మేము ఆట ఆడాము",en:"We played a game",lvl:"med",th:"school"},
+  {t:"సీత పుస్తకం చదువుతుంది",en:"Sita reads a book",lvl:"med",th:"school"},
+  {t:"పక్షి చెట్టు మీద కూర్చుంది",en:"The bird sat on the tree",lvl:"med",th:"nature"},
+  {t:"అమ్మ నాకు మిఠాయి ఇచ్చింది",en:"Mother gave me a sweet",lvl:"med",th:"family"},
+  {t:"ఏనుగు నీళ్ళు తాగుతుంది",en:"The elephant drinks water",lvl:"med",th:"animals"},
+  {t:"మేము పండుగ జరుపుకున్నాము",en:"We celebrated the festival",lvl:"med",th:"festival"},
+  {t:"పిల్లలు తోటలో ఆడుకుంటారు",en:"The children play in the garden",lvl:"med",th:"school"},
+  {t:"విద్యార్థులు ఉదయం పాఠశాలకు వెళ్తారు",en:"Students go to school in the morning",lvl:"hard",th:"school"},
+  {t:"మా ఊరిలో పెద్ద చెరువు ఉంది",en:"There is a big lake in our village",lvl:"hard",th:"nature"},
+  {t:"సూర్యుడు తూర్పున ఉదయిస్తాడు",en:"The sun rises in the east",lvl:"hard",th:"nature"},
+  {t:"దీపావళి రోజున మేము దీపాలు వెలిగిస్తాము",en:"On Diwali we light lamps",lvl:"hard",th:"festival"},
+  {t:"అడవిలో చాలా రకాల జంతువులు ఉంటాయి",en:"There are many kinds of animals in the forest",lvl:"hard",th:"animals"},
+  {t:"మా అమ్మ ప్రతిరోజూ రుచికరమైన భోజనం వండుతుంది",en:"My mother cooks tasty food every day",lvl:"hard",th:"family"},
+  {t:"పిల్లలు సెలవు రోజున ఉద్యానవనానికి వెళ్ళారు",en:"The children went to the park on the holiday",lvl:"hard",th:"school"},
+];
+const LETTERS=[
+  {l:"అ",w:"అరటి",en:"banana",e:"🍌",lvl:"easy"},{l:"ఆ",w:"ఆవు",en:"cow",e:"🐄",lvl:"easy"},
+  {l:"ఇ",w:"ఇల్లు",en:"house",e:"🏠",lvl:"easy"},{l:"ఈ",w:"ఈగ",en:"fly",e:"🪰",lvl:"easy"},
+  {l:"ఉ",w:"ఉడుత",en:"squirrel",e:"🐿️",lvl:"easy"},{l:"ఊ",w:"ఊయల",en:"swing",e:"🛝",lvl:"easy"},
+  {l:"ఎ",w:"ఎలుక",en:"mouse",e:"🐭",lvl:"easy"},{l:"ఏ",w:"ఏనుగు",en:"elephant",e:"🐘",lvl:"easy"},
+  {l:"ఒ",w:"ఒంటె",en:"camel",e:"🐫",lvl:"easy"},{l:"ఓ",w:"ఓడ",en:"ship",e:"🚢",lvl:"easy"},
+  {l:"క",w:"కాకి",en:"crow",e:"🐦",lvl:"med"},{l:"గ",w:"గుర్రం",en:"horse",e:"🐎",lvl:"med"},
+  {l:"చ",w:"చేప",en:"fish",e:"🐟",lvl:"med"},{l:"ట",w:"టమాట",en:"tomato",e:"🍅",lvl:"med"},
+  {l:"న",w:"నక్క",en:"fox",e:"🦊",lvl:"med"},{l:"ప",w:"పులి",en:"tiger",e:"🐅",lvl:"med"},
+  {l:"మ",w:"మామిడి",en:"mango",e:"🥭",lvl:"med"},{l:"బ",w:"బడి",en:"school",e:"🏫",lvl:"med"},
+  {l:"ర",w:"రైలు",en:"train",e:"🚂",lvl:"med"},{l:"ల",w:"లేడి",en:"deer",e:"🦌",lvl:"med"},
+  {l:"వ",w:"వంట",en:"cooking",e:"🍳",lvl:"med"},{l:"స",w:"సింహం",en:"lion",e:"🦁",lvl:"med"},
+  {l:"త",w:"తాబేలు",en:"turtle",e:"🐢",lvl:"med"},{l:"ద",w:"దీపం",en:"lamp",e:"🪔",lvl:"med"},
+  {l:"హ",w:"హంస",en:"swan",e:"🦢",lvl:"hard"},
+];
+const GUNINTHA=["క","కా","కి","కీ","కు","కూ","కె","కే","మ","మా","మి","మీ","ము","మూ","న","నా","ని","నీ","ను","నూ","ప","పా","పి","పీ","పు","పూ"].map(l=>({l,lvl:"hard"}));
+const WRITE_WORDS=[{w:"అమ్మ",en:"mother",e:"👩"},{w:"నాన్న",en:"father",e:"👨"},{w:"ఇల్లు",en:"house",e:"🏠"},{w:"పూవు",en:"flower",e:"🌸"}];
+// guninthalu + vottulu
+const CONS=["క","గ","చ","జ","ట","డ","త","ద","న","ప","బ","మ","య","ర","ల","వ","స","హ"];
+const VPAIRS=[{v:"అ",m:""},{v:"ఆ",m:"ా"},{v:"ఇ",m:"ి"},{v:"ఈ",m:"ీ"},{v:"ఉ",m:"ు"},{v:"ఊ",m:"ూ"},{v:"ఎ",m:"ె"},{v:"ఏ",m:"ే"},{v:"ఒ",m:"ొ"},{v:"ఓ",m:"ో"}];
+const VOTTU_WORDS=[
+  {w:"అమ్మ",en:"mother",e:"👩",conj:"మ్మ"},{w:"కుక్క",en:"dog",e:"🐕",conj:"క్క"},
+  {w:"పిల్లి",en:"cat",e:"🐈",conj:"ల్ల"},{w:"చెట్టు",en:"tree",e:"🌳",conj:"ట్ట"},
+  {w:"పెద్ద",en:"big",e:"🔺",conj:"ద్ద"},{w:"చిన్న",en:"small",e:"🔹",conj:"న్న"},
+  {w:"బొమ్మ",en:"doll",e:"🪆",conj:"మ్మ"},{w:"అక్క",en:"sister",e:"👧",conj:"క్క"},
+  {w:"మొక్క",en:"plant",e:"🌱",conj:"క్క"},{w:"గొర్రె",en:"sheep",e:"🐑",conj:"ర్ర"},
+];
+// grammar
+const PLURALS=[
+  {s:"పుస్తకం",p:"పుస్తకాలు"},{s:"పువ్వు",p:"పువ్వులు"},{s:"పిల్లి",p:"పిల్లులు"},
+  {s:"చెట్టు",p:"చెట్లు"},{s:"పండు",p:"పండ్లు"},{s:"బడి",p:"బడులు"},
+  {s:"కలం",p:"కలాలు"},{s:"ఇల్లు",p:"ఇళ్ళు"},{s:"అబ్బాయి",p:"అబ్బాయిలు"},{s:"అమ్మాయి",p:"అమ్మాయిలు"},
+];
+const OPPOSITES=[
+  {a:"పెద్ద",b:"చిన్న"},{a:"మంచి",b:"చెడ్డ"},{a:"వేడి",b:"చల్లని"},{a:"పగలు",b:"రాత్రి"},
+  {a:"కొత్త",b:"పాత"},{a:"ఎక్కువ",b:"తక్కువ"},{a:"పైన",b:"కింద"},{a:"ముందు",b:"వెనుక"},
+  {a:"తెలుపు",b:"నలుపు"},{a:"పొడవు",b:"పొట్టి"},
+];
+const VERBS=["తింటాడు","పరిగెత్తాడు","చదువుతాడు","ఆడుతాడు","నిద్రపోతాడు","వ్రాస్తాడు","నవ్వాడు","పాడాడు"];
+
+/* ============================ UTILITIES ============================ */
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function rshuf(arr,rnd){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pickOne(arr,rnd){return arr[Math.floor(rnd()*arr.length)];}
+function graphemes(str){try{const seg=new Intl.Segmenter('te',{granularity:'grapheme'});return Array.from(seg.segment(str),s=>s.segment);}catch(e){return Array.from(str);}}
+function speak(text){try{const u=new SpeechSynthesisUtterance(text);u.lang="te-IN";u.rate=.85;const v=window.speechSynthesis.getVoices().find(x=>x.lang&&x.lang.toLowerCase().startsWith("te"));if(v)u.voice=v;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}catch(e){}}
+async function askClaude(messages,maxTokens=1000){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages})});
+  const data=await res.json();return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+}
+const GPOOL=Array.from(new Set(WORDS.flatMap(w=>graphemes(w.w)).concat(["ా","ి","ీ","ు","ూ","ె","ే","ొ","ో","ం","్","క","మ","న","ప","ల","ర","గ","డ"])));
+
+/* ============================ DIFFICULTY ============================ */
+function diffCfg(grade,level){
+  let opts=level==="Beginner"?3:level==="Intermediate"?4:5;
+  let buckets=level==="Beginner"?["easy"]:level==="Intermediate"?["easy","med"]:["med","hard"];
+  if(level==="Beginner"&&grade>=5)buckets=["easy","med"];
+  if(level==="Advanced"&&grade<=3)buckets=["easy","med","hard"];
+  return {opts,buckets,
+    sentenceDistractors:level==="Beginner"?0:level==="Intermediate"?1:2,
+    buildDistractors:level==="Advanced"?1:0,
+    missingPreferComplex:level!=="Beginner",
+  };
+}
+const ACTIVITY_TYPES={alphabet:["letterListen","letterMatch"],vocab:["match","build"],missing:["missing"],sentence:["sentence"],guninthalu:["gunintham","vottuForm","vottuWord"],grammar:["plural","opposite","wordType"],mixed:["letterListen","letterMatch","match","listen","missing","build","sentence"]};
+
+/* ============================ GENERATORS ============================ */
+function wordPool(cfg,needE){
+  let p=WORDS.filter(w=>cfg.buckets.includes(w.lvl)&&(!needE||w.e)&&(cfg.theme==="All"||w.th===cfg.theme));
+  if(p.length<cfg.opts+1)p=WORDS.filter(w=>cfg.buckets.includes(w.lvl)&&(!needE||w.e));
+  if(p.length<cfg.opts+1)p=WORDS.filter(w=>!needE||w.e);
+  return p;
+}
+function letterPool(cfg,needE){
+  let base=LETTERS.filter(x=>cfg.buckets.includes(x.lvl)&&(!needE||x.e));
+  if(cfg.buckets.includes("hard")&&!needE)base=base.concat(GUNINTHA);
+  if(base.length<cfg.opts+1)base=LETTERS.filter(x=>!needE||x.e);
+  return base;
+}
+function distract(pool,answer,n,rnd){return rshuf(Array.from(new Set(pool)).filter(x=>x!==answer),rnd).slice(0,n);}
+function mkOptions(answer,distractors,rnd){return rshuf([{label:answer,correct:true}].concat(distractors.map(l=>({label:l,correct:false}))),rnd);}
+function genMatch(cfg,rnd){const pool=wordPool(cfg,true);const w=pickOne(pool,rnd);return {kind:"choice",mode:"match",emoji:w.e,en:w.en,options:mkOptions(w.w,distract(pool.map(x=>x.w),w.w,cfg.opts-1,rnd),rnd),say:w.w,key:"m"+w.w};}
+function genListen(cfg,rnd){const pool=wordPool(cfg,false);const w=pickOne(pool,rnd);return {kind:"choice",mode:"listen",hintEn:w.en,options:mkOptions(w.w,distract(pool.map(x=>x.w),w.w,cfg.opts-1,rnd),rnd),say:w.w,autoSay:true,key:"l"+w.w};}
+function genMissing(cfg,rnd){
+  const pool=wordPool(cfg,false);let w,g,tries=0;const need=cfg.missingPreferComplex?3:2;
+  do{w=pickOne(pool,rnd);g=graphemes(w.w);tries++;}while(g.length<need&&tries<12);
+  let idx;
+  if(cfg.missingPreferComplex){const cx=g.map((x,i)=>({x,i})).filter(o=>o.x.length>1||o.x.indexOf("్")>=0).map(o=>o.i);idx=cx.length?cx[Math.floor(rnd()*cx.length)]:Math.floor(rnd()*g.length);}
+  else idx=Math.floor(rnd()*g.length);
+  const ans=g[idx];const mask=g.map((x,i)=>i===idx?"＿":x).join("");
+  return {kind:"choice",mode:"missing",mask,emoji:w.e,en:w.en,options:mkOptions(ans,distract(GPOOL,ans,cfg.opts-1,rnd),rnd),say:w.w,key:"x"+w.w+idx};
+}
+function genLetterListen(cfg,rnd){const pool=letterPool(cfg,false);const it=pickOne(pool,rnd);return {kind:"choice",mode:"letterListen",options:mkOptions(it.l,distract(pool.map(x=>x.l),it.l,cfg.opts-1,rnd),rnd),say:it.l,autoSay:true,key:"ll"+it.l};}
+function genLetterMatch(cfg,rnd){const pool=letterPool(cfg,true);const it=pickOne(pool,rnd);return {kind:"choice",mode:"letterMatch",emoji:it.e,en:it.en,word:it.w,options:mkOptions(it.l,distract(pool.map(x=>x.l),it.l,cfg.opts-1,rnd),rnd),say:it.l,key:"lm"+it.l};}
+function genBuild(cfg,rnd){
+  const pool=wordPool(cfg,true);let w,g,tries=0;
+  do{w=pickOne(pool,rnd);g=graphemes(w.w);tries++;}while(g.length<2&&tries<12);
+  let p=[...g];if(cfg.buildDistractors>0){const ex=rshuf(GPOOL.filter(x=>!g.includes(x)),rnd).slice(0,cfg.buildDistractors);p=p.concat(ex);}
+  return {kind:"build",emoji:w.e,en:w.en,target:g,pool:rshuf(p,rnd),say:w.w,key:"b"+w.w};
+}
+function genSentence(cfg,rnd){
+  let bank=SENTENCES.filter(s=>cfg.buckets.includes(s.lvl)&&(cfg.theme==="All"||s.th===cfg.theme));
+  if(bank.length<2)bank=SENTENCES.filter(s=>cfg.buckets.includes(s.lvl));
+  if(bank.length===0)bank=SENTENCES;
+  const s=pickOne(bank,rnd);const words=s.t.split(" ");let pool=[...words];
+  if(cfg.sentenceDistractors>0){const src=Array.from(new Set(SENTENCES.flatMap(x=>x.t.split(" ")))).filter(w=>!words.includes(w));pool=pool.concat(rshuf(src,rnd).slice(0,cfg.sentenceDistractors));}
+  return {kind:"sentence",words,en:s.en,pool:rshuf(pool,rnd),say:s.t,key:"s"+s.t};
+}
+function genGunintham(cfg,rnd){const b=pickOne(CONS,rnd);const vp=pickOne(VPAIRS,rnd);const ans=b+vp.m;const others=VPAIRS.filter(x=>x.m!==vp.m).map(x=>b+x.m);return {kind:"choice",mode:"prompt",promptMain:b+" + "+vp.v,promptSub:"Which is the correct గుణింతం?",options:mkOptions(ans,distract(others,ans,cfg.opts-1,rnd),rnd),say:ans,key:"g"+b+vp.m};}
+function genVottuForm(cfg,rnd){const c=pickOne(CONS,rnd);const ans=c+"్"+c;const others=CONS.filter(x=>x!==c).map(x=>x+"్"+x).concat(CONS.filter(x=>x!==c).map(x=>c+"్"+x));return {kind:"choice",mode:"prompt",promptMain:c+" + "+c,promptSub:"Join with ఒత్తు — pick the correct form",options:mkOptions(ans,distract(others,ans,cfg.opts-1,rnd),rnd),say:ans,key:"vf"+c};}
+function genVottuWord(cfg,rnd){const it=pickOne(VOTTU_WORDS,rnd);const ans=it.conj;return {kind:"choice",mode:"prompt",emoji:it.e,promptMain:it.w,promptSub:"Which ఒత్తు is in this word? ("+it.en+")",options:mkOptions(ans,distract(VOTTU_WORDS.map(x=>x.conj),ans,cfg.opts-1,rnd),rnd),say:it.w,key:"vw"+it.w};}
+function genPlural(cfg,rnd){const it=pickOne(PLURALS,rnd);const ans=it.p;return {kind:"choice",mode:"prompt",promptMain:it.s,promptSub:"What is the plural (బహువచనం)?",options:mkOptions(ans,distract(PLURALS.map(x=>x.p),ans,cfg.opts-1,rnd),rnd),say:ans,key:"pl"+it.s};}
+function genOpposite(cfg,rnd){const pr=pickOne(OPPOSITES,rnd);const useA=rnd()<.5;const prompt=useA?pr.a:pr.b;const ans=useA?pr.b:pr.a;const pool=OPPOSITES.flatMap(x=>[x.a,x.b]).filter(x=>x!==prompt&&x!==ans);return {kind:"choice",mode:"prompt",promptMain:prompt,promptSub:"Opposite word (వ్యతిరేక పదం)?",options:mkOptions(ans,distract(pool,ans,cfg.opts-1,rnd),rnd),say:ans,key:"op"+prompt};}
+function genWordType(cfg,rnd){const askVerb=rnd()<.5;let ans,ds,sub;if(askVerb){ans=pickOne(VERBS,rnd);ds=distract(WORDS.map(w=>w.w),ans,cfg.opts-1,rnd);sub="Which is an action word (క్రియ)?";}else{ans=pickOne(WORDS,rnd).w;ds=distract(VERBS,ans,cfg.opts-1,rnd);sub="Which is a naming word (నామవాచకం)?";}return {kind:"choice",mode:"prompt",emoji:"🧩",promptSub:sub,options:mkOptions(ans,ds,rnd),say:ans,key:"wt"+(askVerb?"v":"n")+ans};}
+const GEN={match:genMatch,listen:genListen,missing:genMissing,letterListen:genLetterListen,letterMatch:genLetterMatch,build:genBuild,sentence:genSentence,gunintham:genGunintham,vottuForm:genVottuForm,vottuWord:genVottuWord,plural:genPlural,opposite:genOpposite,wordType:genWordType};
+function nextQuestion(cfg,rnd,recentRef){
+  const types=ACTIVITY_TYPES[cfg.activity]||ACTIVITY_TYPES.mixed;let q,tries=0;
+  do{const t=types[Math.floor(rnd()*types.length)];q=GEN[t](cfg,rnd);tries++;}while(recentRef.current.indexOf(q.key)>=0&&tries<16);
+  recentRef.current.push(q.key);if(recentRef.current.length>16)recentRef.current.shift();
+  return q;
+}
+
+/* ============================ SHARED UI ============================ */
+function Pill({emoji,value}){return <div className="row g1 rfull bodyf" style={{padding:"4px 12px",fontWeight:800,background:C.white,color:C.ink,boxShadow:"0 2px 0 rgba(0,0,0,.08)"}}><span>{emoji}</span>{value}</div>;}
+function Toast({kind,text}){if(!text)return null;return <div className="toast pop bodyf" style={{background:kind==="ok"?C.leaf:C.terracotta}}>{text}</div>;}
+function Bar({pct,color}){return <div style={{height:8,borderRadius:9999,background:C.sand}}><div style={{height:8,borderRadius:9999,width:pct+"%",background:color}}></div></div>;}
+function BackBar({title,onBack}){return <div className="row g2" style={{marginBottom:16}}><button onClick={onBack} className="tap rfull" style={{padding:8,background:C.white}}><span style={{fontSize:20,color:C.ink,lineHeight:1}}>←</span></button><h1 className="disp trunc" style={{fontSize:22,margin:0,color:C.ink}}>{title}</h1></div>;}
+function Stat({e,v,label,c}){return <div className="r2xl tac" style={{padding:12,background:C.white,boxShadow:"0 4px 0 "+c}}><div style={{fontSize:24}}>{e}</div><div className="disp" style={{fontSize:24,color:C.ink}}>{v}</div><div className="bodyf" style={{fontSize:12,fontWeight:700,color:C.soft}}>{label}</div></div>;}
+
+/* ============================ HOME ============================ */
+function Home({cfg,setCfg,go,stars,progress}){
+  const tiles=[{key:"alphabet",e:"🔤",t:"అక్షరాలు",s:"Alphabet",c:C.terracotta},{key:"vocab",e:"🧩",t:"పదాలు",s:"Word Games",c:C.leaf},{key:"missing",e:"🔍",t:"తప్పిన అక్షరం",s:"Missing Letter",c:C.sky},{key:"sentence",e:"📝",t:"వాక్యాలు",s:"Sentences",c:C.plum}];
+  const set=(k,v)=>setCfg(p=>({...p,[k]:v}));
+  const showAdv=cfg.grade>=4&&(cfg.level==="Intermediate"||cfg.level==="Advanced");
+  return (<div>
+    <div className="row between" style={{marginBottom:6}}>
+      <div className="row g2 minw0">
+        <div className="disp" style={{width:42,height:42,borderRadius:12,background:C.navy,color:C.gold,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,boxShadow:"0 3px 0 "+C.sand}}>YF</div>
+        <div className="minw0"><h1 className="disp trunc" style={{fontSize:20,margin:0,color:C.navy}}>Young Foundry</h1><p className="bodyf trunc" style={{fontSize:11,fontWeight:800,margin:0,color:C.gold}}>Where young minds build</p></div>
+      </div>
+      <Pill emoji="⭐" value={stars}/>
+    </div>
+    <p className="te" style={{fontSize:17,margin:"0 0 14px",color:C.soft}}>తెలుగు నేర్చుకుందాం · Telugu for kids</p>
+    <div className="r3xl" style={{padding:16,marginBottom:16,background:C.white,boxShadow:"0 5px 0 "+C.sand}}>
+      <p className="disp" style={{fontSize:18,margin:"0 0 10px",color:C.ink}}>Set up today's session</p>
+      <div className="row g2" style={{marginBottom:12}}>
+        <div className="flex1"><label className="bodyf" style={{fontSize:12,fontWeight:800,color:C.soft}}>Grade</label>
+          <select className="full" style={{marginTop:4}} value={cfg.grade} onChange={e=>set("grade",Number(e.target.value))}><option value={3}>Grade 3</option><option value={4}>Grade 4</option><option value={5}>Grade 5</option></select></div>
+        <div className="flex1"><label className="bodyf" style={{fontSize:12,fontWeight:800,color:C.soft}}>Session time</label>
+          <select className="full" style={{marginTop:4}} value={cfg.minutes} onChange={e=>set("minutes",Number(e.target.value))}>{[10,15,20,25,30,45].map(d=><option key={d} value={d}>{d} minutes</option>)}</select></div>
+      </div>
+      <label className="bodyf" style={{fontSize:12,fontWeight:800,color:C.soft}}>Level (complexity)</label>
+      <div className="grid3" style={{marginTop:4,marginBottom:12}}>{["Beginner","Intermediate","Advanced"].map(lv=><button key={lv} onClick={()=>set("level",lv)} className="tap rxl bodyf" style={{padding:"10px 4px",fontWeight:800,fontSize:13,background:cfg.level===lv?C.leaf:C.cream,color:cfg.level===lv?"#fff":C.ink,boxShadow:"0 3px 0 "+C.sand}}>{lv}</button>)}</div>
+      <label className="bodyf" style={{fontSize:12,fontWeight:800,color:C.soft}}>Theme</label>
+      <div className="row g2 scrollx" style={{marginTop:4}}>{THEMES.map(th=><button key={th.k} onClick={()=>set("theme",th.k)} className="tap shrink0 rxl bodyf" style={{padding:"8px 12px",fontWeight:800,fontSize:13,background:cfg.theme===th.k?C.sky:C.cream,color:cfg.theme===th.k?"#fff":C.ink,boxShadow:"0 3px 0 "+C.sand}}>{th.e} {th.t}</button>)}</div>
+      <p className="bodyf" style={{fontSize:12,fontWeight:600,margin:"10px 0 0",color:C.soft}}>{cfg.level==="Beginner"?"Simple words & vowels, 3 choices.":cfg.level==="Intermediate"?"Longer words, sentences with a distractor word, 4 choices.":"Hard vocabulary, conjunct letters, multi-distractor sentences, 5 choices."} Questions refresh daily and run the full {cfg.minutes} minutes.</p>
+    </div>
+    <p className="bodyf" style={{fontSize:13,fontWeight:800,margin:"0 0 8px",color:C.soft}}>Choose what to practise</p>
+    <button onClick={()=>go("mixed")} className="cardanim full r2xl row between" style={{padding:18,marginBottom:12,background:C.marigold,boxShadow:"0 5px 0 #9C7A1E"}}><span className="disp" style={{fontSize:22,color:"#fff"}}>🎲 Start Mixed Session</span><span style={{fontSize:22}}>▶️</span></button>
+    <div className="grid2">{tiles.map(t=><button key={t.key} onClick={()=>go(t.key)} className="cardanim r2xl tal" style={{padding:16,background:C.white,boxShadow:"0 4px 0 "+t.c}}><div style={{fontSize:28,marginBottom:4}}>{t.e}</div><p className="te" style={{fontSize:17,lineHeight:1.1,margin:0,color:C.ink}}>{t.t}</p><p className="bodyf" style={{fontSize:12,fontWeight:700,margin:0,color:t.c}}>{t.s}</p></button>)}</div>
+    {showAdv&&<>
+      <div className="row g2" style={{margin:"16px 0 8px"}}><span className="bodyf rfull" style={{fontSize:10,fontWeight:800,padding:"2px 8px",background:C.navy,color:C.gold}}>GRADES 4–5</span><span className="bodyf" style={{fontSize:13,fontWeight:800,color:C.soft}}>Intermediate & Advanced</span></div>
+      <div className="grid2">
+        <button onClick={()=>go("guninthalu")} className="cardanim r2xl tal" style={{padding:16,background:C.white,boxShadow:"0 4px 0 "+C.sky}}><div style={{fontSize:28,marginBottom:4}}>🔡</div><p className="te" style={{fontSize:16,lineHeight:1.15,margin:0,color:C.ink}}>గుణింతాలు &amp; ఒత్తులు</p><p className="bodyf" style={{fontSize:12,fontWeight:700,margin:0,color:C.sky}}>Guninthalu &amp; Vottulu</p></button>
+        <button onClick={()=>go("grammar")} className="cardanim r2xl tal" style={{padding:16,background:C.white,boxShadow:"0 4px 0 "+C.marigold}}><div style={{fontSize:28,marginBottom:4}}>📐</div><p className="te" style={{fontSize:16,lineHeight:1.15,margin:0,color:C.ink}}>వ్యాకరణం</p><p className="bodyf" style={{fontSize:12,fontWeight:700,margin:0,color:C.temple}}>Grammar Intro</p></button>
+      </div>
+    </>}
+    <div className="grid2" style={{marginTop:12}}>
+      <button onClick={()=>go("story")} className="cardanim r2xl tal" style={{padding:16,background:C.white,boxShadow:"0 4px 0 "+C.plum}}><div style={{fontSize:28,marginBottom:4}}>📖</div><p className="te" style={{fontSize:17,margin:0,color:C.ink}}>కథలు</p><p className="bodyf" style={{fontSize:12,fontWeight:700,margin:0,color:C.plum}}>AI Stories</p></button>
+      <button onClick={()=>go("write")} className="cardanim r2xl tal" style={{padding:16,position:"relative",background:C.white,boxShadow:"0 4px 0 "+C.sand,opacity:.85}}><span className="bodyf rfull" style={{position:"absolute",top:10,right:10,fontSize:10,fontWeight:800,padding:"2px 8px",background:C.temple,color:"#fff"}}>SOON</span><div style={{fontSize:28,marginBottom:4}}>✍️</div><p className="te" style={{fontSize:17,margin:0,color:C.ink}}>రాయడం</p><p className="bodyf" style={{fontSize:12,fontWeight:700,margin:0,color:C.soft}}>Handwriting</p></button>
+    </div>
+    <button onClick={()=>go("parent")} className="bodyf full r2xl row center g2" style={{marginTop:12,padding:12,fontWeight:700,background:C.sand,color:C.soft}}>📊 Parent Dashboard · {progress.sessions} sessions</button>
+  </div>);
+}
+
+/* ============================ QUESTION VIEW ============================ */
+function QuestionView({q,onResolve}){
+  const [locked,setLocked]=useState(false);const [chosen,setChosen]=useState(null);
+  const [asm,setAsm]=useState([]);const [pool,setPool]=useState(q.pool||[]);
+  useEffect(()=>{if(q.autoSay)setTimeout(()=>speak(q.say),250);},[]);
+  function choose(o,i){if(locked)return;setChosen(i);setLocked(true);if(o.correct){speak(q.say);setTimeout(()=>onResolve(true),750);}else setTimeout(()=>onResolve(false),1050);}
+  function place(p,k){if(locked)return;const na=[...asm,p];setAsm(na);setPool(pool.filter((_,j)=>j!==k));
+    const done=q.kind==="build"?na.length===q.target.length:na.length===q.words.length;
+    if(done){const ok=q.kind==="build"?na.join("")===q.target.join(""):na.join(" ")===q.words.join(" ");setLocked(true);if(ok){speak(q.say);setTimeout(()=>onResolve(true),750);}else setTimeout(()=>onResolve(false),1050);}}
+  function resetAsm(){if(locked)return;setAsm([]);setPool(q.pool);}
+  if(q.kind==="choice"){
+    const head=q.mode==="match"?<div className="tac"><div style={{fontSize:64}}>{q.emoji}</div><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"4px 0 0"}}>Which word is "{q.en}"?</p></div>
+      :q.mode==="listen"?<div className="tac"><button onClick={()=>speak(q.say)} className="tap rfull bodyf" style={{padding:"14px 22px",fontSize:18,fontWeight:800,color:"#fff",background:C.sky}}>🔊 Tap to listen</button><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"8px 0 0"}}>Pick the word you heard</p></div>
+      :q.mode==="missing"?<div className="tac"><div style={{fontSize:30,marginBottom:4}}>{q.emoji}</div><div className="te" style={{fontSize:46,color:C.ink,letterSpacing:2}}>{q.mask.split("＿").map((p,i,a)=><span key={i}>{p}{i<a.length-1&&<span style={{color:C.terracotta}}>＿</span>}</span>)}</div><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"4px 0 0"}}>Fill the missing letter ({q.en})</p></div>
+      :q.mode==="letterMatch"?<div className="tac"><div style={{fontSize:60}}>{q.emoji}</div><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"4px 0 0"}}>Which letter does <b className="te">{q.word}</b> ({q.en}) start with?</p></div>
+      :q.mode==="letterListen"?<div className="tac"><button onClick={()=>speak(q.say)} className="tap rfull bodyf" style={{padding:"14px 22px",fontSize:18,fontWeight:800,color:"#fff",background:C.sky}}>🔊 Tap to listen</button><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"8px 0 0"}}>Pick the letter you heard</p></div>
+      :<div className="tac">{q.emoji&&<div style={{fontSize:54}}>{q.emoji}</div>}{q.promptMain&&<div className="te" style={{fontSize:44,color:C.ink}}>{q.promptMain}</div>}<p className="bodyf" style={{fontWeight:700,color:C.soft,margin:"6px 0 0"}}>{q.promptSub}</p></div>;
+    return <div><div className="r3xl pop" style={{padding:20,background:C.white,boxShadow:"0 6px 0 "+C.sand}}>{head}</div>
+      <div className="grid3" style={{marginTop:16}}>{q.options.map((o,i)=>{let bg=C.white,col=C.ink;if(locked){if(o.correct){bg=C.green;col="#fff";}else if(i===chosen){bg=C.red;col="#fff";}}return <button key={i} disabled={locked} onClick={()=>choose(o,i)} className="tap r2xl te" style={{padding:"16px 6px",fontSize:30,background:bg,color:col,boxShadow:"0 4px 0 "+C.sand}}>{o.label}</button>;})}</div></div>;
+  }
+  const isS=q.kind==="sentence";
+  return <div><div className="r3xl pop" style={{padding:20,background:C.white,boxShadow:"0 6px 0 "+C.sand}}>
+    {!isS&&<div className="tac" style={{fontSize:60,marginBottom:8}}>{q.emoji}</div>}
+    <p className="bodyf tac" style={{fontWeight:700,color:C.soft,margin:"0 0 8px"}}>{isS?'Make the sentence: "'+q.en+'"':"Build the word ("+q.en+")"}</p>
+    <div className="row center wrapw g1 r2xl" style={{minHeight:54,padding:8,background:C.cream}}>{asm.length===0?<span className="bodyf" style={{fontWeight:700,color:C.soft}}>tap below…</span>:asm.map((p,j)=><span key={j} className="te pop" style={{fontSize:isS?22:34,padding:isS?"2px 8px":0,background:isS?C.white:"transparent",borderRadius:8,color:C.ink}}>{p}</span>)}</div></div>
+    <div className={isS?"row wrapw g2":"grid3"} style={{marginTop:16}}>{pool.map((p,k)=><button key={k} disabled={locked} onClick={()=>place(p,k)} className="tap te" style={{borderRadius:12,padding:isS?"8px 14px":"14px 6px",fontSize:isS?22:32,background:C.white,color:isS?C.plum:C.leaf,boxShadow:"0 4px 0 "+C.sand}}>{p}</button>)}</div>
+    <button onClick={resetAsm} className="tap bodyf row center g2" style={{margin:"12px auto 0",fontWeight:700,color:C.soft}}>↺ reset</button></div>;
+}
+
+/* ============================ SESSION ============================ */
+const TITLES={mixed:"మిశ్రమ సాధన · Mixed",alphabet:"అక్షరాలు · Alphabet",vocab:"పదాలు · Word Games",missing:"తప్పిన అక్షరం · Missing Letter",sentence:"వాక్యాలు · Sentences",guninthalu:"గుణింతాలు & ఒత్తులు",grammar:"వ్యాకరణం · Grammar"};
+function Session({cfg,onCorrect,onFinish,toast}){
+  const endRef=useRef(Date.now()+cfg.minutes*60000);
+  const rndRef=useRef(mulberry32(hashStr(new Date().toISOString().slice(0,10)+cfg.activity+cfg.grade+cfg.level+cfg.theme)));
+  const recentRef=useRef([]);const statsRef=useRef({answered:0,correct:0});const finishedRef=useRef(false);
+  const [now,setNow]=useState(Date.now());const [qid,setQid]=useState(0);
+  const [q,setQ]=useState(()=>nextQuestion(cfg,rndRef.current,recentRef));
+  const [stats,setStats]=useState({answered:0,correct:0});
+  useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),250);return ()=>clearInterval(id);},[]);
+  const remaining=Math.max(0,endRef.current-now);
+  useEffect(()=>{if(remaining<=0)finish("time");},[remaining]);
+  function finish(r){if(finishedRef.current)return;finishedRef.current=true;onFinish(statsRef.current,r);}
+  function resolve(ok){const ns={answered:statsRef.current.answered+1,correct:statsRef.current.correct+(ok?1:0)};statsRef.current=ns;setStats(ns);if(ok){onCorrect();toast("ok","శభాష్! +1 ⭐");}else toast("no","Next one! 👍");if(Date.now()>=endRef.current){finish("time");return;}setQ(nextQuestion(cfg,rndRef.current,recentRef));setQid(x=>x+1);}
+  function skip(){const ns={answered:statsRef.current.answered+1,correct:statsRef.current.correct};statsRef.current=ns;setStats(ns);setQ(nextQuestion(cfg,rndRef.current,recentRef));setQid(x=>x+1);}
+  const mm=Math.floor(remaining/60000),ss=Math.floor((remaining%60000)/1000),low=remaining<60000;
+  const pct=Math.max(0,Math.min(100,(remaining/(cfg.minutes*60000))*100));
+  return <div>
+    <div className="row between g2" style={{marginBottom:10}}><button onClick={()=>finish("end")} className="tap rfull bodyf" style={{padding:"8px 14px",fontWeight:800,background:C.white,color:C.terracotta,boxShadow:"0 3px 0 "+C.sand}}>End</button>
+      <div className="disp rfull tac" style={{padding:"6px 18px",fontSize:22,minWidth:96,color:"#fff",background:low?C.red:C.leaf,boxShadow:"0 3px 0 rgba(0,0,0,.12)"}}>{mm}:{String(ss).padStart(2,"0")}</div>
+      <Pill emoji="✅" value={stats.correct}/></div>
+    <div style={{marginBottom:6}}><Bar pct={pct} color={low?C.red:C.sky}/></div>
+    <p className="bodyf" style={{fontSize:12,fontWeight:700,margin:"0 0 14px",color:C.soft}}>{TITLES[cfg.activity]} · Grade {cfg.grade} · {cfg.level} · {stats.answered} answered</p>
+    <QuestionView key={qid} q={q} onResolve={resolve}/>
+    <button onClick={skip} className="tap bodyf full" style={{marginTop:18,fontWeight:800,color:C.soft}}>Skip ▸</button>
+  </div>;
+}
+
+/* ============================ SUMMARY ============================ */
+function Summary({stats,cfg,reason,onHome,onAgain}){
+  const acc=stats.answered?Math.round((stats.correct/stats.answered)*100):0;
+  return <div>
+    <div className="tac" style={{padding:"20px 0"}}><div className="float" style={{fontSize:64}}>{acc>=70?"🌟":acc>=40?"💪":"🌱"}</div><h1 className="disp" style={{fontSize:28,margin:"6px 0",color:C.ink}}>{reason==="time"?"Time's up!":"Session done!"}</h1><p className="bodyf" style={{fontWeight:700,color:C.soft,margin:0}}>Grade {cfg.grade} · {cfg.level} · {cfg.minutes} min</p></div>
+    <div className="grid3" style={{marginBottom:20}}><Stat e="📝" v={stats.answered} label="Answered" c={C.sky}/><Stat e="✅" v={stats.correct} label="Correct" c={C.leaf}/><Stat e="🎯" v={acc+"%"} label="Accuracy" c={C.marigold}/></div>
+    <div className="r2xl tac" style={{padding:16,marginBottom:16,background:C.white,boxShadow:"0 4px 0 "+C.marigold}}><p className="disp" style={{fontSize:20,margin:0,color:C.ink}}>+{stats.correct} ⭐ earned!</p></div>
+    <button onClick={onAgain} className="cardanim full r2xl disp" style={{padding:16,marginBottom:12,fontSize:20,color:"#fff",background:C.leaf,boxShadow:"0 4px 0 #1F6E49"}}>↻ Practise again</button>
+    <button onClick={onHome} className="bodyf full r2xl" style={{padding:14,fontWeight:800,background:C.sand,color:C.soft}}>🏠 Home</button>
+  </div>;
+}
+
+/* ============================ AI STORY (level-scaled) ============================ */
+function StoryMaker({back,level,theme,onStory}){
+  const chars=["🐘 ఏనుగు","🦜 చిలుక","🐯 పులి","🐢 తాబేలు","🦁 సింహం","🐒 కోతి"];
+  const places=["🌳 అడవి","🏞️ నది","🏫 బడి","🏡 ఊరు","⛰️ కొండ","🌊 సముద్రం"];
+  const [ch,setCh]=useState(chars[0]);const [pl,setPl]=useState(places[0]);
+  const [story,setStory]=useState("");const [busy,setBusy]=useState(false);
+  const spec=level==="Advanced"?{len:"12 to 15 sentences, with a small moral at the end and richer vocabulary",tok:1900}:level==="Intermediate"?{len:"8 to 10 sentences with some descriptive words",tok:1200}:{len:"4 to 5 short, very simple sentences",tok:600};
+  async function make(){setBusy(true);setStory("");
+    try{const out=await askClaude([{role:"user",content:`Write a cheerful original story in TELUGU for a child. Reading level: ${level}. Length: ${spec.len}. Main character: ${ch}. Setting: ${pl}. Theme: ${theme==="All"?"a fun everyday adventure":theme}. Use age-appropriate Telugu for the reading level. After the Telugu story, add one line starting with "Meaning:" giving a short English summary. No other commentary.`}],spec.tok);
+      setStory(out.trim());onStory();}catch(e){setStory("⚠️ Couldn't reach the story engine. Please try again.");}
+    setBusy(false);}
+  return <div>
+    <BackBar title="AI కథలు · Story Maker" onBack={back}/>
+    <p className="bodyf" style={{fontSize:12,fontWeight:700,margin:"0 0 12px",color:C.soft}}>Level: {level} — {level==="Advanced"?"a longer story with a moral":level==="Intermediate"?"a medium-length story":"a short, simple story"} · Theme: {THEMES.find(t=>t.k===theme).t}</p>
+    <div className="r2xl" style={{padding:12,marginBottom:12,background:C.white,boxShadow:"0 4px 0 "+C.sand}}><p className="disp" style={{fontSize:16,margin:"0 0 8px",color:C.ink}}>Hero</p><div className="grid3">{chars.map(c=><button key={c} onClick={()=>setCh(c)} className="tap te rxl" style={{fontSize:16,padding:"8px 2px",background:ch===c?C.marigold:C.cream,color:ch===c?"#fff":C.ink}}>{c}</button>)}</div></div>
+    <div className="r2xl" style={{padding:12,marginBottom:12,background:C.white,boxShadow:"0 4px 0 "+C.sand}}><p className="disp" style={{fontSize:16,margin:"0 0 8px",color:C.ink}}>Place</p><div className="grid3">{places.map(p=><button key={p} onClick={()=>setPl(p)} className="tap te rxl" style={{fontSize:16,padding:"8px 2px",background:pl===p?C.leaf:C.cream,color:pl===p?"#fff":C.ink}}>{p}</button>)}</div></div>
+    <button onClick={make} disabled={busy} className="cardanim full r2xl disp row center g2" style={{padding:16,fontSize:20,color:"#fff",background:C.marigold,boxShadow:"0 4px 0 #9C7A1E",opacity:busy?0.7:1}}>{busy?<><span className="spin"></span> Writing…</>:<>✨ Create my story</>}</button>
+    {story&&<div className="pop r2xl" style={{padding:16,marginTop:16,background:C.white,boxShadow:"0 6px 0 "+C.marigold}}><p className="te pre" style={{fontSize:19,lineHeight:1.7,margin:0,color:C.ink}}>{story}</p><button onClick={()=>speak(story.split("Meaning")[0])} className="tap rfull bodyf" style={{marginTop:12,padding:"8px 16px",display:"inline-flex",fontWeight:800,color:"#fff",background:C.sky}}>🔊 Read aloud</button></div>}
+  </div>;
+}
+
+/* ============================ COMING SOON (handwriting) ============================ */
+function ComingSoon({back}){
+  return <div><BackBar title="రాయడం · Handwriting" onBack={back}/>
+    <div className="r3xl tac" style={{padding:"36px 20px",background:C.white,boxShadow:"0 6px 0 "+C.temple}}>
+      <div className="float" style={{fontSize:64}}>✍️</div>
+      <h2 className="disp" style={{fontSize:26,margin:"10px 0 6px",color:C.ink}}>Coming soon!</h2>
+      <p className="bodyf" style={{fontWeight:700,fontSize:14,color:C.soft,margin:"0 auto",maxWidth:300}}>The AI Handwriting Coach — write a Telugu word in your notebook, snap a photo, and get letter-by-letter feedback — is on its way. We're making the Telugu handwriting recognition more accurate first.</p>
+    </div>
+    <button onClick={back} className="bodyf full r2xl" style={{marginTop:16,padding:14,fontWeight:800,background:C.sand,color:C.soft}}>🏠 Back</button>
+  </div>;
+}
+
+/* ============================ PARENT ============================ */
+function Parent({back,progress,stars}){
+  const skills=[{name:"Listening",v:70},{name:"Reading",v:progress.badges.includes("reading")?60:25},{name:"Vocabulary",v:progress.badges.includes("vocab")?55:20},{name:"Alphabet",v:progress.badges.includes("akshara")?90:40},{name:"Stories",v:progress.badges.includes("story")?50:10}];
+  return <div><BackBar title="Parent Dashboard" onBack={back}/>
+    <div className="r2xl" style={{padding:16,marginBottom:16,background:C.white,boxShadow:"0 4px 0 "+C.sky}}><p className="disp" style={{fontSize:18,margin:"0 0 4px",color:C.ink}}>Progress</p><p className="bodyf" style={{fontSize:13,fontWeight:700,margin:0,color:C.soft}}>{stars} stars · {progress.sessions} sessions completed</p></div>
+    <p className="disp" style={{fontSize:18,margin:"0 0 8px",color:C.ink}}>Skill mastery</p>
+    <div className="r2xl" style={{padding:16,marginBottom:16,background:C.white,boxShadow:"0 4px 0 "+C.sand}}>{skills.map(s=><div key={s.name} style={{marginBottom:12}}><div className="row between bodyf" style={{fontWeight:700,fontSize:14,color:C.ink}}><span>{s.name}</span><span style={{color:C.soft}}>{s.v}%</span></div><div style={{marginTop:4}}><Bar pct={s.v} color={s.v>=70?C.leaf:s.v>=40?C.marigold:C.terracotta}/></div></div>)}</div>
+    <div className="row g3 r2xl" style={{padding:16,background:C.sand}}><span style={{fontSize:20}}>💛</span><p className="bodyf" style={{fontSize:14,fontWeight:700,margin:0,color:C.ink}}>Tip: short daily 10–15 minute timed sessions build the strongest habits. Switch themes to keep vocabulary fresh, and raise the level once accuracy stays above 80%.</p></div>
+  </div>;
+}
+
+/* ============================ APP ============================ */
+const BADGE_FOR={alphabet:"akshara",vocab:"vocab",missing:"vocab",sentence:"reading",guninthalu:"akshara",grammar:"reading",mixed:"reading"};
+function App(){
+  const [screen,setScreen]=useState("home");
+  const [cfg,setCfg]=useState({grade:4,level:"Beginner",minutes:15,theme:"All"});
+  const [active,setActive]=useState(null);
+  const [stars,setStars]=useState(0);
+  const [progress,setProgress]=useState({badges:[],sessions:0});
+  const [lastStats,setLastStats]=useState({answered:0,correct:0});const [lastReason,setLastReason]=useState("time");
+  const [toast,setToast]=useState({kind:"",text:""});const tRef=useRef();
+  function fireToast(k,t){setToast({kind:k,text:t});clearTimeout(tRef.current);tRef.current=setTimeout(()=>setToast({kind:"",text:""}),1400);}
+  function go(activity){
+    if(activity==="write"){setScreen("soon");return;}
+    if(activity==="story"){setScreen("story");return;}
+    if(activity==="parent"){setScreen("parent");return;}
+    setActive({activity,grade:cfg.grade,level:cfg.level,minutes:cfg.minutes,theme:cfg.theme,...diffCfg(cfg.grade,cfg.level)});
+    setScreen("session");
+  }
+  function finishSession(stats,reason){setLastStats(stats);setLastReason(reason);const b=BADGE_FOR[active.activity];setProgress(p=>({sessions:p.sessions+1,badges:b&&!p.badges.includes(b)?[...p.badges,b]:p.badges}));setScreen("summary");}
+  const home=()=>setScreen("home");
+  return <div className="app bodyf"><div className="wrap">
+    {screen==="home"&&<Home cfg={cfg} setCfg={setCfg} go={go} stars={stars} progress={progress}/>}
+    {screen==="session"&&active&&<Session cfg={active} onCorrect={()=>setStars(s=>s+1)} onFinish={finishSession} toast={fireToast}/>}
+    {screen==="summary"&&<Summary stats={lastStats} cfg={active} reason={lastReason} onHome={home} onAgain={()=>{setActive(a=>({...a}));setScreen("session");}}/>}
+    {screen==="story"&&<StoryMaker back={home} level={cfg.level} theme={cfg.theme} onStory={()=>setProgress(p=>({...p,badges:p.badges.includes("story")?p.badges:[...p.badges,"story"]}))}/>}
+    {screen==="soon"&&<ComingSoon back={home}/>}
+    {screen==="parent"&&<Parent back={home} progress={progress} stars={stars}/>}
+  </div><Toast kind={toast.kind} text={toast.text}/></div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

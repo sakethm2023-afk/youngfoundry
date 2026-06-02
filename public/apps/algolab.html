@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlgoLab — Young Foundry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#07111E; --navy-mid:#0D1B2A; --navy-light:#1B2D44;
+  --gold:#C9A84C; --gold-warm:#A07830; --gold-pale:#E8D5A3;
+  --cream:#F5EFE0; --cream-dark:#D4C9B0;
+  --surface:rgba(201,168,76,0.06); --surface-hover:rgba(201,168,76,0.12);
+  --border:rgba(201,168,76,0.15); --border-strong:rgba(201,168,76,0.3);
+  --text-1:#F5EFE0; --text-2:#8B9AAF; --text-3:#5A6A80;
+  --coral:#D4836B; --sage:#7BA384; --sky:#6B9FBF; --plum:#9B7BB5;
+  --amber:#D4A54B; --terra:#C47A5A; --mint:#5DB8A3; --rose:#C47A8A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(165deg,var(--navy),var(--navy-mid) 50%,var(--navy-light));
+  font-family:'DM Sans',sans-serif;color:var(--text-1);min-height:100vh}
+
+/* ─── ANIMATIONS ─── */
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes glow{0%,100%{box-shadow:0 0 16px rgba(201,168,76,.2)}50%{box-shadow:0 0 36px rgba(201,168,76,.5)}}
+@keyframes pop{0%{transform:scale(0) rotate(-20deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes swap{0%{transform:translateX(0)}50%{transform:translateY(-24px)}100%{transform:translateX(var(--dx))}}
+@keyframes highlight{0%{box-shadow:0 0 0 0 var(--gold)}50%{box-shadow:0 0 0 8px rgba(201,168,76,.3)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.anim-up{animation:slideUp .5s ease both}
+.anim-up-1{animation:slideUp .5s ease .1s both}
+.anim-up-2{animation:slideUp .5s ease .2s both}
+.anim-pop{animation:pop .4s ease both}
+.anim-pulse{animation:pulse 2s infinite}
+.anim-glow{animation:glow 2s infinite}
+.anim-hl{animation:highlight .6s ease}
+
+/* ─── LAYOUT ─── */
+.container{max-width:960px;margin:0 auto;padding:20px 16px;position:relative}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.flex{display:flex}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}
+.items-center{align-items:center}.justify-center{justify-content:center}
+.justify-between{justify-content:space-between}
+.gap-4{gap:4px}.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}
+.text-center{text-align:center}.w-full{width:100%}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-4{margin-bottom:4px}.mb-6{margin-bottom:6px}.mb-8{margin-bottom:8px}
+.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}
+.hidden{display:none!important}
+
+/* ─── COMPONENTS ─── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px}
+.panel-lg{padding:24px}
+.card{background:linear-gradient(145deg,rgba(201,168,76,.06),rgba(201,168,76,.02));
+  border:1px solid var(--border);border-radius:14px;padding:16px;
+  cursor:pointer;transition:all .3s}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px rgba(201,168,76,.15)}
+.card.locked{opacity:.35;cursor:not-allowed}.card.locked:hover{transform:none;box-shadow:none}
+
+.btn{font-family:inherit;border:none;border-radius:10px;padding:11px 24px;
+  font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn:active{transform:translateY(0)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;filter:none}
+.btn[disabled]:hover{transform:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-warm));color:var(--navy)}
+.btn-outline{background:var(--surface);border:1px solid var(--border);color:var(--cream)}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px}
+.btn-xs{padding:5px 10px;font-size:11px;border-radius:6px}
+
+.pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:6px 14px;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:8px;font-weight:500}
+
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ─── ARRAY VISUALIZATION ─── */
+.arr-container{display:flex;justify-content:center;gap:6px;padding:8px 0;flex-wrap:wrap}
+.arr-cell{min-width:44px;height:44px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:16px;transition:all .35s;
+  border:2px solid var(--border);background:var(--surface);position:relative}
+.arr-cell.active{border-color:var(--gold);background:rgba(201,168,76,.18);box-shadow:0 0 16px rgba(201,168,76,.25)}
+.arr-cell.comparing{border-color:var(--amber);background:rgba(212,165,75,.18)}
+.arr-cell.sorted{border-color:var(--sage);background:rgba(123,163,132,.15)}
+.arr-cell.found{border-color:var(--gold);background:rgba(201,168,76,.25);animation:pulse .5s}
+.arr-cell.pivot{border-color:var(--coral);background:rgba(212,131,107,.18)}
+.arr-cell.left-ptr{border-bottom:3px solid var(--sky)}
+.arr-cell.right-ptr{border-bottom:3px solid var(--coral)}
+.arr-cell .idx{position:absolute;top:-16px;font-size:9px;color:var(--text-3);font-weight:400}
+
+/* ─── TRACE TABLE ─── */
+.trace{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.trace th{color:var(--gold);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
+.trace td{padding:5px 8px;border-bottom:1px solid rgba(201,168,76,.08);color:var(--text-2)}
+.trace tr:last-child td{border-bottom:none}
+.trace tr.current td{color:var(--gold);font-weight:500;background:rgba(201,168,76,.06)}
+
+/* ─── SPEED CONTROL ─── */
+.speed-control{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3)}
+.speed-control input[type=range]{width:80px;accent-color:var(--gold)}
+
+/* ─── PROGRESS / XP ─── */
+.xp-bar{height:6px;background:rgba(201,168,76,.12);border-radius:3px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-warm));border-radius:3px;transition:width .6s ease}
+.belt-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+
+/* ─── PREDICT BOX ─── */
+.predict-box{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);
+  border-radius:12px;padding:14px}
+.predict-input{width:100%;background:rgba(0,0,0,.25);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;color:var(--cream);font-family:inherit;font-size:13px;outline:none}
+.predict-input:focus{border-color:var(--gold)}
+
+/* ─── CODE PANEL ─── */
+.code-panel{background:rgba(0,0,0,.35);border:1px solid rgba(201,168,76,.1);
+  border-radius:12px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  line-height:1.8;color:var(--text-2);overflow-x:auto}
+.code-panel .line{padding:1px 0;border-left:2px solid transparent;padding-left:8px}
+.code-panel .line.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.06)}
+.code-panel .kw{color:var(--coral)}.code-panel .fn{color:var(--sky)}
+.code-panel .num{color:var(--amber)}.code-panel .str{color:var(--sage)}
+.code-panel .cmt{color:var(--text-3);font-style:italic}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:rgba(201,168,76,.03)}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.18);border-radius:3px}
+::selection{background:rgba(201,168,76,.3);color:var(--cream)}
+
+@media(max-width:600px){
+  .grid-2{grid-template-columns:1fr}
+  .arr-cell{min-width:38px;height:38px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const h=(tag,props,...ch)=>{const el=document.createElement(tag);if(props)Object.entries(props).forEach(([k,v])=>{
+  if(k==='class')el.className=v;else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),v);
+  else if(k==='style'&&typeof v==='object')Object.assign(el.style,v);else if(k==='html')el.innerHTML=v;
+  else el.setAttribute(k,v)});ch.flat(9).forEach(c=>{if(c!=null)el.append(typeof c==='string'?c:c)});return el};
+
+// ═══════════════════════════════════════════
+//  YF LOGO
+// ═══════════════════════════════════════════
+const LOGO=s=>`<svg width="${s}" height="${s}" viewBox="0 0 48 48" fill="none"><line x1="4" y1="8" x2="14" y2="22" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/><line x1="24" y1="8" x2="14" y2="22" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/><line x1="14" y1="22" x2="14" y2="36" stroke="#F5EFE0" stroke-width="3.2" stroke-linecap="round"/><line x1="28" y1="8" x2="28" y2="36" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/><line x1="28" y1="8" x2="40" y2="8" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/><line x1="28" y1="22" x2="38" y2="22" stroke="#C9A84C" stroke-width="3.2" stroke-linecap="round"/><line x1="4" y1="42" x2="44" y2="42" stroke="#C9A84C" stroke-width=".8" opacity=".35"/></svg>`;
+
+// ═══════════════════════════════════════════
+//  BELTS — Kumon-style progression
+// ═══════════════════════════════════════════
+const BELTS=[
+  {name:'White Belt',color:'#ccc',bg:'rgba(200,200,200,.12)',xp:0},
+  {name:'Yellow Belt',color:'#D4A54B',bg:'rgba(212,165,75,.12)',xp:30},
+  {name:'Green Belt',color:'#7BA384',bg:'rgba(123,163,132,.12)',xp:80},
+  {name:'Blue Belt',color:'#6B9FBF',bg:'rgba(107,159,191,.12)',xp:150},
+  {name:'Gold Belt',color:'#C9A84C',bg:'rgba(201,168,76,.15)',xp:250},
+  {name:'Black Belt',color:'#F5EFE0',bg:'rgba(245,239,224,.1)',xp:400},
+];
+function getBelt(xp){for(let i=BELTS.length-1;i>=0;i--)if(xp>=BELTS[i].xp)return{...BELTS[i],level:i,next:BELTS[i+1]||null};return{...BELTS[0],level:0,next:BELTS[1]}}
+
+// ═══════════════════════════════════════════
+//  ALGORITHM MODULES
+// ═══════════════════════════════════════════
+const ALGOS=[
+  {
+    id:'linear-search', title:'Linear Search', emoji:'🔍', color:'var(--amber)', hex:'#D4A54B',
+    category:'Searching', difficulty:1, xpReward:10,
+    desc:'Check each item one by one until you find what you want.',
+    pseudocode:[
+      {text:'SET found = false',kw:['SET']},
+      {text:'FOR each item in the list',kw:['FOR']},
+      {text:'  IF item equals target',kw:['IF']},
+      {text:'    SET found = true',kw:['SET']},
+      {text:'    STOP searching',kw:['STOP']},
+      {text:'  END IF',kw:['END','IF']},
+      {text:'END FOR',kw:['END','FOR']},
+    ],
+    generate:()=>{
+      const size=6+Math.floor(Math.random()*4);
+      const arr=Array.from({length:size},()=>Math.floor(Math.random()*50)+1);
+      const target=arr[Math.floor(Math.random()*arr.length)];
+      return{arr,target};
+    },
+    run:function*(data){
+      const{arr,target}=data;let steps=0;
+      for(let i=0;i<arr.length;i++){
+        steps++;
+        yield{type:'step',line:1,i,comparing:true,msg:`Checking index ${i}: is ${arr[i]} equal to ${target}?`};
+        if(arr[i]===target){
+          yield{type:'found',line:3,i,msg:`✅ Found ${target} at index ${i} after ${steps} steps!`};
+          return;
+        }
+        yield{type:'skip',line:5,i,msg:`${arr[i]} ≠ ${target}, move to next`};
+      }
+      yield{type:'not-found',line:6,msg:`❌ ${target} not found after checking all ${steps} items`};
+    },
+    question:(data)=>`How many steps to find ${data.target}?`,
+    answer:(data)=>data.arr.indexOf(data.target)+1,
+  },
+  {
+    id:'binary-search', title:'Binary Search', emoji:'⚡', color:'var(--sky)', hex:'#6B9FBF',
+    category:'Searching', difficulty:2, xpReward:15,
+    desc:'Cut the sorted list in half each time — much faster!',
+    pseudocode:[
+      {text:'SET low = 0, high = length - 1',kw:['SET']},
+      {text:'WHILE low <= high',kw:['WHILE']},
+      {text:'  SET mid = (low + high) / 2',kw:['SET']},
+      {text:'  IF list[mid] equals target',kw:['IF']},
+      {text:'    RETURN mid (found!)',kw:['RETURN']},
+      {text:'  ELSE IF list[mid] < target',kw:['ELSE','IF']},
+      {text:'    SET low = mid + 1',kw:['SET']},
+      {text:'  ELSE',kw:['ELSE']},
+      {text:'    SET high = mid - 1',kw:['SET']},
+      {text:'END WHILE',kw:['END','WHILE']},
+    ],
+    generate:()=>{
+      const size=8+Math.floor(Math.random()*5);
+      const arr=Array.from({length:size},()=>Math.floor(Math.random()*80)+1).sort((a,b)=>a-b);
+      // Remove duplicates
+      const unique=[...new Set(arr)];
+      const target=unique[Math.floor(Math.random()*unique.length)];
+      return{arr:unique,target};
+    },
+    run:function*(data){
+      const{arr,target}=data;let low=0,high=arr.length-1,steps=0;
+      while(low<=high){
+        const mid=Math.floor((low+high)/2);steps++;
+        yield{type:'step',line:2,low,high,mid,msg:`Step ${steps}: low=${low}, high=${high}, mid=${mid}, checking ${arr[mid]}`};
+        if(arr[mid]===target){yield{type:'found',line:4,mid,msg:`✅ Found ${target} at index ${mid} in ${steps} steps!`};return;}
+        if(arr[mid]<target){low=mid+1;yield{type:'narrow',line:6,low,high,mid,msg:`${arr[mid]} < ${target}, search RIGHT half (low=${low})`};}
+        else{high=mid-1;yield{type:'narrow',line:8,low,high,mid,msg:`${arr[mid]} > ${target}, search LEFT half (high=${high})`};}
+      }
+      yield{type:'not-found',msg:`❌ Not found after ${steps} steps`};
+    },
+    question:(data)=>`How many halves to find ${data.target} in a list of ${data.arr.length}?`,
+    answer:(data)=>{let l=0,h=data.arr.length-1,s=0;while(l<=h){const m=Math.floor((l+h)/2);s++;if(data.arr[m]===data.target)return s;if(data.arr[m]<data.target)l=m+1;else h=m-1;}return s;},
+  },
+  {
+    id:'bubble-sort', title:'Bubble Sort', emoji:'🫧', color:'var(--coral)', hex:'#D4836B',
+    category:'Sorting', difficulty:1, xpReward:12,
+    desc:'Compare neighbors and swap if out of order. Biggest bubbles up!',
+    pseudocode:[
+      {text:'REPEAT length-1 times (each pass)',kw:['REPEAT']},
+      {text:'  FOR each pair of neighbors',kw:['FOR']},
+      {text:'    IF left > right',kw:['IF']},
+      {text:'      SWAP them',kw:['SWAP']},
+      {text:'    END IF',kw:['END','IF']},
+      {text:'  END FOR',kw:['END','FOR']},
+      {text:'END REPEAT',kw:['END','REPEAT']},
+    ],
+    generate:()=>{const arr=Array.from({length:6},()=>Math.floor(Math.random()*30)+1);return{arr};},
+    run:function*(data){
+      const arr=[...data.arr];let swaps=0,pass=0;
+      for(let i=0;i<arr.length-1;i++){
+        pass++;
+        for(let j=0;j<arr.length-1-i;j++){
+          yield{type:'compare',line:2,arr:[...arr],j,j2:j+1,pass,swaps,msg:`Pass ${pass}: compare ${arr[j]} and ${arr[j+1]}`};
+          if(arr[j]>arr[j+1]){
+            [arr[j],arr[j+1]]=[arr[j+1],arr[j]];swaps++;
+            yield{type:'swap',line:3,arr:[...arr],j,j2:j+1,pass,swaps,msg:`Swapped! ${arr[j+1]} → ${arr[j]}`};
+          }
+        }
+        yield{type:'pass-done',line:0,arr:[...arr],sorted:arr.length-1-i,pass,swaps,msg:`Pass ${pass} done — largest is now in place`};
+      }
+      yield{type:'done',arr:[...arr],swaps,msg:`✅ Sorted in ${pass} passes with ${swaps} swaps!`};
+    },
+    question:(data)=>`How many swaps needed to sort [${data.arr.join(', ')}]?`,
+    answer:(data)=>{const a=[...data.arr];let s=0;for(let i=0;i<a.length-1;i++)for(let j=0;j<a.length-1-i;j++)if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];s++;}return s;},
+  },
+  {
+    id:'selection-sort', title:'Selection Sort', emoji:'👆', color:'var(--plum)', hex:'#9B7BB5',
+    category:'Sorting', difficulty:2, xpReward:14,
+    desc:'Find the smallest unsorted item and put it in place.',
+    pseudocode:[
+      {text:'FOR i = 0 to length - 1',kw:['FOR']},
+      {text:'  SET minIndex = i',kw:['SET']},
+      {text:'  FOR j = i+1 to length',kw:['FOR']},
+      {text:'    IF list[j] < list[minIndex]',kw:['IF']},
+      {text:'      SET minIndex = j',kw:['SET']},
+      {text:'  SWAP list[i] and list[minIndex]',kw:['SWAP']},
+      {text:'END FOR',kw:['END','FOR']},
+    ],
+    generate:()=>({arr:Array.from({length:6},()=>Math.floor(Math.random()*30)+1)}),
+    run:function*(data){
+      const arr=[...data.arr];let swaps=0;
+      for(let i=0;i<arr.length-1;i++){
+        let minIdx=i;
+        yield{type:'scan-start',arr:[...arr],i,minIdx,msg:`Round ${i+1}: looking for smallest from index ${i}`};
+        for(let j=i+1;j<arr.length;j++){
+          yield{type:'compare',arr:[...arr],i,j,minIdx,msg:`Is ${arr[j]} < ${arr[minIdx]}?`};
+          if(arr[j]<arr[minIdx])minIdx=j;
+        }
+        if(minIdx!==i){[arr[i],arr[minIdx]]=[arr[minIdx],arr[i]];swaps++;
+          yield{type:'swap',arr:[...arr],i,minIdx,swaps,msg:`Swap ${arr[minIdx]} ↔ ${arr[i]}, placed ${arr[i]} at index ${i}`};
+        }else{yield{type:'no-swap',arr:[...arr],i,msg:`${arr[i]} already in correct position`};}
+      }
+      yield{type:'done',arr:[...arr],swaps,msg:`✅ Sorted with ${swaps} swaps!`};
+    },
+    question:(data)=>`How many swaps for selection sort on [${data.arr.join(', ')}]?`,
+    answer:(data)=>{const a=[...data.arr];let s=0;for(let i=0;i<a.length-1;i++){let m=i;for(let j=i+1;j<a.length;j++)if(a[j]<a[m])m=j;if(m!==i){[a[i],a[m]]=[a[m],a[i]];s++;}}return s;},
+  },
+  {
+    id:'counting', title:'Counting Algorithm', emoji:'🔢', color:'var(--sage)', hex:'#7BA384',
+    category:'Basics', difficulty:1, xpReward:8,
+    desc:'Count how many items match a condition — the foundation of data analysis.',
+    pseudocode:[
+      {text:'SET count = 0',kw:['SET']},
+      {text:'FOR each item in the list',kw:['FOR']},
+      {text:'  IF item matches condition',kw:['IF']},
+      {text:'    SET count = count + 1',kw:['SET']},
+      {text:'  END IF',kw:['END','IF']},
+      {text:'END FOR',kw:['END','FOR']},
+      {text:'OUTPUT count',kw:['OUTPUT']},
+    ],
+    generate:()=>{
+      const arr=Array.from({length:8},()=>Math.floor(Math.random()*20)+1);
+      const threshold=10;
+      return{arr,condition:`greater than ${threshold}`,threshold};
+    },
+    run:function*(data){
+      const{arr,threshold}=data;let count=0;
+      for(let i=0;i<arr.length;i++){
+        yield{type:'check',line:2,i,count,msg:`Check ${arr[i]}: is it > ${threshold}?`};
+        if(arr[i]>threshold){count++;
+          yield{type:'count',line:3,i,count,msg:`Yes! ${arr[i]} > ${threshold}. Count = ${count}`};
+        }else{yield{type:'skip',line:4,i,count,msg:`No, ${arr[i]} ≤ ${threshold}. Count stays ${count}`};}
+      }
+      yield{type:'done',count,msg:`✅ Found ${count} items greater than ${threshold}`};
+    },
+    question:(data)=>`How many numbers in [${data.arr.join(', ')}] are > ${data.threshold}?`,
+    answer:(data)=>data.arr.filter(x=>x>data.threshold).length,
+  },
+  {
+    id:'find-max', title:'Find Maximum', emoji:'📈', color:'var(--terra)', hex:'#C47A5A',
+    category:'Basics', difficulty:1, xpReward:8,
+    desc:'Track the biggest number as you scan through a list.',
+    pseudocode:[
+      {text:'SET max = first item',kw:['SET']},
+      {text:'FOR each remaining item',kw:['FOR']},
+      {text:'  IF item > max',kw:['IF']},
+      {text:'    SET max = item',kw:['SET']},
+      {text:'  END IF',kw:['END','IF']},
+      {text:'END FOR',kw:['END','FOR']},
+      {text:'OUTPUT max',kw:['OUTPUT']},
+    ],
+    generate:()=>({arr:Array.from({length:7},()=>Math.floor(Math.random()*50)+1)}),
+    run:function*(data){
+      const{arr}=data;let max=arr[0];
+      yield{type:'init',i:0,max,msg:`Start: max = ${arr[0]}`};
+      for(let i=1;i<arr.length;i++){
+        yield{type:'check',i,max,msg:`Compare ${arr[i]} with current max (${max})`};
+        if(arr[i]>max){max=arr[i];yield{type:'new-max',i,max,msg:`🆕 New max = ${arr[i]}!`};}
+        else{yield{type:'keep',i,max,msg:`${arr[i]} ≤ ${max}, max stays`};}
+      }
+      yield{type:'done',max,msg:`✅ Maximum is ${max}`};
+    },
+    question:(data)=>`What is the maximum of [${data.arr.join(', ')}]?`,
+    answer:(data)=>Math.max(...data.arr),
+  },
+  {
+    id:'sum-average', title:'Sum & Average', emoji:'➗', color:'var(--mint)', hex:'#5DB8A3',
+    category:'Basics', difficulty:1, xpReward:8,
+    desc:'Add everything up, then divide to find the average.',
+    pseudocode:[
+      {text:'SET sum = 0',kw:['SET']},
+      {text:'FOR each item in the list',kw:['FOR']},
+      {text:'  SET sum = sum + item',kw:['SET']},
+      {text:'END FOR',kw:['END','FOR']},
+      {text:'SET average = sum / length',kw:['SET']},
+      {text:'OUTPUT sum, average',kw:['OUTPUT']},
+    ],
+    generate:()=>({arr:Array.from({length:6},()=>Math.floor(Math.random()*20)+1)}),
+    run:function*(data){
+      const{arr}=data;let sum=0;
+      for(let i=0;i<arr.length;i++){
+        sum+=arr[i];
+        yield{type:'add',i,sum,msg:`Add ${arr[i]}: sum = ${sum}`};
+      }
+      const avg=Math.round(sum/arr.length*10)/10;
+      yield{type:'done',sum,avg,msg:`✅ Sum = ${sum}, Average = ${avg}`};
+    },
+    question:(data)=>`What is the sum of [${data.arr.join(', ')}]?`,
+    answer:(data)=>data.arr.reduce((a,b)=>a+b,0),
+  },
+  {
+    id:'insertion-sort', title:'Insertion Sort', emoji:'🃏', color:'var(--rose)', hex:'#C47A8A',
+    category:'Sorting', difficulty:2, xpReward:14,
+    desc:'Pick up each card and slide it into the right spot — like sorting a hand of cards.',
+    pseudocode:[
+      {text:'FOR i = 1 to length - 1',kw:['FOR']},
+      {text:'  SET key = list[i]',kw:['SET']},
+      {text:'  SET j = i - 1',kw:['SET']},
+      {text:'  WHILE j >= 0 AND list[j] > key',kw:['WHILE','AND']},
+      {text:'    SHIFT list[j] right',kw:['SHIFT']},
+      {text:'    SET j = j - 1',kw:['SET']},
+      {text:'  INSERT key at position j + 1',kw:['INSERT']},
+      {text:'END FOR',kw:['END','FOR']},
+    ],
+    generate:()=>({arr:Array.from({length:6},()=>Math.floor(Math.random()*30)+1)}),
+    run:function*(data){
+      const arr=[...data.arr];let shifts=0;
+      for(let i=1;i<arr.length;i++){
+        const key=arr[i];let j=i-1;
+        yield{type:'pick',arr:[...arr],i,key,msg:`Pick up ${key} from index ${i}`};
+        while(j>=0&&arr[j]>key){
+          arr[j+1]=arr[j];j--;shifts++;
+          yield{type:'shift',arr:[...arr],j:j+1,key,shifts,msg:`Shift ${arr[j+1]} right`};
+        }
+        arr[j+1]=key;
+        yield{type:'insert',arr:[...arr],pos:j+1,key,msg:`Insert ${key} at index ${j+1}`};
+      }
+      yield{type:'done',arr:[...arr],shifts,msg:`✅ Sorted with ${shifts} shifts!`};
+    },
+    question:(data)=>`How many shifts to sort [${data.arr.join(', ')}]?`,
+    answer:(data)=>{const a=[...data.arr];let s=0;for(let i=1;i<a.length;i++){const k=a[i];let j=i-1;while(j>=0&&a[j]>k){a[j+1]=a[j];j--;s++;}a[j+1]=k;}return s;},
+  },
+];
+
+// ═══════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════
+const S={
+  screen:'home', // home | algo | history
+  xp:0,
+  history:[], // {algoId, date, correct, predicted, actual}
+  currentAlgo:null,
+  algoState:null, // running algorithm state
+};
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function render(){
+  const app=$('#app');
+  app.innerHTML='';
+  switch(S.screen){
+    case 'home':renderHome(app);break;
+    case 'algo':renderAlgo(app);break;
+    case 'history':renderHistory(app);break;
+  }
+}
+
+// ─── HOME ───
+function renderHome(app){
+  const belt=getBelt(S.xp);
+  const nextXP=belt.next?belt.next.xp:belt.xp;
+  const progress=belt.next?Math.min(100,((S.xp-belt.xp)/(nextXP-belt.xp))*100):100;
+  const cats=[...new Set(ALGOS.map(a=>a.category))];
+
+  app.innerHTML=`<div class="container">
+    <!-- Header -->
+    <div class="text-center mb-20 anim-up">
+      <div class="flex justify-center mb-8">${LOGO(52)}</div>
+      <div style="font-size:10px;font-weight:300;letter-spacing:4px;color:var(--text-2);text-transform:uppercase;margin-bottom:2px">Young Foundry</div>
+      <h1 style="font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px">Algo<span style="color:var(--gold)">Lab</span></h1>
+      <p style="color:var(--text-2);font-size:13px;font-weight:300;margin-top:2px">Master algorithms step by step — Kumon style</p>
+      <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto 0;opacity:.5"></div>
+    </div>
+
+    <!-- Belt & XP -->
+    <div class="panel mb-16 anim-up-1" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div>
+        <span class="belt-badge" style="background:${belt.bg};color:${belt.color};border:1px solid ${belt.color}44">${belt.name}</span>
+      </div>
+      <div style="flex:1;min-width:120px">
+        <div class="flex justify-between mb-4" style="font-size:11px;color:var(--text-3)">
+          <span>${S.xp} XP</span>
+          <span>${belt.next?belt.next.name+' at '+belt.next.xp+' XP':'Max rank!'}</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" style="width:${progress}%"></div></div>
+      </div>
+      <div class="flex gap-8">
+        <div class="pill" style="cursor:pointer" onclick="AL.go('history')">📊 History</div>
+        <div class="pill"><span style="color:var(--gold);font-weight:600">${S.history.length}</span> <span style="font-size:12px;color:var(--text-2)">runs</span></div>
+      </div>
+    </div>
+
+    <!-- Algorithm Cards by Category -->
+    ${cats.map((cat,ci)=>{
+      const algos=ALGOS.filter(a=>a.category===cat);
+      return`<div class="anim-up-${Math.min(ci+1,2)} mb-20">
+        <div class="flex items-center gap-8 mb-12">
+          <span style="font-size:14px">${cat==='Basics'?'📦':cat==='Searching'?'🔍':'📊'}</span>
+          <h2 style="font-size:13px;color:var(--text-2);font-weight:500;letter-spacing:1px;text-transform:uppercase">${cat}</h2>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+        <div class="grid-3">
+          ${algos.map(a=>{
+            const runs=S.history.filter(h=>h.algoId===a.id).length;
+            const correct=S.history.filter(h=>h.algoId===a.id&&h.correct).length;
+            return`<div class="card" onclick="AL.start('${a.id}')">
+              <div style="font-size:28px;margin-bottom:6px">${a.emoji}</div>
+              <h3 style="font-size:14px;font-weight:600;margin-bottom:3px">${a.title}</h3>
+              <p style="font-size:11px;color:var(--text-2);line-height:1.4;margin-bottom:8px">${a.desc}</p>
+              <div class="flex items-center gap-6">
+                <span class="tag" style="background:${a.hex}18;color:${a.hex};border:1px solid ${a.hex}22">+${a.xpReward} XP</span>
+                ${runs>0?`<span style="font-size:10px;color:var(--text-3)">${correct}/${runs} ✓</span>`:''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+
+    <div class="text-center" style="padding:12px 0;opacity:.3">
+      <div style="width:60px;height:1px;background:var(--gold);margin:0 auto 10px;opacity:.4"></div>
+      <span style="font-size:10px;color:var(--text-3);letter-spacing:2px">WHERE YOUNG MINDS BUILD</span>
+    </div>
+  </div>`;
+}
+
+// ─── ALGORITHM PAGE ───
+function startAlgo(id){
+  const algo=ALGOS.find(a=>a.id===id);
+  S.currentAlgo=algo;
+  const data=algo.generate();
+  S.algoState={
+    data,
+    gen:algo.run(data),
+    steps:[],
+    currentStep:null,
+    phase:'predict', // predict → run → result
+    prediction:'',
+    speed:400,
+    autoPlaying:false,
+    done:false,
+    arrSnapshot:data.arr?[...data.arr]:null,
+  };
+  S.screen='algo';
+  render();
+}
+
+function renderAlgo(app){
+  const algo=S.currentAlgo;
+  const as=S.algoState;
+
+  app.innerHTML=`<div class="container">
+    <!-- Header -->
+    <div class="flex items-center gap-12 mb-16">
+      <button class="btn btn-outline btn-sm" onclick="AL.go('home')">← Back</button>
+      <div>
+        <h2 style="font-size:18px;font-weight:600">${algo.emoji} ${algo.title}</h2>
+        <span class="tag" style="background:${algo.hex}18;color:${algo.hex};border:1px solid ${algo.hex}22">${algo.category} · +${algo.xpReward} XP</span>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="AL.start('${algo.id}')">🔄 New Data</button>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <!-- LEFT: Pseudocode -->
+      <div>
+        <div class="panel mb-12">
+          <h3 style="font-size:13px;color:var(--gold);margin-bottom:10px;font-weight:600">📝 Pseudocode</h3>
+          <div class="code-panel">
+            ${algo.pseudocode.map((l,i)=>{
+              const isActive=as.currentStep&&as.currentStep.line===i;
+              let html=l.text;
+              l.kw.forEach(k=>{html=html.replace(k,`<span class="kw">${k}</span>`)});
+              return`<div class="line${isActive?' active':''}">${html}</div>`;
+            }).join('')}
+          </div>
+        </div>
+        ${as.phase!=='predict'?`
+        <div class="panel">
+          <h3 style="font-size:13px;color:var(--text-2);margin-bottom:8px;font-weight:600">📋 Trace Log</h3>
+          <div style="max-height:180px;overflow-y:auto">
+            ${as.steps.map((s,i)=>`<div class="mono" style="font-size:11px;padding:3px 0;color:${
+              s.type==='done'||s.type==='found'?'var(--sage)':
+              s.type==='swap'||s.type==='new-max'||s.type==='count'?'var(--gold)':
+              s.type==='not-found'?'var(--coral)':'var(--text-3)'
+            };${i===as.steps.length-1?'font-weight:500':''}">
+              <span style="color:var(--text-3);opacity:.5;margin-right:6px">${i+1}.</span>${s.msg}
+            </div>`).join('')}
+          </div>
+        </div>`:''}
+      </div>
+
+      <!-- RIGHT: Visualization -->
+      <div>
+        ${renderVisualization(algo,as)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderVisualization(algo,as){
+  const data=as.data;
+  let arrHTML='';
+  let controlsHTML='';
+
+  // ─── PREDICT PHASE ───
+  if(as.phase==='predict'){
+    return`<div class="panel panel-lg">
+      <h3 style="font-size:16px;color:var(--gold-pale);margin-bottom:8px;font-weight:600">🤔 Predict First!</h3>
+      <p style="font-size:13px;color:var(--text-2);line-height:1.5;margin-bottom:14px">Look at the data and think: what will the algorithm do?</p>
+
+      <div class="mb-12">
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:6px">Data:</div>
+        <div class="arr-container">
+          ${(data.arr||[]).map((v,i)=>`<div class="arr-cell"><span class="idx">${i}</span>${v}</div>`).join('')}
+        </div>
+        ${data.target!=null?`<div style="font-size:13px;color:var(--amber);margin-top:6px;text-align:center">🎯 Target: <strong>${data.target}</strong></div>`:''}
+        ${data.condition?`<div style="font-size:13px;color:var(--sage);margin-top:6px;text-align:center">Condition: <strong>${data.condition}</strong></div>`:''}
+      </div>
+
+      <div class="predict-box mb-12">
+        <label style="font-size:13px;color:var(--gold);font-weight:500;display:block;margin-bottom:6px">
+          💭 ${algo.question(data)}
+        </label>
+        <input class="predict-input" type="number" id="prediction-input" placeholder="Your prediction..." onkeydown="if(event.key==='Enter')AL.predict()">
+      </div>
+
+      <div class="flex gap-8">
+        <button class="btn btn-gold w-full" onclick="AL.predict()">Lock In My Prediction 🔒</button>
+      </div>
+      <button class="btn btn-outline btn-sm w-full mt-8" style="opacity:.6" onclick="AL.skip()">Skip prediction →</button>
+    </div>`;
+  }
+
+  // ─── RUN PHASE ───
+  const step=as.currentStep;
+  const arrData=step?.arr||data.arr||[];
+  const sortAlgo=['bubble-sort','selection-sort','insertion-sort'].includes(algo.id);
+
+  arrHTML=`<div class="arr-container">
+    ${arrData.map((v,i)=>{
+      let cls='arr-cell';
+      if(step){
+        if(sortAlgo){
+          if(step.sorted!=null&&i>=step.sorted)cls+=' sorted';
+          if(i===step.j||i===step.j2||i===step.i)cls+=' comparing';
+          if(i===step.minIdx)cls+=' active';
+          if(i===step.pos)cls+=' found';
+        }else{
+          if(i===step.i)cls+=' active';
+          if(i===step.mid)cls+=' pivot';
+          if(step.low!=null&&i===step.low)cls+=' left-ptr';
+          if(step.high!=null&&i===step.high)cls+=' right-ptr';
+          if(step.type==='found')cls+=' found';
+        }
+      }
+      if(as.done&&(step?.type==='done'||step?.type==='found'))cls+=' sorted';
+      return`<div class="${cls}"><span class="idx">${i}</span>${v}</div>`;
+    }).join('')}
+  </div>`;
+
+  const statusMsg=step?step.msg:'Ready — step through or auto-play the algorithm';
+  const statusColor=step?(step.type==='done'||step.type==='found'?'var(--sage)':step.type==='not-found'?'var(--coral)':'var(--text-2)'):'var(--text-3)';
+
+  controlsHTML=`<div class="flex items-center justify-between mt-12 gap-8" style="flex-wrap:wrap">
+    <div class="flex gap-6">
+      <button class="btn btn-gold btn-sm" onclick="AL.step()" ${as.done?'disabled':''}>${as.done?'Done':'Step →'}</button>
+      <button class="btn btn-outline btn-sm" onclick="AL.auto()" ${as.done?'disabled':''}>${as.autoPlaying?'⏸ Pause':'▶ Auto'}</button>
+    </div>
+    <div class="speed-control">
+      <span>🐢</span>
+      <input type="range" min="100" max="1000" value="${1100-as.speed}" oninput="AL.speed(this.value)">
+      <span>🐇</span>
+    </div>
+  </div>`;
+
+  if(as.phase==='result'){
+    const correct=as.prediction!==''&&Number(as.prediction)===algo.answer(data);
+    const actual=algo.answer(data);
+    return`<div class="panel panel-lg">
+      <div class="text-center mb-16">
+        <div style="font-size:44px;margin-bottom:8px" class="anim-pop">${correct?'🎉':'🤔'}</div>
+        <h3 style="font-size:20px;color:${correct?'var(--sage)':'var(--amber)'};font-weight:700">${correct?'You nailed it!':'Not quite — but you learned!'}</h3>
+      </div>
+
+      ${as.prediction!==''?`<div class="grid-2 mb-16">
+        <div style="background:rgba(201,168,76,.06);border-radius:12px;padding:14px;border:1px solid rgba(201,168,76,.1)">
+          <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:4px">Your Prediction</div>
+          <div style="font-size:24px;font-weight:700;color:var(--cream)">${as.prediction}</div>
+        </div>
+        <div style="background:rgba(123,163,132,.06);border-radius:12px;padding:14px;border:1px solid rgba(123,163,132,.1)">
+          <div style="font-size:11px;color:var(--sage);font-weight:600;margin-bottom:4px">Actual Answer</div>
+          <div style="font-size:24px;font-weight:700;color:var(--cream)">${actual}</div>
+        </div>
+      </div>`:`<div class="mb-16 text-center" style="color:var(--text-3);font-size:13px">You skipped prediction — try it next time for bonus XP!</div>`}
+
+      <div class="panel mb-12" style="background:${algo.hex}0A;border-color:${algo.hex}20">
+        <div style="font-size:12px;color:${algo.hex};font-weight:600;margin-bottom:4px">💡 Key Insight</div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.5">${algo.desc}</p>
+      </div>
+
+      <div class="flex gap-8">
+        <button class="btn btn-gold w-full" onclick="AL.start('${algo.id}')">Try Again 🔄</button>
+        <button class="btn btn-outline w-full" onclick="AL.go('home')">All Algorithms</button>
+      </div>
+    </div>`;
+  }
+
+  return`<div class="panel panel-lg">
+    <h3 style="font-size:14px;color:var(--text-2);margin-bottom:6px;font-weight:500">
+      ${data.target!=null?`🎯 Find: <strong style="color:var(--amber)">${data.target}</strong>`:
+        data.condition?`📊 Count items ${data.condition}`:
+        `📊 ${algo.title}`}
+    </h3>
+    ${arrHTML}
+    <div style="font-size:13px;color:${statusColor};margin-top:10px;min-height:20px;line-height:1.5;padding:8px 12px;background:rgba(0,0,0,.2);border-radius:8px" class="mono">${statusMsg}</div>
+    ${controlsHTML}
+  </div>`;
+}
+
+// ─── HISTORY ───
+function renderHistory(app){
+  const belt=getBelt(S.xp);
+  app.innerHTML=`<div class="container" style="max-width:700px">
+    <div class="flex items-center gap-12 mb-20">
+      <button class="btn btn-outline btn-sm" onclick="AL.go('home')">← Back</button>
+      <div class="flex items-center gap-8">${LOGO(28)}<h2 style="font-size:18px;font-weight:600">Progress Dashboard</h2></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-2 mb-16">
+      <div class="panel text-center">
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Total XP</div>
+        <div style="font-size:28px;font-weight:700;color:var(--gold)">${S.xp}</div>
+        <span class="belt-badge mt-8" style="background:${belt.bg};color:${belt.color};border:1px solid ${belt.color}44">${belt.name}</span>
+      </div>
+      <div class="panel text-center">
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Accuracy</div>
+        <div style="font-size:28px;font-weight:700;color:var(--sage)">${S.history.length>0?Math.round(S.history.filter(h=>h.correct).length/S.history.length*100):0}%</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:4px">${S.history.filter(h=>h.correct).length} / ${S.history.length} correct</div>
+      </div>
+    </div>
+
+    <!-- Per-Algorithm Stats -->
+    <div class="panel mb-16">
+      <h3 style="font-size:13px;color:var(--gold);margin-bottom:12px;font-weight:600">Algorithm Breakdown</h3>
+      ${ALGOS.map(a=>{
+        const runs=S.history.filter(h=>h.algoId===a.id);
+        const correct=runs.filter(r=>r.correct).length;
+        if(runs.length===0)return`<div class="flex items-center gap-8 mb-6" style="opacity:.4"><span>${a.emoji}</span><span style="font-size:13px">${a.title}</span><span style="font-size:11px;color:var(--text-3);margin-left:auto">Not attempted</span></div>`;
+        const pct=Math.round(correct/runs.length*100);
+        return`<div class="flex items-center gap-8 mb-8">
+          <span>${a.emoji}</span>
+          <span style="font-size:13px;min-width:120px">${a.title}</span>
+          <div style="flex:1;min-width:60px"><div class="xp-bar"><div class="xp-fill" style="width:${pct}%;background:${pct>=70?'var(--sage)':pct>=40?'var(--amber)':'var(--coral)'}"></div></div></div>
+          <span class="mono" style="font-size:11px;color:var(--text-3);min-width:50px;text-align:right">${correct}/${runs.length}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Recent History -->
+    <div class="panel">
+      <h3 style="font-size:13px;color:var(--gold);margin-bottom:12px;font-weight:600">Recent Runs</h3>
+      ${S.history.length===0?'<p style="color:var(--text-3);font-size:13px">Complete some algorithms to see your history!</p>':
+        S.history.slice(-10).reverse().map(h=>{
+          const algo=ALGOS.find(a=>a.id===h.algoId);
+          return`<div class="flex items-center gap-8 mb-6" style="font-size:12px">
+            <span>${algo?.emoji||'?'}</span>
+            <span style="color:var(--text-2)">${algo?.title||h.algoId}</span>
+            <span style="margin-left:auto;color:${h.correct?'var(--sage)':'var(--coral)'}">${h.correct?'✓ Correct':'✗ Wrong'}</span>
+            <span class="mono" style="color:var(--text-3);font-size:10px">${h.predicted}→${h.actual}</span>
+          </div>`;
+        }).join('')}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  ALGORITHM ACTIONS
+// ═══════════════════════════════════════════
+let autoInterval=null;
+
+function finishAlgo(){
+  const as=S.algoState;
+  const algo=S.currentAlgo;
+  const actual=algo.answer(as.data);
+  const correct=as.prediction!==''&&Number(as.prediction)===actual;
+  let xpEarned=Math.floor(algo.xpReward*0.5);
+  if(correct)xpEarned=algo.xpReward;
+  if(as.prediction==='')xpEarned=Math.floor(algo.xpReward*0.3);
+  S.xp+=xpEarned;
+  S.history.push({algoId:algo.id,correct,predicted:as.prediction||'—',actual,date:Date.now()});
+  as.phase='result';
+  if(autoInterval){clearInterval(autoInterval);as.autoPlaying=false;}
+  render();
+}
+
+function doAlgoStep(){
+  const as=S.algoState;
+  if(as.done)return;
+  const next=as.gen.next();
+  if(next.done){as.done=true;finishAlgo();return;}
+  as.currentStep=next.value;
+  as.steps.push(next.value);
+  if(next.value.type==='done'||next.value.type==='found'||next.value.type==='not-found'){
+    as.done=true;render();setTimeout(finishAlgo,1200);return;
+  }
+  render();
+}
+
+// ─── GLOBAL NAMESPACE ───
+window.AL={
+  go(screen){S.screen=screen;render();},
+  start(id){startAlgo(id);},
+  predict(){
+    const input=$('#prediction-input');
+    if(!input)return;
+    S.algoState.prediction=input.value;
+    S.algoState.phase='run';
+    render();
+  },
+  skip(){
+    S.algoState.prediction='';
+    S.algoState.phase='run';
+    render();
+  },
+  step(){doAlgoStep();},
+  auto(){
+    const as=S.algoState;
+    if(as.autoPlaying){as.autoPlaying=false;clearInterval(autoInterval);render();return;}
+    as.autoPlaying=true;render();
+    autoInterval=setInterval(()=>{
+      if(as.done||!as.autoPlaying){clearInterval(autoInterval);as.autoPlaying=false;return;}
+      doAlgoStep();
+    },as.speed);
+  },
+  speed(v){S.algoState.speed=1100-Number(v);},
+};
+
+// ─── BOOT ───
+render();
+
+})();
+</script>
+</body>
+</html>

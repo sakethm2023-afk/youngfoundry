@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowChart Quest — Learn Algorithms by Building</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+/* ═══════ RESET & GLOBALS ═══════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F172A;--surface:#1E293B;--surface2:#334155;--border:#475569;
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --amber:#F59E0B;--green:#10B981;--blue:#6366F1;--pink:#EC4899;
+  --red:#EF4444;--purple:#8B5CF6;--teal:#14B8A6;
+  --radius:14px;--shadow:0 4px 24px rgba(0,0,0,.4);
+  --font:'Baloo 2',cursive;--display:'Lilita One',cursive;
+}
+html{font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none}
+input{font-family:var(--font);outline:none}
+
+/* ═══════ LAYOUT ═══════ */
+#app{max-width:1000px;margin:0 auto;padding:20px 16px 60px;position:relative;min-height:100vh}
+.hidden{display:none!important}
+
+/* ═══════ ANIMATIONS ═══════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.4)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.anim-fade{animation:fadeUp .45s ease both}
+.anim-pop{animation:pop .35s ease both}
+.anim-shake{animation:shake .4s ease}
+
+/* ═══════ HEADER ═══════ */
+.logo{font-family:var(--display);font-size:2.2rem;text-align:center;letter-spacing:1px;margin-bottom:2px}
+.logo-emoji{font-size:2.4rem;vertical-align:middle}
+.tagline{text-align:center;font-size:.92rem;color:var(--text2);font-weight:600;margin-bottom:24px}
+
+/* ═══════ BACK BUTTON ═══════ */
+.back-btn{position:absolute;top:20px;left:16px;background:var(--surface);color:var(--text2);font-weight:700;font-size:.85rem;padding:6px 14px;border-radius:10px;border:1px solid var(--border);transition:all .2s}
+.back-btn:hover{background:var(--surface2);color:var(--text)}
+
+/* ═══════ LEVEL MAP ═══════ */
+.level-list{display:flex;flex-direction:column;gap:16px}
+.level-card{background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);padding:18px;transition:all .25s}
+.level-card.locked{opacity:.5;filter:saturate(.3)}
+.lv-header{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.lv-emoji{font-size:1.8rem}
+.lv-title{font-family:var(--display);font-size:1.1rem;letter-spacing:.5px}
+.lv-desc{font-size:.82rem;color:var(--text2);font-weight:600}
+.progress-bar{height:7px;border-radius:4px;background:var(--surface2);overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.lv-footer{display:flex;justify-content:space-between;align-items:center}
+.lv-prog{font-size:.78rem;font-weight:700;color:var(--text3)}
+.reset-all{display:block;margin:28px auto 0;background:none;border:none;font-size:.75rem;color:var(--text3);cursor:pointer;text-decoration:underline}
+
+/* ═══════ BUTTONS ═══════ */
+.btn{padding:10px 22px;font-size:.88rem;font-weight:800;color:#fff;border-radius:12px;box-shadow:var(--shadow);transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-sec{padding:8px 18px;font-size:.82rem;font-weight:700;color:var(--text2);background:var(--surface);border:2px solid var(--border);border-radius:12px;transition:all .2s}
+.btn-sec:hover{background:var(--surface2);color:var(--text)}
+
+/* ═══════ ACTIVITY LIST ═══════ */
+.act-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.act-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 14px;border:2.5px solid;border-radius:var(--radius);background:var(--surface);cursor:pointer;transition:all .25s;position:relative}
+.act-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.act-emoji{font-size:2rem}
+.act-title{font-weight:800;font-size:.88rem;text-align:center}
+.act-meta{font-size:.72rem;color:var(--text3);font-weight:600}
+.done-badge{position:absolute;top:8px;right:10px;font-size:.72rem;font-weight:800;color:var(--green)}
+
+/* ═══════ LEARN PHASE ═══════ */
+.page-title{font-family:var(--display);font-size:1.5rem;text-align:center;margin-bottom:4px;letter-spacing:.5px}
+.concept-box{display:flex;gap:12px;align-items:flex-start;padding:16px;background:var(--surface);border-radius:var(--radius);margin-bottom:20px;border:1px solid var(--border)}
+.concept-emoji{font-size:1.5rem;flex-shrink:0}
+.concept-text{font-size:.88rem;line-height:1.65;color:var(--text2)}
+.legend-box{padding:12px;border-radius:12px;border:2px dashed var(--border);margin-bottom:16px;text-align:center;font-size:.82rem;font-weight:600;color:var(--text2)}
+.legend-row{display:flex;justify-content:center;gap:18px;margin-top:8px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.78rem}
+.shape-oval{width:22px;height:14px;border-radius:8px;border:2px solid var(--green);background:rgba(16,185,129,.15)}
+.shape-rect{width:22px;height:14px;border-radius:3px;border:2px solid var(--blue);background:rgba(99,102,241,.15)}
+.shape-diamond{width:14px;height:14px;border:2px solid var(--amber);background:rgba(245,158,11,.15);transform:rotate(45deg)}
+.edges-list{display:flex;flex-direction:column;gap:6px;max-width:620px;margin:0 auto 22px}
+.edge-row{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--surface);border-radius:10px;border-left:4px solid;font-size:.78rem;font-weight:600;flex-wrap:wrap}
+.node-chip{padding:3px 10px;font-size:.72rem;font-weight:700;border-radius:6px;white-space:nowrap}
+.edge-arrow{font-size:.85rem;color:var(--text3);font-weight:800;flex-shrink:0}
+.count-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.count-label{font-size:.95rem;font-weight:700}
+.count-input{width:60px;padding:8px;font-size:1.1rem;font-weight:800;border-radius:10px;border:2px solid var(--border);text-align:center;background:var(--surface);color:var(--text)}
+.fb-ok{margin-top:16px;padding:18px;background:rgba(16,185,129,.12);border-radius:var(--radius);text-align:center;font-size:.95rem;font-weight:700;color:var(--green);border:2px solid rgba(16,185,129,.3);display:flex;flex-direction:column;align-items:center;gap:8px}
+.fb-no{margin-top:16px;padding:14px;background:rgba(245,158,11,.1);border-radius:var(--radius);text-align:center;font-size:.88rem;font-weight:700;color:var(--amber);border:2px solid rgba(245,158,11,.25)}
+
+/* ═══════ BUILDER ═══════ */
+.builder-instr{text-align:center;font-size:.82rem;color:var(--text2);margin:0 0 8px;line-height:1.55}
+.decision-hint{text-align:center;font-size:.82rem;color:var(--amber);font-weight:700;margin:0 0 10px}
+.hint-toggle{display:block;margin:0 auto 10px;background:var(--surface);border:2px solid;border-radius:10px;padding:5px 18px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.hint-toggle:hover{filter:brightness(1.2)}
+.hint-box{max-width:640px;margin:0 auto 14px;padding:12px;background:var(--surface);border-radius:12px;border:2px dashed;display:flex;flex-wrap:wrap;gap:4px}
+.hint-chip{background:var(--surface2);padding:3px 9px;border-radius:6px;font-size:.72rem;font-weight:600;color:var(--text2);white-space:nowrap}
+.builder-wrap{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.bank{width:195px;min-width:170px;background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:6px;max-height:600px;overflow-y:auto;flex-shrink:0}
+.bank-head{font-weight:800;font-size:.85rem;color:var(--text2);text-align:center;margin-bottom:2px}
+.bank-item{padding:8px 8px;font-size:.75rem;font-weight:700;border:2px solid;text-align:center;user-select:none;cursor:grab;line-height:1.35;color:var(--text);transition:transform .15s}
+.bank-item:hover{transform:scale(1.03)}
+.bank-empty{font-size:.78rem;color:var(--text3);text-align:center;padding:16px;font-weight:600}
+.canvas-box{flex:1;min-width:300px;overflow-x:auto}
+.canvas-svg{border-radius:var(--radius);border:2px solid var(--border);display:block;touch-action:none;max-width:100%}
+.ctrl-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.val-box{padding:20px;border-radius:var(--radius);border:2px solid;text-align:center;font-size:.95rem;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:8px}
+.val-ok{background:rgba(16,185,129,.1);border-color:var(--green);color:var(--green)}
+.val-no{background:rgba(245,158,11,.1);border-color:var(--amber);color:var(--amber)}
+
+/* ═══════ DRAG GHOST ═══════ */
+.drag-ghost{position:fixed;padding:8px 12px;background:var(--surface);border:2px solid var(--amber);font-size:.75rem;font-weight:700;pointer-events:none;z-index:9999;box-shadow:var(--shadow);text-align:center;color:var(--text);max-width:180px}
+
+/* ═══════ MODAL ═══════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border-radius:20px;padding:28px;max-width:440px;width:92%;position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid var(--border)}
+.modal-close{position:absolute;top:12px;right:16px;background:none;font-size:1.2rem;cursor:pointer;color:var(--text3);border:none}
+.modal-title{font-family:var(--display);font-size:1.25rem;margin-bottom:14px}
+.q-num{font-size:.78rem;font-weight:700;color:var(--text3);margin-bottom:8px}
+.q-text{font-size:1rem;font-weight:700;margin-bottom:16px;line-height:1.55}
+.opt-list{display:flex;flex-direction:column;gap:8px}
+.opt-btn{padding:12px 16px;font-size:.9rem;font-weight:600;background:var(--surface2);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;color:var(--text);transition:all .2s}
+.opt-btn:hover{border-color:var(--amber)}
+.opt-btn.correct{border-color:var(--green);background:rgba(16,185,129,.15)}
+.opt-btn.wrong{border-color:var(--red);background:rgba(239,68,68,.1)}
+.q-feedback{margin-top:12px;font-size:.9rem;font-weight:700;text-align:center}
+.quiz-result{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.quiz-result-emoji{font-size:3rem}
+
+/* ═══════ LABEL PROMPT ═══════ */
+.label-modal{text-align:center}
+.label-modal h3{font-family:var(--display);color:var(--amber);margin-bottom:12px;font-size:1.1rem}
+.label-btns{display:flex;gap:12px;justify-content:center;margin-top:16px}
+
+/* ═══════ EMBED HELPER ═══════ */
+.embed-note{position:fixed;bottom:8px;right:12px;font-size:.65rem;color:var(--text3);opacity:.5}
+
+/* ═══════ RESPONSIVE ═══════ */
+@media(max-width:700px){
+  .builder-wrap{flex-direction:column}
+  .bank{width:100%;max-height:200px;flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .bank-item{flex:0 0 auto;max-width:160px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="embed-note">FlowChart Quest · Embeddable Widget</div>
+<div id="drag-ghost" class="drag-ghost hidden"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════ */
+const LEVELS = [
+  {id:0,title:"Sequencer",emoji:"🧩",desc:"Simple step-by-step flows",color:"#F59E0B",need:3},
+  {id:1,title:"Decision Maker",emoji:"🔀",desc:"Flowcharts with Yes / No choices",color:"#6366F1",need:2},
+  {id:2,title:"Explorer",emoji:"🔍",desc:"Searching — find what you need",color:"#10B981",need:2},
+  {id:3,title:"Organizer",emoji:"📊",desc:"Sorting — put things in order",color:"#EC4899",need:2},
+  {id:4,title:"Collector",emoji:"📦",desc:"Lists & Arrays — store and manage",color:"#8B5CF6",need:0},
+];
+
+const QUIZ_PASS = 9; // 9 out of 10 = 90% (meets 85% target)
+const QUIZZES = {
+  1:[
+    {q:"What shape represents a DECISION in a flowchart?",opts:["Rectangle","Diamond ◇","Circle","Triangle"],ans:1},
+    {q:"A flowchart usually flows from…",opts:["Right to Left","Bottom to Top","Top to Bottom","Random"],ans:2},
+    {q:"What does a decision block give you?",opts:["One path","Two or more paths","No path","A loop only"],ans:1},
+    {q:"How many arrows come OUT of a decision diamond?",opts:["Zero","Exactly 1","At least 2","Five"],ans:2},
+    {q:"What labels go on arrows leaving a decision?",opts:["Left / Right","Start / Stop","Yes / No","Up / Down"],ans:2},
+    {q:"A START block has how many arrows going IN to it?",opts:["One","Two","Three","Zero"],ans:3},
+    {q:"What shape is used for START and END?",opts:["Rectangle","Diamond","Oval / Rounded","Star"],ans:2},
+    {q:"If a decision says 'Is it raining?' and you follow the YES arrow, it means…",opts:["It is NOT raining","It is raining","It might rain","Skip the step"],ans:1},
+    {q:"Can a flowchart have more than one END block?",opts:["Never","Yes, if there are decisions","Only on Tuesdays","Only with loops"],ans:1},
+    {q:"A rectangle □ in a flowchart represents a…",opts:["Question","Process / Action step","Start point","Data input"],ans:1},
+  ],
+  2:[
+    {q:"Linear Search checks items…",opts:["All at once","One by one, in order","From the middle","Randomly"],ans:1},
+    {q:"Binary Search works best on…",opts:["Any list","A shuffled list","A sorted list","An empty list"],ans:2},
+    {q:"If a list has 8 items, binary search needs at most ___ guesses.",opts:["8","4","3","2"],ans:2},
+    {q:"Linear Search always starts from the…",opts:["Middle item","Last item","First item","Random item"],ans:2},
+    {q:"In Binary Search, you always check the ___ first.",opts:["First item","Last item","Middle item","Smallest item"],ans:2},
+    {q:"If the item is NOT in the list, Linear Search checks ___ items.",opts:["Zero","Half of them","All of them","Just one"],ans:2},
+    {q:"Binary Search cuts the remaining list in ___ each time.",opts:["Thirds","Quarters","Half","Tenths"],ans:2},
+    {q:"Which search is faster for a LONG sorted list?",opts:["Linear Search","Binary Search","Both are the same","Neither works"],ans:1},
+    {q:"In Binary Search, if your guess is too HIGH, you look in the…",opts:["Upper half","Lower half","Same spot","Start over"],ans:1},
+    {q:"Linear Search works on lists that are…",opts:["Only sorted","Only unsorted","Both sorted and unsorted","Only numbers"],ans:2},
+  ],
+  3:[
+    {q:"Bubble Sort works by…",opts:["Picking the smallest each time","Comparing neighbours & swapping","Splitting the list in half","Guessing"],ans:1},
+    {q:"After one full pass of Bubble Sort, the ___ item is in its correct place.",opts:["First","Middle","Last (biggest)","Random"],ans:2},
+    {q:"Selection Sort finds the ___ and moves it to the front.",opts:["Biggest","Middle","Smallest","Random"],ans:2},
+    {q:"In Bubble Sort, the biggest items 'bubble' to the…",opts:["Front of the list","Middle","End of the list","They don't move"],ans:2},
+    {q:"How many items does Bubble Sort compare at a time?",opts:["1","2","3","All of them"],ans:1},
+    {q:"Insertion Sort is most like…",opts:["Flipping pancakes","Sorting cards in your hand","Rolling dice","Stacking blocks"],ans:1},
+    {q:"If a list is ALREADY sorted, which sort detects this fastest?",opts:["Selection Sort","Insertion Sort","Bubble Sort (no swaps needed)","None can tell"],ans:2},
+    {q:"Selection Sort divides the list into…",opts:["Top and bottom","Red and blue","Sorted and unsorted parts","Even and odd"],ans:2},
+    {q:"Sorting [5, 3, 1] from smallest to largest gives…",opts:["[5, 3, 1]","[3, 1, 5]","[1, 3, 5]","[1, 5, 3]"],ans:2},
+    {q:"What does 'swap' mean in sorting?",opts:["Delete both items","Copy an item","Exchange two items' positions","Add a new item"],ans:2},
+  ],
+  4:[
+    {q:"An array stores items using…",opts:["Names","Colours","Index numbers (0, 1, 2…)","Magic"],ans:2},
+    {q:"The first index of an array is…",opts:["1","0","-1","10"],ans:1},
+    {q:"When you remove an item from the middle, the others…",opts:["Stay put","Shift to fill the gap","Disappear","Double"],ans:1},
+    {q:"In the array [Cat, Dog, Bird], what is at index 1?",opts:["Cat","Dog","Bird","Nothing"],ans:1},
+    {q:"'Append' adds an item to the ___ of a list.",opts:["Beginning","Middle","End","A random spot"],ans:2},
+    {q:"If you INSERT at index 0, existing items…",opts:["Get deleted","Shift right by one","Stay in place","Reverse order"],ans:1},
+    {q:"An array with 5 items has indices from ___ to ___.",opts:["1 to 5","0 to 5","0 to 4","1 to 4"],ans:2},
+    {q:"What is the LENGTH of [A, B, C]?",opts:["2","3","4","0"],ans:1},
+    {q:"To find an item in an unsorted array, you use…",opts:["Binary Search","Linear Search","Bubble Sort","Nothing"],ans:1},
+    {q:"Removing the LAST item from an array is often called…",opts:["Push","Shift","Pop","Swap"],ans:2},
+  ],
+};
+
+const N=(id,label,type="step")=>({id,label,type});
+const E=(from,to,label)=>label?{from,to,label}:{from,to};
+const A=(id,title,emoji,color,concept,nodes,edges)=>({id,title,emoji,color,concept,nodes,edges});
+
+const ACTIVITIES = {
+  0:[
+    A("sand","Make a Sandwich","🥪","#F59E0B","Follow the steps in order — that's an algorithm!",
+      [N("start","START","start"),N("s1","Get two slices of bread"),N("s2","Spread butter on bread"),N("s3","Add cheese & lettuce"),N("s4","Put second slice on top"),N("s5","Cut in half"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","end")]),
+    A("plant","Plant a Seed","🌱","#10B981","Each step must happen in order for the seed to grow!",
+      [N("start","START","start"),N("s1","Fill pot with soil"),N("s2","Make a small hole"),N("s3","Drop seed in hole"),N("s4","Cover with soil"),N("s5","Water gently"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","end")]),
+    A("teeth","Brush Your Teeth","🪥","#3B82F6","Morning routine — same steps every day!",
+      [N("start","START","start"),N("s1","Pick up toothbrush"),N("s2","Put toothpaste on it"),N("s3","Brush top teeth"),N("s4","Brush bottom teeth"),N("s5","Rinse mouth with water"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","end")]),
+    A("smooth","Make a Smoothie","🥤","#EC4899","Blend the steps in the right order!",
+      [N("start","START","start"),N("s1","Wash & peel fruits"),N("s2","Cut into pieces"),N("s3","Put in blender"),N("s4","Add yoghurt"),N("s5","Blend until smooth"),N("s6","Pour into glass"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","s6"),E("s6","end")]),
+    A("bag","Pack Your School Bag","🎒","#8B5CF6","Don't forget anything!",
+      [N("start","START","start"),N("s1","Check timetable"),N("s2","Put books in bag"),N("s3","Add pencil box"),N("s4","Pack water bottle"),N("s5","Zip the bag"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","end")]),
+  ],
+  1:[
+    A("school","Getting Ready for School","🏫","#6366F1",
+      "Sometimes you make a CHOICE — if it's raining, take an umbrella! A diamond ◇ means a Yes/No question.",
+      [N("start","START","start"),N("s1","Wake up & get dressed"),N("d1","Is it raining?","decision"),N("s2a","Take an umbrella"),N("s2b","Wear sunglasses"),N("s3","Eat breakfast"),N("s4","Go to school"),N("end","END","end")],
+      [E("start","s1"),E("s1","d1"),E("d1","s2a","Yes"),E("d1","s2b","No"),E("s2a","s3"),E("s2b","s3"),E("s3","s4"),E("s4","end")]),
+    A("snack","Choosing a Snack","🍎","#F59E0B",
+      "Decisions let your flowchart split into different paths!",
+      [N("start","START","start"),N("s1","Open the kitchen"),N("d1","Feeling hungry?","decision"),N("s2a","Pick a fruit"),N("d2","Want something warm?","decision"),N("s3a","Make toast"),N("s3b","Grab a biscuit"),N("s4","Eat & enjoy"),N("end","END","end")],
+      [E("start","s1"),E("s1","d1"),E("d1","s2a","Yes"),E("d1","end","No"),E("s2a","d2"),E("d2","s3a","Yes"),E("d2","s3b","No"),E("s3a","s4"),E("s3b","s4"),E("s4","end")]),
+    A("pet","Taking Care of Pets","🐾","#10B981",
+      "Chain decisions together — just like caring for different pets!",
+      [N("start","START","start"),N("d1","Have a dog?","decision"),N("s1a","Walk the dog"),N("d2","Have a cat?","decision"),N("s2a","Feed the cat"),N("s2b","Clean fish tank"),N("s3","Give fresh water"),N("end","END","end")],
+      [E("start","d1"),E("d1","s1a","Yes"),E("d1","d2","No"),E("s1a","s3"),E("d2","s2a","Yes"),E("d2","s2b","No"),E("s2a","s3"),E("s2b","s3"),E("s3","end")]),
+  ],
+  2:[
+    A("linsearch","Find the Red Ball","🔴","#EF4444",
+      "LINEAR SEARCH: Look at each item one by one until you find it!",
+      [N("start","START","start"),N("s1","Look at first ball"),N("d1","Is it red?","decision"),N("s2","Found it!"),N("d2","More balls left?","decision"),N("s3","Move to next ball"),N("s4","Not found!"),N("end1","END","end"),N("end2","END","end")],
+      [E("start","s1"),E("s1","d1"),E("d1","s2","Yes"),E("d1","d2","No"),E("s2","end1"),E("d2","s3","Yes"),E("d2","s4","No"),E("s3","d1"),E("s4","end2")]),
+    A("binsearch","Guess My Number","🔢","#3B82F6",
+      "BINARY SEARCH: Guess the MIDDLE — cut options in half each time! Only works on sorted items.",
+      [N("start","START","start"),N("s1","Set Low=1, High=100"),N("s2","Guess the middle"),N("d1","Is it correct?","decision"),N("s3","You win!"),N("d2","Guess too high?","decision"),N("s4","Set High = guess−1"),N("s5","Set Low = guess+1"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","d1"),E("d1","s3","Yes"),E("d1","d2","No"),E("s3","end"),E("d2","s4","Yes"),E("d2","s5","No"),E("s4","s2"),E("s5","s2")]),
+    A("dictlook","Dictionary Lookup","📖","#8B5CF6",
+      "A dictionary is BINARY SEARCH in real life! Open to the middle, then decide: left or right half?",
+      [N("start","START","start"),N("s1","Open to middle page"),N("d1","Found the word?","decision"),N("s2","Read the definition!"),N("d2","Word comes before?","decision"),N("s3","Go to left half"),N("s4","Go to right half"),N("end","END","end")],
+      [E("start","s1"),E("s1","d1"),E("d1","s2","Yes"),E("d1","d2","No"),E("s2","end"),E("d2","s3","Yes"),E("d2","s4","No"),E("s3","d1"),E("s4","d1")]),
+  ],
+  3:[
+    A("bubble","Bubble Sort: Biggest Floats Up","🫧","#EC4899",
+      "BUBBLE SORT: Compare neighbours. Wrong order? Swap! Keep going until no swaps needed.",
+      [N("start","START","start"),N("s1","Start at first pair"),N("s2","Compare neighbours"),N("d1","Wrong order?","decision"),N("s3","Swap them"),N("s4","Move to next pair"),N("d2","Reached the end?","decision"),N("d3","Any swaps this round?","decision"),N("s5","All sorted!"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","d1"),E("d1","s3","Yes"),E("d1","s4","No"),E("s3","s4"),E("s4","d2"),E("d2","d3","Yes"),E("d2","s2","No"),E("d3","s1","Yes"),E("d3","s5","No"),E("s5","end")]),
+    A("selection","Selection Sort: Pick the Smallest","🃏","#F59E0B",
+      "SELECTION SORT: Find the smallest card and put it first. Repeat!",
+      [N("start","START","start"),N("s1","Look at unsorted cards"),N("s2","Find the smallest"),N("s3","Move to sorted pile"),N("d1","Cards left?","decision"),N("s4","All sorted!"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","d1"),E("d1","s1","Yes"),E("d1","s4","No"),E("s4","end")]),
+    A("insert","Insertion Sort: Slide into Place","🎴","#10B981",
+      "INSERTION SORT: Take a card and slide it into the right spot!",
+      [N("start","START","start"),N("s1","Pick next unsorted card"),N("d1","Smaller than left card?","decision"),N("s2","Slide it one spot left"),N("s3","Card is in place!"),N("d2","More unsorted cards?","decision"),N("s4","All sorted!"),N("end","END","end")],
+      [E("start","s1"),E("s1","d1"),E("d1","s2","Yes"),E("d1","s3","No"),E("s2","d1"),E("s3","d2"),E("d2","s1","Yes"),E("d2","s4","No"),E("s4","end")]),
+  ],
+  4:[
+    A("playlist","Build a Playlist","🎵","#8B5CF6",
+      "An ARRAY is a numbered list (0,1,2…). You can add, remove, or find items by their index!",
+      [N("start","START","start"),N("s1","Create empty list [ ]"),N("s2","Add 'Pop' at index 0"),N("s3","Add 'Rock' at index 1"),N("s4","Add 'Jazz' at index 2"),N("d1","List full (3 songs)?","decision"),N("s5","Remove index 1 (Rock)"),N("s6","Jazz shifts to index 1"),N("s7","List: [Pop, Jazz]"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","d1"),E("d1","s5","Yes"),E("d1","s4","No"),E("s5","s6"),E("s6","s7"),E("s7","end")]),
+    A("chest","Treasure Chest Array","💎","#F59E0B",
+      "Arrays let you GET, SET, and SWAP items by their slot number!",
+      [N("start","START","start"),N("s1","Create chest with 3 slots"),N("s2","Put Gold in slot [0]"),N("s3","Put Gem in slot [1]"),N("s4","Put Key in slot [2]"),N("d1","What's in slot [1]?","decision"),N("s5","It's the Gem!"),N("s6","Swap slot [0] and [2]"),N("s7","Chest: [Key, Gem, Gold]"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","d1"),E("d1","s5","Gem"),E("d1","s6","Check"),E("s5","s6"),E("s6","s7"),E("s7","end")]),
+    A("shop","Shopping List Manager","🛒","#10B981",
+      "Lists grow and shrink! APPEND adds to the end, INSERT goes anywhere, SEARCH finds items.",
+      [N("start","START","start"),N("s1","Create empty list"),N("s2","Append 'Milk'"),N("s3","Append 'Bread'"),N("s4","Insert 'Eggs' at index 1"),N("s5","List: [Milk, Eggs, Bread]"),N("d1","Need to find Bread?","decision"),N("s6","Search from index 0…"),N("s7","Found at index 2!"),N("end","END","end")],
+      [E("start","s1"),E("s1","s2"),E("s2","s3"),E("s3","s4"),E("s4","s5"),E("s5","d1"),E("d1","s6","Yes"),E("d1","end","No"),E("s6","s7"),E("s7","end")]),
+  ],
+};
+
+/* ═══════════════════════════════════════════
+   STATE & HELPERS
+   ═══════════════════════════════════════════ */
+let state = {
+  screen: "levels",
+  level: 0,
+  activity: null,
+  progress: loadProgress(),
+  // builder state
+  placed: [],
+  bank: [],
+  conns: [],
+  connecting: null,
+  dragging: null,
+  dragPos: {x:0,y:0},
+  moving: null,
+  moveOff: {x:0,y:0},
+  validated: null,
+  showHint: false,
+  // quiz state
+  quizLevel: null,
+  quizIdx: 0,
+  quizScore: 0,
+  quizSel: null,
+  quizDone: false,
+  quizFeedback: null,
+  // learn
+  guess: "",
+  countResult: null,
+  // label
+  labelPrompt: null,
+};
+
+function loadProgress(){
+  try{const d=JSON.parse(localStorage.getItem("fq_progress")||"{}");return{completed:new Set(d.completed||[]),unlocked:d.unlocked||0}}
+  catch{return{completed:new Set(),unlocked:0}}
+}
+function saveProgress(p){localStorage.setItem("fq_progress",JSON.stringify({completed:[...p.completed],unlocked:p.unlocked}))}
+function countDone(level){return(ACTIVITIES[level]||[]).filter(a=>state.progress.completed.has(a.id)).length}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function nodeColor(n){return n.type==="start"?"#10B981":n.type==="end"?"#EF4444":n.type==="decision"?"#F59E0B":"#6366F1"}
+function chipBg(n){return n.type==="start"?"rgba(16,185,129,.18)":n.type==="end"?"rgba(239,68,68,.15)":n.type==="decision"?"rgba(245,158,11,.18)":"rgba(99,102,241,.15)"}
+
+const $=id=>document.getElementById(id);
+const app=$("app");
+
+/* ═══════════════════════════════════════════
+   RENDER ENGINE
+   ═══════════════════════════════════════════ */
+function render(){
+  switch(state.screen){
+    case "levels": renderLevels(); break;
+    case "activities": renderActivities(); break;
+    case "learn": renderLearn(); break;
+    case "build": renderBuilder(); break;
+  }
+  renderModal();
+}
+
+/* ── LEVEL MAP ── */
+function renderLevels(){
+  let h=`<h1 class="logo anim-fade"><span class="logo-emoji">🧩</span> FlowChart Quest</h1>
+  <p class="tagline anim-fade" style="animation-delay:.1s">Master algorithms — one level at a time!</p>
+  <div class="level-list">`;
+  LEVELS.forEach((lv,i)=>{
+    const unlocked = lv.id <= state.progress.unlocked;
+    const done = countDone(lv.id), total = (ACTIVITIES[lv.id]||[]).length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    h+=`<div class="level-card ${unlocked?"":"locked"} anim-fade" style="animation-delay:${i*.08}s;border-color:${unlocked?lv.color:"var(--border)"}">
+      <div class="lv-header">
+        <span class="lv-emoji">${unlocked?lv.emoji:"🔒"}</span>
+        <div><div class="lv-title" style="color:${unlocked?lv.color:"var(--text3)"}">${"Level "+lv.id+" — "+lv.title}</div>
+        <div class="lv-desc">${lv.desc}</div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${lv.color}"></div></div>
+      <div class="lv-footer">
+        <span class="lv-prog">${done}/${total} complete</span>
+        ${unlocked
+          ?`<button class="btn" style="background:${lv.color}" onclick="goActivities(${lv.id})">Play →</button>`
+          :`<button class="btn" style="background:var(--blue)" onclick="startQuiz(${lv.id})">🧠 Quiz to Unlock (85%)</button>`}
+      </div>
+    </div>`;
+  });
+  h+=`</div><button class="reset-all" onclick="resetAll()">Reset All Progress</button>`;
+  app.innerHTML=h;
+}
+
+/* ── ACTIVITY LIST ── */
+function renderActivities(){
+  const lv=LEVELS[state.level]; const acts=ACTIVITIES[state.level]||[];
+  let h=`<button class="back-btn" onclick="goLevels()">← Levels</button>
+  <h2 class="page-title anim-fade" style="color:${lv.color}">${lv.emoji} Level ${lv.id}: ${lv.title}</h2>
+  <p class="tagline anim-fade" style="animation-delay:.08s">${lv.desc}</p>
+  <div class="act-grid">`;
+  acts.forEach((a,i)=>{
+    const done=state.progress.completed.has(a.id);
+    h+=`<div class="act-card anim-fade" style="border-color:${done?"var(--green)":a.color};animation-delay:${i*.07}s" onclick="goLearn('${a.id}')">
+      <span class="act-emoji">${a.emoji}</span>
+      <span class="act-title">${a.title}</span>
+      ${done?'<span class="done-badge">✅ Done</span>':""}
+      <span class="act-meta">${a.nodes.length} blocks</span>
+    </div>`;
+  });
+  h+=`</div>`;
+  app.innerHTML=h;
+}
+
+/* ── LEARN PHASE ── */
+function renderLearn(){
+  const a=state.activity; const lv=state.level;
+  const hasDecisions=a.nodes.some(n=>n.type==="decision");
+  let h=`<button class="back-btn" onclick="goActivities(${lv})">← Activities</button>
+  <h2 class="page-title anim-fade" style="color:${a.color}">${a.emoji} ${a.title}</h2>
+  <div class="concept-box anim-fade" style="animation-delay:.1s">
+    <span class="concept-emoji">💡</span>
+    <p class="concept-text">${a.concept}</p>
+  </div>`;
+  if(hasDecisions){
+    h+=`<div class="legend-box anim-fade" style="animation-delay:.15s;border-color:${a.color}">
+      <b>Shapes you'll use:</b>
+      <div class="legend-row">
+        <span class="legend-item"><span class="shape-oval"></span> START / END</span>
+        <span class="legend-item"><span class="shape-rect"></span> Step</span>
+        <span class="legend-item"><span class="shape-diamond"></span> Decision</span>
+      </div>
+    </div>`;
+  }
+  h+=`<div class="edges-list">`;
+  a.edges.forEach((e,i)=>{
+    const from=a.nodes.find(n=>n.id===e.from), to=a.nodes.find(n=>n.id===e.to);
+    if(!from||!to) return;
+    h+=`<div class="edge-row anim-fade" style="border-left-color:${a.color};animation-delay:${.15+i*.05}s">
+      <span class="node-chip" style="background:${chipBg(from)};border-radius:${from.type==="decision"?"4px":from.type==="step"?"8px":"20px"}">${from.label}</span>
+      <span class="edge-arrow">${e.label?"—"+e.label+"→":"→"}</span>
+      <span class="node-chip" style="background:${chipBg(to)};border-radius:${to.type==="decision"?"4px":to.type==="step"?"8px":"20px"}">${to.label}</span>
+    </div>`;
+  });
+  h+=`</div>
+  <div class="count-row">
+    <label class="count-label">How many TOTAL blocks? →</label>
+    <input type="number" min="1" max="20" class="count-input" id="countInput" value="${state.guess}" oninput="state.guess=this.value;state.countResult=null;updateCountFb()">
+    <button class="btn" style="background:${a.color};opacity:${state.guess?"1":".5"}" onclick="checkCount()">Check</button>
+  </div>
+  <div id="countFb"></div>`;
+  app.innerHTML=h;
+  updateCountFb();
+}
+
+function updateCountFb(){
+  const fb=$("countFb"); if(!fb) return;
+  if(state.countResult==="ok"){
+    fb.innerHTML=`<div class="fb-ok anim-pop">🎉 Correct — <b>${state.activity.nodes.length} blocks</b>!
+      <button class="btn" style="background:${state.activity.color};margin-top:8px" onclick="goBuild()">Build Flowchart →</button></div>`;
+  } else if(state.countResult==="no"){
+    fb.innerHTML=`<div class="fb-no anim-shake">🤔 Not quite — count every block including START, END, and decisions!</div>`;
+  } else fb.innerHTML="";
+}
+
+function checkCount(){
+  const g=parseInt(state.guess,10);
+  state.countResult = g===state.activity.nodes.length?"ok":"no";
+  updateCountFb();
+}
+
+/* ── BUILDER ── */
+const CW=720, CH=600, NW=180, NH=50;
+
+function renderBuilder(){
+  const a=state.activity; const hasD=a.nodes.some(n=>n.type==="decision");
+  let h=`<button class="back-btn" onclick="goLearn('${a.id}')">← Back</button>
+  <h2 class="page-title anim-fade" style="color:${a.color}">${a.emoji} Build: ${a.title}</h2>
+  <p class="builder-instr anim-fade"><b>Drag</b> blocks onto canvas. <b>Click</b> two blocks to connect. <b>Double-click</b> to remove.</p>`;
+  if(hasD) h+=`<p class="decision-hint anim-fade">◇ Diamond = Decision — arrows from it need a Yes/No label!</p>`;
+  h+=`<button class="hint-toggle" style="border-color:${a.color};color:${a.color}" onclick="toggleHint()">${state.showHint?"Hide Hint 🙈":"Show Hint 💡"}</button>`;
+  if(state.showHint){
+    h+=`<div class="hint-box" style="border-color:${a.color}">`;
+    a.edges.forEach(e=>{
+      const fn=a.nodes.find(n=>n.id===e.from)?.label||""; const tn=a.nodes.find(n=>n.id===e.to)?.label||"";
+      h+=`<span class="hint-chip">${fn} ${e.label?"—"+e.label+"→":"→"} ${tn}</span>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`<div class="builder-wrap"><div class="bank" id="bank"><div class="bank-head">🧱 Blocks</div>`;
+  if(state.bank.length===0) h+=`<div class="bank-empty">All placed! 👏</div>`;
+  state.bank.forEach(item=>{
+    const c=nodeColor(item);
+    h+=`<div class="bank-item" style="border-color:${c};background:${c}15;border-radius:${item.type==="decision"?"4px":item.type==="step"?"10px":"24px"}"
+      data-bankid="${item.id}" onmousedown="startDragBank(event,'${item.id}')" ontouchstart="startDragBank(event,'${item.id}')">
+      ${item.type==="decision"?'<span style="color:#F59E0B;font-weight:900">◇ </span>':""}${item.label}</div>`;
+  });
+  h+=`</div><div class="canvas-box"><svg id="cvs" class="canvas-svg" width="${CW}" height="${CH}" style="background:#111827"></svg></div></div>`;
+  h+=`<div class="ctrl-row">
+    <button class="btn-sec" onclick="resetBuilder()">🔄 Reset</button>
+    <button class="btn" style="background:${a.color};font-size:1rem;padding:12px 28px" onclick="validateFlow()">✅ Check Flowchart</button>
+  </div><div id="valFb"></div>`;
+  app.innerHTML=h;
+  drawSVG();
+  updateValFb();
+}
+
+function drawSVG(){
+  const svg=$("cvs"); if(!svg) return;
+  const a=state.activity;
+  let s=`<defs>
+    <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#94A3B8"/></marker>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0L0 0 0 20" fill="none" stroke="#1E293B" stroke-width=".5"/></pattern>
+  </defs>
+  <rect width="${CW}" height="${CH}" fill="url(#grid)" rx="12"/>`;
+
+  // connections
+  state.conns.forEach((c,i)=>{
+    const f=state.placed.find(n=>n.id===c.from), t=state.placed.find(n=>n.id===c.to);
+    if(!f||!t) return;
+    const x1=f.x+NW/2, y1=f.y+NH/2, x2=t.x+NW/2, y2=t.y+NH/2;
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#64748B" stroke-width="2" marker-end="url(#ah)" style="cursor:pointer" onclick="removeConn(${i})"/>`;
+    if(c.label){
+      s+=`<rect x="${mx-20}" y="${my-10}" width="40" height="18" rx="4" fill="#1E293B" stroke="#475569" stroke-width="1"/>`;
+      const lc=c.label==="Yes"?"#10B981":c.label==="No"?"#EF4444":"#A78BFA";
+      s+=`<text x="${mx}" y="${my+3}" text-anchor="middle" font-size="10" font-weight="700" fill="${lc}" font-family="'Baloo 2',cursive">${c.label}</text>`;
+    }
+  });
+
+  // nodes
+  state.placed.forEach(node=>{
+    const col=nodeColor(node); const sel=state.connecting===node.id;
+    const cx=node.x+NW/2, cy=node.y+NH/2;
+    const sw=sel?3:2; const sd=sel?"6 3":"none"; const sc=sel?"#F1F5F9":col;
+    if(node.type==="decision"){
+      s+=`<polygon points="${cx},${node.y} ${node.x+NW},${cy} ${cx},${node.y+NH} ${node.x},${cy}" fill="${col}22" stroke="${sc}" stroke-width="${sw}" stroke-dasharray="${sd}"
+        style="cursor:pointer" data-nodeid="${node.id}" onclick="clickNode('${node.id}')" ondblclick="removeNode('${node.id}')"
+        onmousedown="startMoveNode(event,'${node.id}')" ontouchstart="startMoveNode(event,'${node.id}')"/>`;
+    } else if(node.type==="step"){
+      s+=`<rect x="${node.x}" y="${node.y}" width="${NW}" height="${NH}" rx="10" fill="${col}1A" stroke="${sc}" stroke-width="${sw}" stroke-dasharray="${sd}"
+        style="cursor:pointer" data-nodeid="${node.id}" onclick="clickNode('${node.id}')" ondblclick="removeNode('${node.id}')"
+        onmousedown="startMoveNode(event,'${node.id}')" ontouchstart="startMoveNode(event,'${node.id}')"/>`;
+    } else {
+      s+=`<ellipse cx="${cx}" cy="${cy}" rx="${NW/2}" ry="${NH/2}" fill="${col}22" stroke="${sc}" stroke-width="${sw}" stroke-dasharray="${sd}"
+        style="cursor:pointer" data-nodeid="${node.id}" onclick="clickNode('${node.id}')" ondblclick="removeNode('${node.id}')"
+        onmousedown="startMoveNode(event,'${node.id}')" ontouchstart="startMoveNode(event,'${node.id}')"/>`;
+    }
+    const lbl=node.label.length>26?node.label.slice(0,24)+"…":node.label;
+    s+=`<text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle" fill="#F1F5F9" font-size="11" font-weight="700"
+      font-family="'Baloo 2',cursive" style="pointer-events:none;user-select:none">${lbl}</text>`;
+  });
+
+  svg.innerHTML=s;
+}
+
+function updateValFb(){
+  const fb=$("valFb"); if(!fb) return;
+  const v=state.validated;
+  if(!v){fb.innerHTML="";return}
+  if(v.ok){
+    fb.innerHTML=`<div class="val-box val-ok anim-pop"><span style="font-size:1.8rem">🏆</span><span>${v.msg}</span>
+      <button class="btn" style="background:var(--green);margin-top:8px" onclick="completeActivity()">Complete & Continue →</button></div>`;
+  } else {
+    fb.innerHTML=`<div class="val-box val-no anim-shake"><span style="font-size:1.4rem">🔧</span><span>${v.msg}</span></div>`;
+  }
+}
+
+/* ── MODAL ── */
+function renderModal(){
+  const mr=$("modal-root");
+  if(state.quizLevel!==null){
+    renderQuiz(mr); return;
+  }
+  if(state.labelPrompt){
+    renderLabelPrompt(mr); return;
+  }
+  mr.innerHTML="";
+}
+
+function renderQuiz(mr){
+  const qs=QUIZZES[state.quizLevel]||[]; const lv=LEVELS[state.quizLevel];
+  let h=`<div class="overlay"><div class="modal">
+    <button class="modal-close" onclick="closeQuiz()">✕</button>
+    <h2 class="modal-title" style="color:${lv.color}">${lv.emoji} Unlock Level ${state.quizLevel}: ${lv.title}</h2>`;
+  if(!state.quizDone){
+    const cur=qs[state.quizIdx];
+    const pct=Math.round(((state.quizIdx)/qs.length)*100);
+    const scorePct=state.quizIdx>0?Math.round((state.quizScore/state.quizIdx)*100):0;
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="q-num">Question ${state.quizIdx+1} of ${qs.length}</div>
+      <div style="font-size:.78rem;font-weight:700;color:${scorePct>=85?"var(--green)":"var(--text3)"}">Score: ${state.quizScore}/${state.quizIdx} ${state.quizIdx>0?"("+scorePct+"%)":""}</div>
+    </div>
+    <div style="height:6px;border-radius:3px;background:var(--surface2);margin-bottom:4px;position:relative;overflow:visible">
+      <div style="height:100%;border-radius:3px;background:${lv.color};width:${pct}%;transition:width .3s"></div>
+      <div style="position:absolute;left:85%;top:-3px;width:2px;height:12px;background:var(--amber);border-radius:1px" title="85% target"></div>
+    </div>
+    <div style="text-align:right;font-size:.65rem;color:var(--text3);margin-bottom:12px">Target: 85% (${QUIZ_PASS}/${qs.length})</div>
+    <p class="q-text">${cur.q}</p><div class="opt-list">`;
+    cur.opts.forEach((o,i)=>{
+      let cls="opt-btn";
+      if(state.quizSel!==null){if(i===cur.ans)cls+=" correct";else if(i===state.quizSel)cls+=" wrong"}
+      h+=`<button class="${cls}" onclick="quizPick(${i})">${o}</button>`;
+    });
+    h+=`</div>`;
+    if(state.quizFeedback){
+      const wrong=state.quizIdx+1-state.quizScore;
+      const maxWrong=qs.length-QUIZ_PASS;
+      const canStillPass=wrong<=maxWrong;
+      h+=`<div class="q-feedback" style="color:${state.quizFeedback.startsWith("✅")?"var(--green)":"var(--red)"}">${state.quizFeedback}</div>`;
+      if(!canStillPass && !state.quizDone){
+        h+=`<div style="margin-top:10px;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;font-size:.82rem;color:var(--red);font-weight:700;text-align:center">
+          ⚠️ You've missed ${wrong} — max allowed is ${maxWrong}. You can finish for practice or try again!
+          <button class="btn-sec" style="margin-top:8px;font-size:.78rem" onclick="closeQuiz()">Retry Later</button>
+        </div>`;
+      }
+    }
+  } else {
+    const passed=state.quizScore>=QUIZ_PASS;
+    h+=`<div class="quiz-result"><span class="quiz-result-emoji">${passed?"🎉":"😅"}</span>
+      <p style="font-size:1.1rem;font-weight:700">You got ${state.quizScore} out of ${qs.length} — ${Math.round(state.quizScore/qs.length*100)}%</p>`;
+    if(passed){
+      h+=`<p style="color:var(--green)">You hit the 85% target — Level ${state.quizLevel} unlocked!</p>
+        <button class="btn" style="background:${lv.color}" onclick="passQuiz()">Continue →</button>`;
+    } else {
+      h+=`<p style="color:var(--red)">You need at least 85% (${QUIZ_PASS}/${qs.length} correct) to unlock. Review the concepts and try again!</p>
+        <button class="btn-sec" onclick="closeQuiz()">Back</button>`;
+    }
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
+  mr.innerHTML=h;
+}
+
+function renderLabelPrompt(mr){
+  const isLv4=state.level>=4;
+  let h=`<div class="overlay"><div class="modal label-modal">
+    <h3>◇ Decision Arrow Label</h3>
+    <p style="font-size:.9rem;color:var(--text2)">Which path does this arrow take?</p>
+    <div class="label-btns">
+      <button class="btn" style="background:var(--green);padding:12px 28px;font-size:1rem" onclick="addLabel('Yes')">✅ Yes</button>
+      <button class="btn" style="background:var(--red);padding:12px 28px;font-size:1rem" onclick="addLabel('No')">❌ No</button>
+      ${isLv4?`<button class="btn" style="background:var(--purple);padding:12px 20px;font-size:.88rem" onclick="customLabel()">✏️ Custom</button>`:""}
+    </div>
+    <button class="btn-sec" style="margin-top:14px" onclick="cancelLabel()">Cancel</button>
+  </div></div>`;
+  mr.innerHTML=h;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════ */
+function goLevels(){state.screen="levels";render()}
+function goActivities(lv){state.level=lv;state.screen="activities";render()}
+function goLearn(id){
+  const a=(ACTIVITIES[state.level]||[]).find(x=>x.id===id);
+  state.activity=a; state.guess=""; state.countResult=null; state.screen="learn"; render();
+}
+function goBuild(){
+  const a=state.activity;
+  state.placed=[]; state.conns=[]; state.connecting=null; state.validated=null; state.showHint=false;
+  state.bank=shuffle(a.nodes.map(n=>({...n})));
+  state.screen="build"; render();
+}
+function resetAll(){localStorage.removeItem("fq_progress");state.progress=loadProgress();goLevels()}
+
+/* ═══════════════════════════════════════════
+   QUIZ
+   ═══════════════════════════════════════════ */
+function startQuiz(lv){
+  state.quizLevel=lv;state.quizIdx=0;state.quizScore=0;state.quizSel=null;state.quizDone=false;state.quizFeedback=null;
+  renderModal();
+}
+function closeQuiz(){state.quizLevel=null;renderModal()}
+function quizPick(i){
+  if(state.quizSel!==null) return;
+  const qs=QUIZZES[state.quizLevel]; const cur=qs[state.quizIdx];
+  state.quizSel=i;
+  const correct=i===cur.ans;
+  state.quizFeedback=correct?"✅ Correct!":"❌ Answer: "+cur.opts[cur.ans];
+  if(correct) state.quizScore++;
+  renderModal();
+  setTimeout(()=>{
+    if(state.quizIdx+1<qs.length){state.quizIdx++;state.quizSel=null;state.quizFeedback=null;renderModal()}
+    else{state.quizDone=true;renderModal()}
+  },1400);
+}
+function passQuiz(){
+  state.progress.unlocked=Math.max(state.progress.unlocked,state.quizLevel);
+  saveProgress(state.progress); state.quizLevel=null; render();
+}
+
+/* ═══════════════════════════════════════════
+   BUILDER — Drag & Drop
+   ═══════════════════════════════════════════ */
+function startDragBank(e, id){
+  e.preventDefault();
+  const item=state.bank.find(n=>n.id===id);
+  if(!item) return;
+  state.dragging=item;
+  const p=e.touches?e.touches[0]:e;
+  state.dragPos={x:p.clientX,y:p.clientY};
+  const ghost=$("drag-ghost");
+  ghost.textContent=item.label;
+  ghost.className="drag-ghost";
+  ghost.style.borderRadius=item.type==="decision"?"4px":"12px";
+  ghost.style.left=(p.clientX-80)+"px";
+  ghost.style.top=(p.clientY-22)+"px";
+}
+
+function startMoveNode(e, id){
+  e.preventDefault(); e.stopPropagation();
+  const svg=$("cvs"); if(!svg) return;
+  const node=state.placed.find(n=>n.id===id); if(!node) return;
+  const p=e.touches?e.touches[0]:e;
+  const r=svg.getBoundingClientRect();
+  state.moving=id;
+  state.moveOff={x:p.clientX-r.left-node.x, y:p.clientY-r.top-node.y};
+}
+
+document.addEventListener("mousemove",onPointerMove);
+document.addEventListener("touchmove",onPointerMove,{passive:false});
+document.addEventListener("mouseup",onPointerUp);
+document.addEventListener("touchend",onPointerUp);
+
+function onPointerMove(e){
+  const p=e.touches?e.touches[0]:e;
+  if(state.dragging){
+    const ghost=$("drag-ghost");
+    ghost.style.left=(p.clientX-80)+"px";
+    ghost.style.top=(p.clientY-22)+"px";
+  }
+  if(state.moving){
+    const svg=$("cvs"); if(!svg) return;
+    const r=svg.getBoundingClientRect();
+    const node=state.placed.find(n=>n.id===state.moving);
+    if(node){
+      node.x=Math.max(0,Math.min(p.clientX-r.left-state.moveOff.x, CW-NW));
+      node.y=Math.max(0,Math.min(p.clientY-r.top-state.moveOff.y, CH-NH));
+      drawSVG();
+    }
+  }
+}
+
+function onPointerUp(e){
+  if(state.dragging){
+    const ghost=$("drag-ghost"); ghost.classList.add("hidden");
+    const svg=$("cvs");
+    if(svg){
+      const p=e.changedTouches?e.changedTouches[0]:e;
+      const r=svg.getBoundingClientRect();
+      const x=p.clientX-r.left-NW/2, y=p.clientY-r.top-NH/2;
+      if(x>-NW && x<CW && y>-NH && y<CH){
+        state.placed.push({...state.dragging, x:Math.max(0,Math.min(x,CW-NW)), y:Math.max(0,Math.min(y,CH-NH))});
+        state.bank=state.bank.filter(n=>n.id!==state.dragging.id);
+        state.validated=null;
+        renderBuilder();
+      }
+    }
+    state.dragging=null;
+  }
+  if(state.moving){state.moving=null}
+}
+
+function clickNode(id){
+  if(!state.connecting){state.connecting=id;drawSVG();return}
+  if(state.connecting===id){state.connecting=null;drawSVG();return}
+  const fromNode=state.placed.find(n=>n.id===state.connecting);
+  if(fromNode && fromNode.type==="decision"){
+    state.labelPrompt={from:state.connecting, to:id};
+    state.connecting=null; drawSVG(); renderModal(); return;
+  }
+  const exists=state.conns.some(c=>c.from===state.connecting && c.to===id);
+  if(!exists){state.conns.push({from:state.connecting,to:id});state.validated=null}
+  state.connecting=null; drawSVG(); updateValFb();
+}
+
+function removeNode(id){
+  const node=state.placed.find(n=>n.id===id);
+  if(!node) return;
+  state.placed=state.placed.filter(n=>n.id!==id);
+  state.bank.push({id:node.id,label:node.label,type:node.type});
+  state.conns=state.conns.filter(c=>c.from!==id && c.to!==id);
+  state.validated=null; state.connecting=null;
+  renderBuilder();
+}
+
+function removeConn(i){
+  state.conns.splice(i,1); state.validated=null; drawSVG(); updateValFb();
+}
+
+function addLabel(lbl){
+  if(state.labelPrompt){
+    state.conns.push({from:state.labelPrompt.from, to:state.labelPrompt.to, label:lbl});
+    state.validated=null;
+  }
+  state.labelPrompt=null; drawSVG(); renderModal(); updateValFb();
+}
+function customLabel(){
+  const lbl=prompt("Enter label:"); if(lbl) addLabel(lbl); else cancelLabel();
+}
+function cancelLabel(){state.labelPrompt=null;renderModal()}
+
+function toggleHint(){state.showHint=!state.showHint;renderBuilder()}
+
+function resetBuilder(){
+  state.placed=[]; state.conns=[]; state.connecting=null; state.validated=null;
+  state.bank=shuffle(state.activity.nodes.map(n=>({...n})));
+  renderBuilder();
+}
+
+function validateFlow(){
+  const a=state.activity;
+  if(state.placed.length!==a.nodes.length){
+    state.validated={ok:false,msg:`Place all ${a.nodes.length} blocks first!`};updateValFb();return;
+  }
+  const expected=a.edges.map(e=>`${e.from}->${e.to}${e.label?":"+e.label:""}`).sort();
+  const actual=state.conns.map(c=>`${c.from}->${c.to}${c.label?":"+c.label:""}`).sort();
+  if(expected.length!==actual.length||!expected.every((v,i)=>v===actual[i])){
+    const missing=expected.filter(e=>!actual.includes(e)).length;
+    const extra=actual.filter(e=>!expected.includes(e)).length;
+    let msg="Check your connections!";
+    if(missing>0) msg=`Missing ${missing} connection(s).`;
+    if(extra>0) msg+=` ${extra} extra connection(s).`;
+    const hasD=a.nodes.some(n=>n.type==="decision");
+    if(hasD) msg+=" Check Yes/No labels on decision arrows!";
+    state.validated={ok:false,msg};updateValFb();return;
+  }
+  state.validated={ok:true,msg:"🏆 Perfect flowchart! You nailed it!"};updateValFb();
+}
+
+function completeActivity(){
+  state.progress.completed.add(state.activity.id);
+  for(let lv=0;lv<LEVELS.length-1;lv++){
+    const done=countDone(lv);
+    if(done>=LEVELS[lv].need && state.progress.unlocked<=lv) state.progress.unlocked=lv+1;
+  }
+  saveProgress(state.progress);
+  goActivities(state.level);
+}
+
+/* ═══════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════ */
+render();
+</script>
+</body>
+</html>

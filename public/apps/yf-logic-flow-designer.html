@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logic Flow Designer — Young Foundry</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--navy:#1B2A4A;--navy-l:#263B66;--navy-m:#1F3259;--navy-d:#111D35;--navy-dd:#0B1425;
+--gold:#E8A838;--gold-l:#F5C76B;--gold-gl:rgba(232,168,56,0.25);
+--white:#FFF;--off:#F0F2F7;
+--green:#4ADE80;--green-d:#22C55E;
+--blue:#60A5FA;--blue-d:#3B82F6;
+--pink:#F472B6;--red:#EF4444;--orange:#FB923C;
+--purple:#A78BFA;--teal:#2DD4BF;--cyan:#22D3EE;
+--ff:'Fredoka',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+body{font-family:var(--ff);background:var(--navy-dd);color:var(--white);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* === TOPBAR === */
+.topbar{display:flex;align-items:center;gap:10px;padding:6px 14px;background:var(--navy);border-bottom:2px solid rgba(232,168,56,0.12);flex-shrink:0;z-index:100}
+.brand{display:flex;align-items:center;gap:6px;padding:3px 12px;border:2px solid var(--gold);border-radius:30px}
+.brand svg{width:22px;height:22px}
+.brand span{font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)}
+.topbar h1{font-size:16px;font-weight:700;flex:1}
+.badge{background:var(--navy-d);padding:3px 10px;border-radius:16px;font-size:11px;color:#8899bb;font-weight:600;border:1px solid rgba(255,255,255,0.06)}
+.top-actions{display:flex;gap:5px}
+.btn{font-family:var(--ff);padding:7px 13px;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:4px}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#D4922E);color:var(--navy-d)}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--gold-gl)}
+.btn-out{background:transparent;border:2px solid rgba(255,255,255,0.12);color:var(--off)}
+.btn-out:hover{border-color:var(--gold);color:var(--gold)}
+.btn-green{background:linear-gradient(135deg,var(--green),var(--green-d));color:var(--navy-d)}
+.btn-green:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(74,222,128,0.3)}
+.btn-sm{padding:5px 9px;font-size:11px;border-radius:8px}
+
+/* === MAIN === */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* === TOOLBOX === */
+.toolbox{width:230px;flex-shrink:0;background:var(--navy);border-right:2px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;overflow:hidden}
+.tb-tabs{display:flex;border-bottom:2px solid rgba(255,255,255,0.05);flex-shrink:0}
+.tb-tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;font-weight:600;color:#667799;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s}
+.tb-tab:hover{color:var(--white)}
+.tb-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tb-panel{display:none;flex:1;overflow-y:auto;padding:10px}
+.tb-panel.active{display:block}
+.tb-head{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#556677;margin:10px 0 6px;font-weight:700}
+.tb-head:first-child{margin-top:0}
+
+.nt{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:10px;cursor:grab;margin-bottom:4px;border:2px solid transparent;transition:all 0.2s;font-size:12px;font-weight:600}
+.nt:hover{transform:translateX(3px)}
+.nt:active{cursor:grabbing}
+.nt .ni{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.nt .nd{font-size:10px;color:#8899bb;font-weight:500}
+
+/* Node type colors */
+.nt.start{background:rgba(74,222,128,0.08);border-color:rgba(74,222,128,0.15)}
+.nt.start .ni{background:rgba(74,222,128,0.2)}
+.nt.action{background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.15)}
+.nt.action .ni{background:rgba(96,165,250,0.2)}
+.nt.decision{background:rgba(232,168,56,0.08);border-color:rgba(232,168,56,0.15)}
+.nt.decision .ni{background:rgba(232,168,56,0.2)}
+.nt.loop{background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.15)}
+.nt.loop .ni{background:rgba(167,139,250,0.2)}
+.nt.variable{background:rgba(45,212,191,0.08);border-color:rgba(45,212,191,0.15)}
+.nt.variable .ni{background:rgba(45,212,191,0.2)}
+.nt.operator{background:rgba(251,146,60,0.08);border-color:rgba(251,146,60,0.15)}
+.nt.operator .ni{background:rgba(251,146,60,0.2)}
+.nt.list{background:rgba(34,211,238,0.08);border-color:rgba(34,211,238,0.15)}
+.nt.list .ni{background:rgba(34,211,238,0.2)}
+.nt.io{background:rgba(244,114,182,0.08);border-color:rgba(244,114,182,0.15)}
+.nt.io .ni{background:rgba(244,114,182,0.2)}
+.nt.end{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.15)}
+.nt.end .ni{background:rgba(239,68,68,0.2)}
+.nt.wait{background:rgba(253,224,71,0.08);border-color:rgba(253,224,71,0.15)}
+.nt.wait .ni{background:rgba(253,224,71,0.2)}
+.nt.function{background:rgba(192,132,252,0.08);border-color:rgba(192,132,252,0.15)}
+.nt.function .ni{background:rgba(192,132,252,0.2)}
+.nt.comment{background:rgba(148,163,184,0.08);border-color:rgba(148,163,184,0.15)}
+.nt.comment .ni{background:rgba(148,163,184,0.2)}
+.nt.random{background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.15)}
+.nt.random .ni{background:rgba(251,191,36,0.2)}
+
+/* Help panel */
+.help-box{padding:10px;background:rgba(232,168,56,0.05);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;font-size:11px;line-height:1.6;color:#99aabb;margin-top:8px}
+.help-box strong{color:var(--gold-l)}
+
+/* === CANVAS === */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--navy-dd)}
+.canvas-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:30px 30px}
+#canvas{position:absolute;inset:0;cursor:default}
+svg#svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+svg#svg path.cl{stroke-width:2.5;fill:none;stroke-linecap:round;pointer-events:stroke;cursor:pointer}
+svg#svg path.cl:hover{stroke-width:4;opacity:1}
+svg#svg .ca{opacity:0.8}
+svg#svg .clbl{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:600}
+svg#svg .ctemp{stroke:var(--gold);opacity:0.4;stroke-dasharray:8 4;stroke-width:2;fill:none}
+
+/* === FLOW NODES === */
+.fn{position:absolute;z-index:10;min-width:150px;max-width:240px;border-radius:14px;cursor:grab;user-select:none;transition:box-shadow 0.2s}
+.fn:hover{z-index:20}
+.fn.selected{box-shadow:0 0 0 3px var(--gold),0 6px 20px rgba(0,0,0,0.4);z-index:30}
+.fn.dragging{opacity:0.85;cursor:grabbing;z-index:50}
+
+.fh{padding:6px 10px;border-radius:14px 14px 0 0;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
+.fb{padding:8px 10px 10px;background:var(--navy);border-radius:0 0 14px 14px;border:2px solid rgba(255,255,255,0.06);border-top:none}
+.fb textarea,.fb input[type=text],.fb input[type=number],.fb select{width:100%;border:none;background:var(--navy-d);color:var(--white);font-family:var(--ff);font-size:12px;outline:none;border-radius:8px;padding:6px 8px;margin-top:4px;resize:none}
+.fb textarea{min-height:24px;line-height:1.3}
+.fb select{font-size:11px;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238899bb' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.fb label{font-size:10px;color:#8899bb;font-weight:600;display:block;margin-top:6px}
+.fb label:first-child{margin-top:0}
+.fb .field-row{display:flex;gap:4px;align-items:center}
+.fb .field-row select,.fb .field-row input{flex:1}
+.fb .mono{font-family:var(--fm);font-size:11px}
+.fb .chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;margin:2px}
+
+/* Node colors */
+.fn.start .fh{background:var(--green);color:var(--navy-d)}
+.fn.start .fb{border-color:rgba(74,222,128,0.2)}
+.fn.action .fh{background:var(--blue);color:var(--navy-d)}
+.fn.action .fb{border-color:rgba(96,165,250,0.2)}
+.fn.decision .fh{background:var(--gold);color:var(--navy-d)}
+.fn.decision .fb{border-color:rgba(232,168,56,0.2)}
+.fn.loop .fh{background:var(--purple);color:var(--navy-d)}
+.fn.loop .fb{border-color:rgba(167,139,250,0.2)}
+.fn.variable .fh{background:var(--teal);color:var(--navy-d)}
+.fn.variable .fb{border-color:rgba(45,212,191,0.2)}
+.fn.setvar .fh{background:var(--teal);color:var(--navy-d)}
+.fn.setvar .fb{border-color:rgba(45,212,191,0.2)}
+.fn.operator .fh{background:var(--orange);color:var(--navy-d)}
+.fn.operator .fb{border-color:rgba(251,146,60,0.2)}
+.fn.list .fh{background:var(--cyan);color:var(--navy-d)}
+.fn.list .fb{border-color:rgba(34,211,238,0.2)}
+.fn.input .fh,.fn.output .fh{background:var(--pink);color:var(--navy-d)}
+.fn.input .fb,.fn.output .fb{border-color:rgba(244,114,182,0.2)}
+.fn.end .fh{background:var(--red);color:var(--white)}
+.fn.end .fb{border-color:rgba(239,68,68,0.2)}
+.fn.wait .fh{background:#FBBF24;color:var(--navy-d)}
+.fn.wait .fb{border-color:rgba(251,191,36,0.2)}
+.fn.function .fh{background:#C084FC;color:var(--navy-d)}
+.fn.function .fb{border-color:rgba(192,132,252,0.2)}
+.fn.comment .fh{background:#94A3B8;color:var(--navy-d)}
+.fn.comment .fb{border-color:rgba(148,163,184,0.2);background:rgba(148,163,184,0.06)}
+.fn.random .fh{background:#FBBF24;color:var(--navy-d)}
+.fn.random .fb{border-color:rgba(251,191,36,0.2)}
+
+/* Ports */
+.port{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid var(--white);cursor:crosshair;z-index:15;transition:transform 0.2s,box-shadow 0.2s}
+.port:hover{transform:scale(1.4);box-shadow:0 0 8px var(--gold-gl)}
+.po{bottom:-6px;left:50%;margin-left:-6px;background:var(--gold)}
+.po-y{bottom:-6px;left:28%;margin-left:-6px;background:var(--green)}
+.po-n{bottom:-6px;left:72%;margin-left:-6px;background:var(--red)}
+.po-loop{bottom:-6px;left:80%;margin-left:-6px;background:var(--purple)}
+.pi{top:-6px;left:50%;margin-left:-6px;background:var(--blue)}
+
+.fn-del{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;border:2px solid var(--navy-d);font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:16;font-weight:700;line-height:1}
+.fn.selected .fn-del{display:flex}
+
+/* Canvas empty */
+.canvas-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#334455;pointer-events:none}
+.canvas-empty .ce-e{font-size:48px;margin-bottom:10px;display:block;opacity:0.5}
+.canvas-empty .ce-t{font-size:15px;font-weight:600}
+.canvas-empty .ce-s{font-size:12px;margin-top:5px;opacity:0.7}
+
+/* === VARIABLE TRACKER (RIGHT PANEL) === */
+.var-panel{width:220px;flex-shrink:0;background:var(--navy);border-left:2px solid rgba(255,255,255,0.05);padding:10px;overflow-y:auto;display:flex;flex-direction:column}
+.vp-head{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#556677;font-weight:700;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.var-item{padding:7px 9px;background:var(--navy-d);border-radius:8px;margin-bottom:4px;font-size:12px;border:1px solid rgba(255,255,255,0.04)}
+.var-item .vi-name{font-family:var(--fm);font-weight:600;color:var(--teal)}
+.var-item .vi-val{color:var(--gold-l);font-family:var(--fm);font-size:11px}
+.var-item .vi-type{font-size:9px;color:#667799;text-transform:uppercase;letter-spacing:0.5px}
+.list-item{border-color:rgba(34,211,238,0.15)}
+.list-item .vi-name{color:var(--cyan)}
+.vp-empty{color:#445566;font-size:12px;text-align:center;padding:20px 0}
+.scratch-map{margin-top:auto;padding:10px;background:rgba(232,168,56,0.05);border-radius:10px;border:1px solid rgba(232,168,56,0.1)}
+.scratch-map h4{font-size:11px;color:var(--gold);margin-bottom:6px}
+.sm-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:11px}
+.sm-row .sm-block{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;color:var(--navy-d)}
+.sm-row .sm-arrow{color:#556677}
+
+/* === PLAY OVERLAY === */
+.play-overlay{position:fixed;inset:0;z-index:500;background:rgba(11,20,37,0.96);display:none;flex-direction:column;align-items:center;justify-content:center;animation:fadeIn 0.4s}
+.play-overlay.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.play-mode-picker{text-align:center;padding:30px}
+.play-mode-picker h2{font-size:26px;margin-bottom:6px;color:var(--gold-l)}
+.play-mode-picker p{color:#8899bb;margin-bottom:22px;font-size:14px}
+.mode-cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.mode-card{width:200px;padding:20px 16px;background:var(--navy);border:2px solid rgba(255,255,255,0.06);border-radius:18px;cursor:pointer;text-align:center;transition:all 0.3s}
+.mode-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 6px 24px var(--gold-gl)}
+.mode-card .mc-e{font-size:36px;display:block;margin-bottom:8px}
+.mode-card .mc-t{font-size:14px;font-weight:700;margin-bottom:4px}
+.mode-card .mc-d{font-size:11px;color:#8899bb;line-height:1.4}
+
+.play-scene{width:92%;max-width:700px;text-align:center}
+.play-close{position:fixed!important;top:14px;right:18px;z-index:510}
+
+.play-step-card{background:var(--navy);border:2px solid rgba(232,168,56,0.15);border-radius:18px;padding:24px 20px;margin:16px auto;max-width:520px;box-shadow:0 8px 28px rgba(0,0,0,0.4);animation:cardPop 0.4s ease}
+@keyframes cardPop{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+.play-step-type{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:6px}
+.play-step-text{font-size:18px;font-weight:600;line-height:1.5;margin-bottom:14px}
+.play-var-state{text-align:left;background:var(--navy-d);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px}
+.play-var-state h4{font-size:10px;color:#667799;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.pv-row{display:flex;justify-content:space-between;padding:2px 0;font-family:var(--fm);font-size:11px}
+.pv-name{color:var(--teal)}.pv-val{color:var(--gold-l)}
+
+.play-choices{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pc{font-family:var(--ff);padding:10px 20px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
+.pc:hover{transform:scale(1.05)}
+.pc.yes{background:rgba(74,222,128,0.12);border-color:var(--green);color:var(--green)}
+.pc.no{background:rgba(239,68,68,0.12);border-color:var(--red);color:var(--red)}
+.pc.next{background:rgba(96,165,250,0.12);border-color:var(--blue);color:var(--blue)}
+.pc.warn{background:rgba(251,146,60,0.12);border-color:var(--orange);color:var(--orange)}
+
+.play-char{font-size:56px;animation:bounce 0.6s ease infinite alternate;display:inline-block}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.play-console{text-align:left;background:var(--navy-dd);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin:10px auto;max-width:520px;max-height:140px;overflow-y:auto;font-family:var(--fm);font-size:12px;line-height:1.6}
+.play-console .cout{color:var(--green)}.play-console .cin{color:var(--pink)}
+
+.play-progress{margin-top:12px;font-size:11px;color:#556677}
+.pp-bar{width:180px;height:5px;background:var(--navy-d);border-radius:3px;margin:4px auto 0;overflow:hidden}
+.pp-fill{height:100%;background:var(--gold);border-radius:3px;transition:width 0.4s}
+
+/* Story mode */
+.play-story{max-width:600px;margin:0 auto;max-height:70vh;overflow-y:auto;padding:10px;text-align:left}
+.se{margin-bottom:12px;animation:storyFade 0.4s}
+@keyframes storyFade{from{opacity:0;transform:translateY(8px)}}
+.se-step{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:3px}
+.se-text{font-size:14px;line-height:1.5;padding:10px 14px;background:var(--navy);border-radius:12px;border-left:4px solid var(--blue)}
+.se.decision .se-text{border-left-color:var(--gold)}
+.se.end .se-text{border-left-color:var(--red)}
+.se.start .se-text{border-left-color:var(--green)}
+.se.loop .se-text{border-left-color:var(--purple)}
+.se.variable .se-text,.se.setvar .se-text{border-left-color:var(--teal)}
+.se.operator .se-text{border-left-color:var(--orange)}
+.se.list .se-text{border-left-color:var(--cyan)}
+.se.input .se-text,.se.output .se-text{border-left-color:var(--pink)}
+.se.wait .se-text{border-left-color:#FBBF24}
+.se.function .se-text{border-left-color:#C084FC}
+.se.random .se-text{border-left-color:#FBBF24}
+.se.comment .se-text{border-left-color:#94A3B8;font-style:italic;opacity:0.7}
+.story-choices{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* Input dialog in play */
+.play-input-wrap{display:flex;gap:6px;margin-top:8px;justify-content:center}
+.play-input-wrap input{padding:8px 12px;border-radius:10px;border:2px solid var(--pink);background:var(--navy-d);color:var(--white);font-family:var(--ff);font-size:14px;width:180px;outline:none}
+.play-input-wrap input:focus{border-color:var(--gold);box-shadow:0 0 10px var(--gold-gl)}
+
+/* Toast */
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--navy);border:2px solid var(--gold);color:var(--white);padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:600;transition:transform 0.4s ease;box-shadow:0 6px 24px rgba(0,0,0,0.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:800px){.toolbox,.var-panel{display:none}.topbar h1{font-size:13px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" stroke="#E8A838" stroke-width="2.5"/><text x="20" y="26" text-anchor="middle" fill="#E8A838" font-family="Fredoka" font-weight="700" font-size="18">YF</text></svg><span>Young Foundry</span></div>
+  <h1>🧩 Logic Flow Designer</h1>
+  <span class="badge" id="bCount">0 blocks</span>
+  <div class="top-actions">
+    <button class="btn btn-out btn-sm" onclick="exportJSON()" title="Save your design">💾 Save</button>
+    <button class="btn btn-out btn-sm" onclick="importJSON()" title="Load a design">📂 Load</button>
+    <button class="btn btn-out btn-sm" onclick="clearAll()">🗑️ Clear</button>
+    <button class="btn btn-green" onclick="openPlay()">▶️ Run It!</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- TOOLBOX -->
+<div class="toolbox">
+  <div class="tb-tabs">
+    <div class="tb-tab active" data-panel="tp-flow" onclick="tbTab(this)">Flow</div>
+    <div class="tb-tab" data-panel="tp-data" onclick="tbTab(this)">Data</div>
+    <div class="tb-tab" data-panel="tp-io" onclick="tbTab(this)">I/O</div>
+    <div class="tb-tab" data-panel="tp-help" onclick="tbTab(this)">Help</div>
+  </div>
+
+  <!-- FLOW TAB -->
+  <div class="tb-panel active" id="tp-flow">
+    <div class="tb-head">🚦 Control</div>
+    <div class="nt start" draggable="true" data-type="start"><div class="ni">🟢</div><div><b>Start</b><div class="nd">Where it begins</div></div></div>
+    <div class="nt action" draggable="true" data-type="action"><div class="ni">⚡</div><div><b>Action / Step</b><div class="nd">Do something</div></div></div>
+    <div class="nt decision" draggable="true" data-type="decision"><div class="ni">❓</div><div><b>Decision (If)</b><div class="nd">Yes or No path</div></div></div>
+    <div class="nt end" draggable="true" data-type="end"><div class="ni">🏁</div><div><b>End / Stop</b><div class="nd">Story ends here</div></div></div>
+
+    <div class="tb-head">🔁 Loops</div>
+    <div class="nt loop" draggable="true" data-type="loop-repeat"><div class="ni">🔄</div><div><b>Repeat N Times</b><div class="nd">Do something X times</div></div></div>
+    <div class="nt loop" draggable="true" data-type="loop-while"><div class="ni">♾️</div><div><b>Repeat While</b><div class="nd">Keep going until…</div></div></div>
+    <div class="nt loop" draggable="true" data-type="loop-foreach"><div class="ni">📋</div><div><b>For Each in List</b><div class="nd">Loop through items</div></div></div>
+
+    <div class="tb-head">⏳ Timing</div>
+    <div class="nt wait" draggable="true" data-type="wait"><div class="ni">⏱️</div><div><b>Wait / Delay</b><div class="nd">Pause for seconds</div></div></div>
+
+    <div class="tb-head">📝 Notes</div>
+    <div class="nt comment" draggable="true" data-type="comment"><div class="ni">💬</div><div><b>Comment</b><div class="nd">Note to yourself</div></div></div>
+  </div>
+
+  <!-- DATA TAB -->
+  <div class="tb-panel" id="tp-data">
+    <div class="tb-head">📦 Variables</div>
+    <div class="nt variable" draggable="true" data-type="variable"><div class="ni">📦</div><div><b>Create Variable</b><div class="nd">Store a value</div></div></div>
+    <div class="nt variable" draggable="true" data-type="setvar"><div class="ni">✏️</div><div><b>Change Variable</b><div class="nd">Update a value</div></div></div>
+    <div class="nt variable" draggable="true" data-type="constant"><div class="ni">🔒</div><div><b>Constant</b><div class="nd">Value that never changes</div></div></div>
+
+    <div class="tb-head">🧮 Math & Operators</div>
+    <div class="nt operator" draggable="true" data-type="math"><div class="ni">➕</div><div><b>Math Operation</b><div class="nd">+ − × ÷ mod</div></div></div>
+    <div class="nt operator" draggable="true" data-type="compare"><div class="ni">⚖️</div><div><b>Compare</b><div class="nd">&gt; &lt; = ≠ ≥ ≤</div></div></div>
+    <div class="nt operator" draggable="true" data-type="logic"><div class="ni">🔗</div><div><b>Logic Gate</b><div class="nd">AND / OR / NOT</div></div></div>
+    <div class="nt random" draggable="true" data-type="random"><div class="ni">🎲</div><div><b>Random Number</b><div class="nd">Pick random 1 to N</div></div></div>
+
+    <div class="tb-head">📋 Lists</div>
+    <div class="nt list" draggable="true" data-type="list-create"><div class="ni">📋</div><div><b>Create List</b><div class="nd">Make a list of items</div></div></div>
+    <div class="nt list" draggable="true" data-type="list-action"><div class="ni">📌</div><div><b>List Action</b><div class="nd">Add / remove / get</div></div></div>
+
+    <div class="tb-head">🧱 Functions</div>
+    <div class="nt function" draggable="true" data-type="function"><div class="ni">🧱</div><div><b>Function / Block</b><div class="nd">Reusable chunk</div></div></div>
+  </div>
+
+  <!-- I/O TAB -->
+  <div class="tb-panel" id="tp-io">
+    <div class="tb-head">💬 Input / Output</div>
+    <div class="nt io" draggable="true" data-type="input"><div class="ni">🎤</div><div><b>Ask User (Input)</b><div class="nd">Get answer from user</div></div></div>
+    <div class="nt io" draggable="true" data-type="output"><div class="ni">💬</div><div><b>Say / Show (Output)</b><div class="nd">Display a message</div></div></div>
+    <div class="nt io" draggable="true" data-type="output-sprite"><div class="ni">🐱</div><div><b>Sprite Says</b><div class="nd">Character speaks</div></div></div>
+    <div class="nt io" draggable="true" data-type="sound"><div class="ni">🔊</div><div><b>Play Sound</b><div class="nd">Sound effect</div></div></div>
+    <div class="nt io" draggable="true" data-type="backdrop"><div class="ni">🖼️</div><div><b>Change Scene</b><div class="nd">Switch backdrop</div></div></div>
+  </div>
+
+  <!-- HELP TAB -->
+  <div class="tb-panel" id="tp-help">
+    <div class="help-box">
+      <strong>How to Build:</strong><br>
+      1️⃣ Drag blocks onto the canvas<br>
+      2️⃣ Fill in the details on each block<br>
+      3️⃣ Connect blocks by dragging from <strong style="color:var(--gold)">●</strong> to <strong style="color:var(--blue)">●</strong><br>
+      4️⃣ Decision blocks have <strong style="color:var(--green)">Yes</strong> / <strong style="color:var(--red)">No</strong> paths<br>
+      5️⃣ Hit <strong style="color:var(--green)">▶️ Run It!</strong> to simulate!
+    </div>
+    <div class="help-box" style="margin-top:8px">
+      <strong>Block Types:</strong><br>
+      🟢 <strong>Start/End</strong> — Every flow needs these<br>
+      ⚡ <strong>Action</strong> — A step that does something<br>
+      ❓ <strong>Decision</strong> — If-then branching<br>
+      🔄 <strong>Loop</strong> — Repeat things<br>
+      📦 <strong>Variable</strong> — Remember values<br>
+      📋 <strong>List</strong> — Group of items<br>
+      ➕ <strong>Operator</strong> — Math & logic<br>
+      🎤 <strong>Input</strong> — Ask the user<br>
+      💬 <strong>Output</strong> — Show messages
+    </div>
+    <div class="help-box" style="margin-top:8px">
+      <strong>Tips:</strong><br>
+      • Click a connection line to delete it<br>
+      • Select a block and press Delete to remove<br>
+      • Use 💾 Save to keep your design<br>
+      • Variables track in the right panel<br>
+      • Plan your logic here, then code in Scratch!
+    </div>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap" id="cWrap">
+  <div class="canvas-grid"></div>
+  <svg id="svg"></svg>
+  <div id="canvas">
+    <div class="canvas-empty" id="empty">
+      <span class="ce-e">🧩</span>
+      <div class="ce-t">Drag blocks here to design your logic!</div>
+      <div class="ce-s">Start with a 🟢 Start block</div>
+    </div>
+  </div>
+</div>
+
+<!-- VARIABLE TRACKER -->
+<div class="var-panel" id="varPanel">
+  <div class="vp-head">📦 Variables <span class="badge" id="vCount">0</span></div>
+  <div id="varList"><div class="vp-empty">No variables yet.<br>Drag a 📦 Create Variable block!</div></div>
+
+  <div style="margin-top:12px"><div class="vp-head">📋 Lists <span class="badge" id="lCount">0</span></div></div>
+  <div id="listList"><div class="vp-empty">No lists yet.</div></div>
+
+  <div class="scratch-map">
+    <h4>🐱 Scratch Block Map</h4>
+    <div class="sm-row"><span class="sm-block" style="background:var(--green)">Start</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">🟢 When flag clicked</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--gold)">Decision</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">🔶 If…then…else</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--purple)">Loop</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">🔁 Repeat / Forever</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--teal)">Variable</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">📦 Set my variable</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--orange)">Math</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">🟢 Operators</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--cyan)">List</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">📋 Add to list</span></div>
+    <div class="sm-row"><span class="sm-block" style="background:var(--pink)">I/O</span><span class="sm-arrow">→</span><span style="font-size:11px;color:#aab">💬 Say / Ask</span></div>
+  </div>
+</div>
+</div>
+
+<!-- PLAY OVERLAY -->
+<div class="play-overlay" id="playOverlay">
+  <div class="play-mode-picker" id="modePicker">
+    <h2>▶️ Run Your Logic Flow</h2>
+    <p>Choose how to test your flowchart</p>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="startPlay('anim')">
+        <span class="mc-e">🧑‍🚀</span>
+        <div class="mc-t">Step-by-Step</div>
+        <div class="mc-d">Walk through each block with a character, see variables change live!</div>
+      </div>
+      <div class="mode-card" onclick="startPlay('story')">
+        <span class="mc-e">📖</span>
+        <div class="mc-t">Story Mode</div>
+        <div class="mc-d">Read your flow as a scrolling story with live variable tracking!</div>
+      </div>
+    </div>
+    <button class="btn btn-out" style="margin-top:20px" onclick="closePlay()">← Back to Builder</button>
+  </div>
+  <div class="play-scene" id="playScene" style="display:none"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileLoad" accept=".json" style="display:none" onchange="doImport(event)">
+
+<script>
+// ============ STATE ============
+let N=[], C=[], nid=1, selId=null, dragType=null, connFrom=null;
+const canvas=document.getElementById('canvas'), cWrap=document.getElementById('cWrap'), svg=document.getElementById('svg'), empty=document.getElementById('empty');
+
+// ============ HELPERS ============
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function updCount(){document.getElementById('bCount').textContent=N.length+' block'+(N.length!==1?'s':'');empty.style.display=N.length?'none':'block';updVarPanel()}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ============ TOOLBOX TABS ============
+function tbTab(el){document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.tb-panel').forEach(p=>p.classList.remove('active'));document.getElementById(el.dataset.panel).classList.add('active')}
+
+// ============ DRAG FROM TOOLBOX ============
+document.querySelectorAll('.nt[draggable]').forEach(el=>{el.addEventListener('dragstart',e=>{dragType=el.dataset.type;e.dataTransfer.effectAllowed='copy'})});
+cWrap.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
+cWrap.addEventListener('drop',e=>{e.preventDefault();if(!dragType)return;const r=cWrap.getBoundingClientRect();addNode(dragType,e.clientX-r.left-75,e.clientY-r.top-25);dragType=null});
+
+// ============ NODE DEFINITIONS ============
+function nodeDefaults(type){
+  const d={id:'n'+(nid++),type,x:0,y:0};
+  switch(type){
+    case'start':d.text='Start';break;
+    case'action':d.text='Do something';break;
+    case'decision':d.text='Is score > 10?';d.condition='score > 10';break;
+    case'end':d.text='The End!';break;
+    case'loop-repeat':d.text='Repeat 10 times';d.times=10;d.counter='i';break;
+    case'loop-while':d.text='Keep going while…';d.condition='lives > 0';break;
+    case'loop-foreach':d.text='For each item in list';d.listName='myList';d.itemVar='item';break;
+    case'wait':d.text='Wait 1 second';d.seconds=1;break;
+    case'comment':d.text='My note here';break;
+    case'variable':d.varName='score';d.varValue='0';d.varType='number';break;
+    case'constant':d.varName='MAX_LIVES';d.varValue='3';d.varType='number';break;
+    case'setvar':d.varName='score';d.op='set';d.value='score + 1';break;
+    case'math':d.result='result';d.a='score';d.operator='+';d.b='10';break;
+    case'compare':d.a='score';d.operator='>';d.b='100';break;
+    case'logic':d.a='hasKey';d.operator='AND';d.b='doorOpen';break;
+    case'random':d.varName='roll';d.min=1;d.max=6;break;
+    case'list-create':d.listName='fruits';d.items='apple, banana, cherry';break;
+    case'list-action':d.listName='fruits';d.action='add';d.value='mango';break;
+    case'input':d.prompt='What is your name?';d.saveAs='playerName';break;
+    case'output':d.message='Hello!';break;
+    case'output-sprite':d.sprite='Cat';d.message='Welcome!';break;
+    case'sound':d.sound='pop';break;
+    case'backdrop':d.scene='Forest';break;
+    case'function':d.funcName='greet';d.text='Say hello to player';break;
+  }
+  return d;
+}
+
+// ============ NODE HTML ============
+function nodeHTML(n){
+  const T={start:'🟢 START',action:'⚡ ACTION',decision:'❓ IF / DECISION',end:'🏁 END','loop-repeat':'🔄 REPEAT','loop-while':'♾️ WHILE LOOP','loop-foreach':'📋 FOR EACH',wait:'⏱️ WAIT',comment:'💬 COMMENT',variable:'📦 CREATE VAR',constant:'🔒 CONSTANT',setvar:'✏️ CHANGE VAR',math:'➕ MATH',compare:'⚖️ COMPARE',logic:'🔗 LOGIC',random:'🎲 RANDOM','list-create':'📋 CREATE LIST','list-action':'📌 LIST ACTION',input:'🎤 INPUT',output:'💬 OUTPUT','output-sprite':'🐱 SPRITE SAYS',sound:'🔊 SOUND',backdrop:'🖼️ SCENE',function:'🧱 FUNCTION'};
+  const cls=n.type.replace(/-.+/,'');
+  let body='';
+
+  switch(n.type){
+    case'start':body=`<textarea placeholder="Description…" onchange="U('${n.id}','text',this.value)">${esc(n.text)}</textarea>`;break;
+    case'action':body=`<textarea placeholder="What happens?" onchange="U('${n.id}','text',this.value)">${esc(n.text)}</textarea>`;break;
+    case'decision':body=`<label>Condition</label><input type="text" class="mono" placeholder="score > 10" value="${esc(n.condition||'')}" onchange="U('${n.id}','condition',this.value)"><label>Description</label><textarea onchange="U('${n.id}','text',this.value)">${esc(n.text)}</textarea>`;break;
+    case'end':body=`<textarea placeholder="How it ends…" onchange="U('${n.id}','text',this.value)">${esc(n.text)}</textarea>`;break;
+    case'loop-repeat':body=`<label>Repeat how many times?</label><input type="number" min="1" max="1000" value="${n.times}" onchange="U('${n.id}','times',+this.value)"><label>Counter variable name</label><input type="text" class="mono" value="${esc(n.counter)}" onchange="U('${n.id}','counter',this.value)">`;break;
+    case'loop-while':body=`<label>Keep repeating while…</label><input type="text" class="mono" placeholder="lives > 0" value="${esc(n.condition||'')}" onchange="U('${n.id}','condition',this.value)">`;break;
+    case'loop-foreach':body=`<label>List name</label><input type="text" class="mono" value="${esc(n.listName)}" onchange="U('${n.id}','listName',this.value)"><label>Item variable</label><input type="text" class="mono" value="${esc(n.itemVar)}" onchange="U('${n.id}','itemVar',this.value)">`;break;
+    case'wait':body=`<label>Wait (seconds)</label><input type="number" min="0.1" max="60" step="0.1" value="${n.seconds}" onchange="U('${n.id}','seconds',+this.value)">`;break;
+    case'comment':body=`<textarea placeholder="Notes…" onchange="U('${n.id}','text',this.value)" style="font-style:italic">${esc(n.text)}</textarea>`;break;
+    case'variable':body=`<label>Variable name</label><input type="text" class="mono" value="${esc(n.varName)}" onchange="U('${n.id}','varName',this.value)"><label>Starting value</label><input type="text" class="mono" value="${esc(n.varValue)}" onchange="U('${n.id}','varValue',this.value)"><label>Type</label><select onchange="U('${n.id}','varType',this.value)"><option ${n.varType==='number'?'selected':''}>number</option><option ${n.varType==='text'?'selected':''}>text</option><option ${n.varType==='boolean'?'selected':''}>boolean</option></select>`;break;
+    case'constant':body=`<label>Constant name</label><input type="text" class="mono" value="${esc(n.varName)}" onchange="U('${n.id}','varName',this.value)" style="text-transform:uppercase"><label>Value (never changes)</label><input type="text" class="mono" value="${esc(n.varValue)}" onchange="U('${n.id}','varValue',this.value)"><label>Type</label><select onchange="U('${n.id}','varType',this.value)"><option ${n.varType==='number'?'selected':''}>number</option><option ${n.varType==='text'?'selected':''}>text</option><option ${n.varType==='boolean'?'selected':''}>boolean</option></select>`;break;
+    case'setvar':body=`<label>Variable name</label><input type="text" class="mono" value="${esc(n.varName)}" onchange="U('${n.id}','varName',this.value)"><label>Action</label><select onchange="U('${n.id}','op',this.value)"><option value="set" ${n.op==='set'?'selected':''}>Set to</option><option value="add" ${n.op==='add'?'selected':''}>Add</option><option value="sub" ${n.op==='sub'?'selected':''}>Subtract</option><option value="mul" ${n.op==='mul'?'selected':''}>Multiply by</option><option value="div" ${n.op==='div'?'selected':''}>Divide by</option></select><label>Value / Expression</label><input type="text" class="mono" value="${esc(n.value)}" onchange="U('${n.id}','value',this.value)">`;break;
+    case'math':body=`<label>Store result in</label><input type="text" class="mono" value="${esc(n.result)}" onchange="U('${n.id}','result',this.value)"><div class="field-row"><input type="text" class="mono" value="${esc(n.a)}" onchange="U('${n.id}','a',this.value)" placeholder="A"><select onchange="U('${n.id}','operator',this.value)"><option ${n.operator==='+'?'selected':''}>+</option><option ${n.operator==='-'?'selected':''}>−</option><option ${n.operator==='*'?'selected':''}>×</option><option ${n.operator==='/'?'selected':''}>÷</option><option ${n.operator==='%'?'selected':''}>mod</option></select><input type="text" class="mono" value="${esc(n.b)}" onchange="U('${n.id}','b',this.value)" placeholder="B"></div>`;break;
+    case'compare':body=`<label>Compare</label><div class="field-row"><input type="text" class="mono" value="${esc(n.a)}" onchange="U('${n.id}','a',this.value)"><select onchange="U('${n.id}','operator',this.value)"><option ${n.operator==='>'?'selected':''}>&gt;</option><option ${n.operator==='<'?'selected':''}>&lt;</option><option ${n.operator==='='?'selected':''}>=</option><option ${n.operator==='≠'?'selected':''}>≠</option><option ${n.operator==='≥'?'selected':''}>≥</option><option ${n.operator==='≤'?'selected':''}>≤</option></select><input type="text" class="mono" value="${esc(n.b)}" onchange="U('${n.id}','b',this.value)"></div>`;break;
+    case'logic':body=`<label>Logic Gate</label><div class="field-row"><input type="text" class="mono" value="${esc(n.a)}" onchange="U('${n.id}','a',this.value)"><select onchange="U('${n.id}','operator',this.value)"><option ${n.operator==='AND'?'selected':''}>AND</option><option ${n.operator==='OR'?'selected':''}>OR</option><option ${n.operator==='NOT'?'selected':''}>NOT</option></select><input type="text" class="mono" value="${esc(n.b)}" onchange="U('${n.id}','b',this.value)"></div>`;break;
+    case'random':body=`<label>Save random number in</label><input type="text" class="mono" value="${esc(n.varName)}" onchange="U('${n.id}','varName',this.value)"><div class="field-row"><label style="margin:0">Min</label><input type="number" value="${n.min}" onchange="U('${n.id}','min',+this.value)"><label style="margin:0">Max</label><input type="number" value="${n.max}" onchange="U('${n.id}','max',+this.value)"></div>`;break;
+    case'list-create':body=`<label>List name</label><input type="text" class="mono" value="${esc(n.listName)}" onchange="U('${n.id}','listName',this.value)"><label>Items (comma separated)</label><input type="text" value="${esc(n.items)}" onchange="U('${n.id}','items',this.value)">`;break;
+    case'list-action':body=`<label>List name</label><input type="text" class="mono" value="${esc(n.listName)}" onchange="U('${n.id}','listName',this.value)"><label>Action</label><select onchange="U('${n.id}','action',this.value)"><option ${n.action==='add'?'selected':''}>Add item</option><option ${n.action==='remove'?'selected':''}>Remove item</option><option ${n.action==='get'?'selected':''}>Get item #</option><option ${n.action==='length'?'selected':''}>Get length</option><option ${n.action==='contains'?'selected':''}>Contains?</option></select><label>Value / Index</label><input type="text" class="mono" value="${esc(n.value||'')}" onchange="U('${n.id}','value',this.value)">`;break;
+    case'input':body=`<label>Ask the user</label><input type="text" value="${esc(n.prompt)}" onchange="U('${n.id}','prompt',this.value)"><label>Save answer in variable</label><input type="text" class="mono" value="${esc(n.saveAs)}" onchange="U('${n.id}','saveAs',this.value)">`;break;
+    case'output':body=`<label>Show message</label><textarea onchange="U('${n.id}','message',this.value)">${esc(n.message)}</textarea>`;break;
+    case'output-sprite':body=`<label>Sprite name</label><input type="text" value="${esc(n.sprite)}" onchange="U('${n.id}','sprite',this.value)"><label>Says…</label><textarea onchange="U('${n.id}','message',this.value)">${esc(n.message)}</textarea>`;break;
+    case'sound':body=`<label>Sound name</label><input type="text" value="${esc(n.sound)}" onchange="U('${n.id}','sound',this.value)">`;break;
+    case'backdrop':body=`<label>Scene / Backdrop name</label><input type="text" value="${esc(n.scene)}" onchange="U('${n.id}','scene',this.value)">`;break;
+    case'function':body=`<label>Function name</label><input type="text" class="mono" value="${esc(n.funcName)}" onchange="U('${n.id}','funcName',this.value)"><label>What it does</label><textarea onchange="U('${n.id}','text',this.value)">${esc(n.text)}</textarea>`;break;
+  }
+
+  // Ports
+  const isLoop=n.type.startsWith('loop');
+  const hasOut=!['end'].includes(n.type);
+  const hasIn=!['start'].includes(n.type);
+  const isDec=n.type==='decision';
+  let ports='';
+  if(isDec) ports=`<div class="port po-y" data-port="yes" title="Yes"></div><div class="port po-n" data-port="no" title="No"></div>`;
+  else if(isLoop) ports=`<div class="port po" data-port="out" title="Inside loop → next"></div><div class="port po-loop" data-port="loop" title="Loop body"></div>`;
+  else if(hasOut) ports=`<div class="port po" data-port="out" title="Next"></div>`;
+  if(hasIn) ports+=`<div class="port pi" data-port="in" title="Connect here"></div>`;
+
+  return `<div class="fh">${T[n.type]||n.type}</div><div class="fb">${body}</div><div class="fn-del" onclick="delNode('${n.id}')">✕</div>${ports}`;
+}
+
+function U(id,key,val){const n=N.find(x=>x.id===id);if(n){n[key]=val;updVarPanel()}}
+
+// ============ ADD NODE ============
+function addNode(type,x,y){
+  const n=nodeDefaults(type);
+  n.x=Math.max(0,x);n.y=Math.max(0,y);
+  N.push(n);
+  renderNode(n);
+  updCount();
+  return n;
+}
+
+function renderNode(n){
+  const el=document.createElement('div');
+  const cls=n.type.startsWith('loop')?'loop':n.type.replace(/-.*$/,'').replace('output-sprite','output').replace('list-create','list').replace('list-action','list');
+  el.className='fn '+cls;
+  el.id=n.id;
+  el.style.left=n.x+'px';el.style.top=n.y+'px';
+  el.innerHTML=nodeHTML(n);
+
+  // Drag
+  let dr=false,sx,sy,ox,oy;
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('port')||['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName)||e.target.classList.contains('fn-del'))return;
+    dr=true;el.classList.add('dragging');sx=e.clientX;sy=e.clientY;ox=n.x;oy=n.y;selNode(n.id);e.preventDefault();
+  });
+  const mm=e=>{if(!dr)return;n.x=Math.max(0,ox+e.clientX-sx);n.y=Math.max(0,oy+e.clientY-sy);el.style.left=n.x+'px';el.style.top=n.y+'px';drawC()};
+  const mu=()=>{if(dr){dr=false;el.classList.remove('dragging')}};
+  document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);
+
+  // Ports
+  el.querySelectorAll('.port').forEach(p=>{
+    p.addEventListener('mousedown',e=>{
+      e.stopPropagation();
+      if(p.dataset.port==='in')return;
+      connFrom={nodeId:n.id,port:p.dataset.port};
+      document.addEventListener('mousemove',onCD);document.addEventListener('mouseup',onCU);
+    });
+    p.addEventListener('mouseup',e=>{
+      e.stopPropagation();
+      if(connFrom&&p.dataset.port==='in'&&connFrom.nodeId!==n.id){
+        const ex=C.find(c=>c.from===connFrom.nodeId&&c.port===connFrom.port);
+        if(ex)ex.to=n.id;
+        else{
+          let lbl='';
+          if(connFrom.port==='yes')lbl='Yes';
+          if(connFrom.port==='no')lbl='No';
+          if(connFrom.port==='loop')lbl='Loop body';
+          C.push({from:connFrom.nodeId,to:n.id,port:connFrom.port,label:lbl});
+        }
+        connFrom=null;rmTemp();drawC();toast('Connected! ✅');
+      }
+    });
+  });
+  el.addEventListener('click',e=>{if(!['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName))selNode(n.id)});
+  canvas.appendChild(el);
+}
+
+function onCD(e){
+  if(!connFrom)return;
+  const fEl=document.getElementById(connFrom.nodeId);
+  const pEl=fEl.querySelector(`[data-port="${connFrom.port}"]`);
+  const wr=cWrap.getBoundingClientRect(),pr=pEl.getBoundingClientRect();
+  drawTemp(pr.left+6-wr.left,pr.top+6-wr.top,e.clientX-wr.left,e.clientY-wr.top);
+}
+function onCU(){connFrom=null;rmTemp();document.removeEventListener('mousemove',onCD);document.removeEventListener('mouseup',onCU)}
+function drawTemp(x1,y1,x2,y2){rmTemp();const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',`M${x1},${y1} C${x1},${y1+50} ${x2},${y2-50} ${x2},${y2}`);p.classList.add('ctemp');p.id='tl';svg.appendChild(p)}
+function rmTemp(){const t=document.getElementById('tl');if(t)t.remove()}
+
+// ============ DRAW CONNECTIONS ============
+function drawC(){
+  svg.innerHTML='';
+  const wr=cWrap.getBoundingClientRect();
+  C.forEach(c=>{
+    const fEl=document.getElementById(c.from),tEl=document.getElementById(c.to);
+    if(!fEl||!tEl)return;
+    const ps=c.port==='yes'?'.po-y':c.port==='no'?'.po-n':c.port==='loop'?'.po-loop':'.po';
+    const fp=fEl.querySelector(ps),tp=tEl.querySelector('.pi');
+    if(!fp||!tp)return;
+    const fr=fp.getBoundingClientRect(),tr=tp.getBoundingClientRect();
+    const x1=fr.left+6-wr.left,y1=fr.top+6-wr.top,x2=tr.left+6-wr.left,y2=tr.top+6-wr.top;
+    const dy=Math.abs(y2-y1);
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${x1},${y1} C${x1},${y1+dy*0.4+25} ${x2},${y2-dy*0.4-25} ${x2},${y2}`);
+    p.classList.add('cl');
+    const col=c.port==='yes'?'var(--green)':c.port==='no'?'var(--red)':c.port==='loop'?'var(--purple)':'var(--gold)';
+    p.style.stroke=col;p.style.opacity='0.6';
+    p.style.pointerEvents='stroke';p.style.cursor='pointer';
+    p.addEventListener('click',()=>{C=C.filter(x=>x!==c);drawC();toast('Connection removed')});
+    svg.appendChild(p);
+    // Arrow
+    const ar=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    ar.setAttribute('points',`${x2},${y2} ${x2-6},${y2-10} ${x2+6},${y2-10}`);
+    ar.classList.add('ca');ar.style.fill=col;svg.appendChild(ar);
+    // Label
+    if(c.label){const lb=document.createElementNS('http://www.w3.org/2000/svg','text');lb.setAttribute('x',(x1+x2)/2);lb.setAttribute('y',(y1+y2)/2-6);lb.setAttribute('text-anchor','middle');lb.classList.add('clbl');lb.style.fill=col;lb.textContent=c.label;svg.appendChild(lb)}
+  });
+}
+
+function selNode(id){selId=id;document.querySelectorAll('.fn').forEach(e=>e.classList.remove('selected'));const el=document.getElementById(id);if(el)el.classList.add('selected')}
+function delNode(id){N=N.filter(n=>n.id!==id);C=C.filter(c=>c.from!==id&&c.to!==id);const el=document.getElementById(id);if(el)el.remove();drawC();updCount();toast('Deleted')}
+function clearAll(){if(N.length&&!confirm('Clear everything?'))return;N=[];C=[];canvas.querySelectorAll('.fn').forEach(e=>e.remove());svg.innerHTML='';updCount();toast('Cleared!')}
+canvas.addEventListener('click',e=>{if(e.target===canvas||e.target===empty){selId=null;document.querySelectorAll('.fn').forEach(e=>e.classList.remove('selected'))}});
+document.addEventListener('keydown',e=>{if(e.key==='Delete'&&selId&&!['TEXTAREA','INPUT'].includes(document.activeElement.tagName)){delNode(selId);selId=null}});
+
+// ============ VARIABLE PANEL ============
+function updVarPanel(){
+  const vars=N.filter(n=>n.type==='variable'||n.type==='constant');
+  const lists=N.filter(n=>n.type==='list-create');
+  document.getElementById('vCount').textContent=vars.length;
+  document.getElementById('lCount').textContent=lists.length;
+  const vl=document.getElementById('varList');
+  if(!vars.length){vl.innerHTML='<div class="vp-empty">No variables yet.</div>'}
+  else{vl.innerHTML=vars.map(v=>`<div class="var-item"><div class="vi-name">${esc(v.varName)} ${v.type==='constant'?'🔒':''}</div><div class="vi-val">= ${esc(v.varValue)}</div><div class="vi-type">${v.varType}</div></div>`).join('')}
+  const ll=document.getElementById('listList');
+  if(!lists.length){ll.innerHTML='<div class="vp-empty">No lists yet.</div>'}
+  else{ll.innerHTML=lists.map(l=>`<div class="var-item list-item"><div class="vi-name">📋 ${esc(l.listName)}</div><div class="vi-val">[${esc(l.items)}]</div></div>`).join('')}
+}
+
+// ============ SAVE / LOAD ============
+function exportJSON(){
+  const data=JSON.stringify({nodes:N,connections:C,nextId:nid},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-logic-flow.json';a.click();
+  toast('Saved! 💾');
+}
+function importJSON(){document.getElementById('fileLoad').click()}
+function doImport(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      clearAll();
+      N=d.nodes||[];C=d.connections||[];nid=d.nextId||N.length+1;
+      N.forEach(n=>renderNode(n));
+      drawC();updCount();toast('Loaded! 📂');
+    }catch(err){toast('Could not read file 😥')}
+  };
+  r.readAsText(f);e.target.value='';
+}
+
+// ============ PLAY ENGINE ============
+function openPlay(){
+  if(!N.find(n=>n.type==='start')){toast('Add a 🟢 Start block first!');return}
+  if(N.length<2){toast('Add more blocks!');return}
+  document.getElementById('playOverlay').classList.add('active');
+  document.getElementById('modePicker').style.display='block';
+  document.getElementById('playScene').style.display='none';
+}
+function closePlay(){document.getElementById('playOverlay').classList.remove('active')}
+
+// Runtime state
+let RV={},RL={},consoleLog=[];
+
+function initRuntime(){
+  RV={};RL={};consoleLog=[];
+  N.filter(n=>n.type==='variable').forEach(v=>{RV[v.varName]=v.varType==='number'?Number(v.varValue)||0:v.varType==='boolean'?(v.varValue==='true'):v.varValue});
+  N.filter(n=>n.type==='constant').forEach(v=>{RV[v.varName]=v.varType==='number'?Number(v.varValue)||0:v.varValue});
+  N.filter(n=>n.type==='list-create').forEach(l=>{RL[l.listName]=(l.items||'').split(',').map(s=>s.trim()).filter(Boolean)});
+}
+
+function getOut(nodeId,port){const c=C.find(c=>c.from===nodeId&&c.port===(port||'out'));return c?N.find(n=>n.id===c.to):null}
+function resolveVal(expr){
+  if(expr===undefined||expr===null)return expr;
+  const s=String(expr).trim();
+  if(RV.hasOwnProperty(s))return RV[s];
+  if(!isNaN(Number(s)))return Number(s);
+  if(s==='true')return true;if(s==='false')return false;
+  // simple expression like "score + 1"
+  const m=s.match(/^(\w+)\s*([+\-*/])\s*(.+)$/);
+  if(m){const a=resolveVal(m[1]),b=resolveVal(m[3]);const ops={'+':a+b,'-':a-b,'*':a*b,'/':b?a/b:0};return ops[m[2]]??s}
+  return s;
+}
+function evalCond(cond){
+  if(!cond)return false;
+  const ops=['>=','<=','≥','≤','!=','≠','>','<','=','=='];
+  for(const op of ops){
+    const i=cond.indexOf(op);
+    if(i>0){const a=resolveVal(cond.slice(0,i).trim()),b=resolveVal(cond.slice(i+op.length).trim());
+    switch(op){case'>':return a>b;case'<':return a<b;case'=':case'==':return a==b;case'!=':case'≠':return a!=b;case'>=':case'≥':return a>=b;case'<=':case'≤':return a<=b}}}
+  return !!resolveVal(cond);
+}
+function execNode(n){
+  switch(n.type){
+    case'setvar':{const v=resolveVal(n.value);if(n.op==='set')RV[n.varName]=v;else if(n.op==='add')RV[n.varName]=(RV[n.varName]||0)+Number(v);else if(n.op==='sub')RV[n.varName]=(RV[n.varName]||0)-Number(v);else if(n.op==='mul')RV[n.varName]=(RV[n.varName]||0)*Number(v);else if(n.op==='div')RV[n.varName]=v?((RV[n.varName]||0)/Number(v)):0;break}
+    case'math':{const a=Number(resolveVal(n.a))||0,b=Number(resolveVal(n.b))||0;const ops={'+':a+b,'-':a-b,'−':a-b,'*':a*b,'×':a*b,'/':b?a/b:0,'÷':b?a/b:0,'%':b?a%b:0,'mod':b?a%b:0};RV[n.result]=ops[n.operator]??0;break}
+    case'random':RV[n.varName]=Math.floor(Math.random()*(n.max-n.min+1))+n.min;break;
+    case'list-action':{const l=RL[n.listName]||[];if(n.action==='add')l.push(resolveVal(n.value));else if(n.action==='remove'){const i=l.indexOf(resolveVal(n.value));if(i>-1)l.splice(i,1)}else if(n.action==='get'){RV['_listResult']=l[Number(resolveVal(n.value))-1]||''}else if(n.action==='length'){RV['_listResult']=l.length}else if(n.action==='contains'){RV['_listResult']=l.includes(resolveVal(n.value))}RL[n.listName]=l;break}
+    case'output':consoleLog.push({type:'out',text:interpolate(n.message)});break;
+    case'output-sprite':consoleLog.push({type:'out',text:`🐱 ${n.sprite} says: "${interpolate(n.message)}"`});break;
+    case'sound':consoleLog.push({type:'out',text:`🔊 Playing sound: ${n.sound}`});break;
+    case'backdrop':consoleLog.push({type:'out',text:`🖼️ Scene changed to: ${n.scene}`});break;
+  }
+}
+function interpolate(msg){return (msg||'').replace(/\{(\w+)\}/g,(_,v)=>RV[v]!==undefined?RV[v]:RL[v]?`[${RL[v].join(', ')}]`:'{'+v+'}')}
+function describeNode(n){
+  switch(n.type){
+    case'start':return `🟢 ${n.text}`;
+    case'action':return `⚡ ${n.text}`;
+    case'decision':return `❓ Checking: ${n.condition||n.text}`;
+    case'end':return `🏁 ${n.text}`;
+    case'loop-repeat':return `🔄 Repeat ${n.times} times (counter: ${n.counter})`;
+    case'loop-while':return `♾️ While ${n.condition}`;
+    case'loop-foreach':return `📋 For each ${n.itemVar} in ${n.listName}`;
+    case'wait':return `⏱️ Wait ${n.seconds} seconds`;
+    case'comment':return `💬 Note: ${n.text}`;
+    case'variable':return `📦 Create ${n.varName} = ${n.varValue} (${n.varType})`;
+    case'constant':return `🔒 Constant ${n.varName} = ${n.varValue}`;
+    case'setvar':return `✏️ ${n.op==='set'?'Set':'Change'} ${n.varName} → ${n.value}`;
+    case'math':return `➕ ${n.result} = ${n.a} ${n.operator} ${n.b}`;
+    case'compare':return `⚖️ Compare: ${n.a} ${n.operator} ${n.b}`;
+    case'logic':return `🔗 Logic: ${n.a} ${n.operator} ${n.b}`;
+    case'random':return `🎲 ${n.varName} = random ${n.min} to ${n.max}`;
+    case'list-create':return `📋 Create list "${n.listName}" = [${n.items}]`;
+    case'list-action':return `📌 ${n.action} on list "${n.listName}"`;
+    case'input':return `🎤 Ask: "${n.prompt}" → save in ${n.saveAs}`;
+    case'output':return `💬 Output: "${interpolate(n.message)}"`;
+    case'output-sprite':return `🐱 ${n.sprite} says: "${interpolate(n.message)}"`;
+    case'sound':return `🔊 Play sound: ${n.sound}`;
+    case'backdrop':return `🖼️ Change scene to: ${n.scene}`;
+    case'function':return `🧱 Function ${n.funcName}: ${n.text}`;
+    default:return n.text||n.type;
+  }
+}
+function varStateHTML(){
+  const keys=Object.keys(RV);const lkeys=Object.keys(RL);
+  if(!keys.length&&!lkeys.length)return'';
+  let h='<div class="play-var-state"><h4>📦 Current Values</h4>';
+  keys.forEach(k=>h+=`<div class="pv-row"><span class="pv-name">${esc(k)}</span><span class="pv-val">${esc(String(RV[k]))}</span></div>`);
+  lkeys.forEach(k=>h+=`<div class="pv-row"><span class="pv-name">📋 ${esc(k)}</span><span class="pv-val">[${RL[k].map(i=>esc(String(i))).join(', ')}]</span></div>`);
+  return h+'</div>';
+}
+function consoleHTML(){
+  if(!consoleLog.length)return'';
+  return'<div class="play-console">'+consoleLog.map(e=>`<div class="${e.type==='out'?'cout':'cin'}">${e.type==='out'?'💬':'🎤'} ${esc(e.text)}</div>`).join('')+'</div>';
+}
+
+// ============ ANIMATED PLAY ============
+function startPlay(mode){
+  document.getElementById('modePicker').style.display='none';
+  document.getElementById('playScene').style.display='block';
+  initRuntime();
+  const sn=N.find(n=>n.type==='start');
+  if(mode==='anim')animPlay(sn);else storyPlay(sn);
+}
+
+function animPlay(startNode){
+  let cur=startNode,step=0,loopStacks=[];
+  const chars=['🧑‍🚀','🧙','🦊','🤖','🦸','🧑‍🎓','🐱'];
+  const ch=chars[Math.floor(Math.random()*chars.length)];
+
+  function render(){
+    if(!cur){document.getElementById('playScene').innerHTML=`<button class="btn btn-out play-close" onclick="closePlay()">✕</button><div><div class="play-char" style="font-size:72px">🎉</div><div class="play-step-card"><div class="play-step-text">No more connections!<br>Go back and connect your blocks.</div><div class="play-choices"><button class="pc next" onclick="closePlay()">← Builder</button></div></div></div>`;return}
+    step++;
+    // Execute side effects
+    if(!['start','end','decision','comment','loop-repeat','loop-while','loop-foreach','compare','logic','input'].includes(cur.type))execNode(cur);
+    if(cur.type==='variable'||cur.type==='constant'){RV[cur.varName]=cur.varType==='number'?Number(cur.varValue)||0:cur.varType==='boolean'?(cur.varValue==='true'):cur.varValue}
+    if(cur.type==='list-create'){RL[cur.listName]=(cur.items||'').split(',').map(s=>s.trim()).filter(Boolean)}
+
+    const tc={start:'var(--green)',action:'var(--blue)',decision:'var(--gold)',end:'var(--red)','loop-repeat':'var(--purple)','loop-while':'var(--purple)','loop-foreach':'var(--purple)',variable:'var(--teal)',constant:'var(--teal)',setvar:'var(--teal)',math:'var(--orange)',compare:'var(--orange)',logic:'var(--orange)',random:'#FBBF24','list-create':'var(--cyan)','list-action':'var(--cyan)',input:'var(--pink)',output:'var(--pink)','output-sprite':'var(--pink)',sound:'var(--pink)',backdrop:'var(--pink)',wait:'#FBBF24',comment:'#94A3B8',function:'#C084FC'};
+
+    let choices='';
+    if(cur.type==='end'){
+      choices=`<button class="pc next" onclick="closePlay()">🏁 Done!</button><button class="pc yes" onclick="animRestart()">🔄 Again</button>`;
+    } else if(cur.type==='decision'){
+      const yN=getOut(cur.id,'yes'),nN=getOut(cur.id,'no');
+      const result=evalCond(cur.condition);
+      choices=`<div style="font-size:12px;color:#8899bb;margin-bottom:8px">Result: <strong style="color:${result?'var(--green)':'var(--red)'};">${result?'TRUE ✅':'FALSE ❌'}</strong></div>`;
+      if(yN)choices+=`<button class="pc yes" onclick="animGo('${yN.id}')">✅ Yes path</button>`;
+      if(nN)choices+=`<button class="pc no" onclick="animGo('${nN.id}')">❌ No path</button>`;
+      if(!yN&&!nN)choices+=`<button class="pc warn" onclick="closePlay()">⚠️ Connect paths!</button>`;
+    } else if(cur.type==='input'){
+      choices=`<div class="play-input-wrap"><input type="text" id="pInput" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')submitInput()"><button class="pc next" onclick="submitInput()">Enter</button></div>`;
+    } else if(cur.type.startsWith('loop')){
+      const body=getOut(cur.id,'loop')||getOut(cur.id,'out');
+      const after=cur.type.startsWith('loop')?getOut(cur.id,'out'):null;
+      if(cur.type==='loop-repeat'){
+        choices=`<div style="font-size:12px;color:#8899bb;margin-bottom:8px">Will repeat <strong style="color:var(--purple)">${cur.times}</strong> times</div>`;
+      } else if(cur.type==='loop-while'){
+        const r=evalCond(cur.condition);
+        choices=`<div style="font-size:12px;color:#8899bb;margin-bottom:8px">Condition: <strong style="color:${r?'var(--green)':'var(--red)'};">${r?'TRUE — will loop':'FALSE — skip'}</strong></div>`;
+      } else if(cur.type==='loop-foreach'){
+        const l=RL[cur.listName]||[];
+        choices=`<div style="font-size:12px;color:#8899bb;margin-bottom:8px">List has <strong style="color:var(--cyan)">${l.length}</strong> items</div>`;
+      }
+      const next=body||after||getOut(cur.id,'out');
+      if(next)choices+=`<button class="pc next" onclick="animGo('${next.id}')">Next →</button>`;
+      else choices+=`<button class="pc warn" onclick="closePlay()">⚠️ Connect loop!</button>`;
+    } else {
+      const next=getOut(cur.id,'out');
+      if(next)choices+=`<button class="pc next" onclick="animGo('${next.id}')">Next →</button>`;
+      else if(cur.type!=='comment')choices+=`<button class="pc warn" onclick="closePlay()">⚠️ Dead end!</button>`;
+      else{const nx2=getOut(cur.id,'out');choices+=`<button class="pc next" onclick="${nx2?`animGo('${nx2.id}')`:'closePlay()'}">Next →</button>`}
+    }
+
+    document.getElementById('playScene').innerHTML=`
+      <button class="btn btn-out play-close" onclick="closePlay()">✕</button>
+      <div><div class="play-char">${ch}</div>
+      <div class="play-step-card">
+        <div class="play-step-type" style="color:${tc[cur.type]||'#fff'}">${cur.type.toUpperCase().replace(/-/g,' ')}</div>
+        <div class="play-step-text">${esc(describeNode(cur))}</div>
+        ${varStateHTML()}${consoleHTML()}
+        <div class="play-choices">${choices}</div>
+      </div>
+      <div class="play-progress">Step ${step}<div class="pp-bar"><div class="pp-fill" style="width:${Math.min(100,step/N.length*100)}%"></div></div></div></div>`;
+    if(cur.type==='input')setTimeout(()=>{const inp=document.getElementById('pInput');if(inp)inp.focus()},100);
+  }
+
+  window.animGo=id=>{cur=N.find(n=>n.id===id)||null;render()};
+  window.animRestart=()=>{initRuntime();step=0;cur=startNode;render()};
+  window.submitInput=()=>{const inp=document.getElementById('pInput');if(!inp)return;const val=inp.value||'';RV[cur.saveAs]=isNaN(Number(val))?val:Number(val);consoleLog.push({type:'in',text:`${cur.prompt} → ${val}`});const next=getOut(cur.id,'out');cur=next;render()};
+  render();
+}
+
+// ============ STORY PLAY ============
+function storyPlay(startNode){
+  let entries=[],cur=startNode;
+
+  function addAndRender(node){
+    entries.push(node);
+    if(!['start','end','decision','comment','loop-repeat','loop-while','loop-foreach','compare','logic','input'].includes(node.type))execNode(node);
+    if(node.type==='variable'||node.type==='constant'){RV[node.varName]=node.varType==='number'?Number(node.varValue)||0:node.varType==='boolean'?(node.varValue==='true'):node.varValue}
+    if(node.type==='list-create'){RL[node.listName]=(node.items||'').split(',').map(s=>s.trim()).filter(Boolean)}
+    renderStory();
+  }
+
+  function renderStory(){
+    const sc=document.getElementById('playScene');
+    let h=`<button class="btn btn-out play-close" onclick="closePlay()">✕</button><div class="play-story" id="sScroll">`;
+    entries.forEach(n=>{
+      const cls=n.type.replace(/-.*$/,'');
+      h+=`<div class="se ${cls}"><div class="se-step" style="color:${typeCol(n.type)}">${n.type.toUpperCase().replace(/-/g,' ')}</div><div class="se-text">${esc(describeNode(n))}</div></div>`;
+    });
+    // Var state
+    h+=varStateHTML();h+=consoleHTML();
+
+    // Choices
+    if(cur&&cur.type==='end'){
+      h+=`<div class="se end"><div class="se-step" style="color:var(--red)">✨ FLOW COMPLETE</div><div class="se-text" style="text-align:center">Reached ending in <strong>${entries.length}</strong> steps!</div></div>`;
+      h+=`<div class="story-choices"><button class="pc next" onclick="closePlay()">← Builder</button><button class="pc yes" onclick="storyRestart()">🔄 Again</button></div>`;
+    } else if(cur&&cur.type==='decision'){
+      const r=evalCond(cur.condition);
+      h+=`<div style="font-size:12px;color:#8899bb;margin:8px 0">Condition result: <strong style="color:${r?'var(--green)':'var(--red)'};">${r?'TRUE':'FALSE'}</strong></div>`;
+      const yN=getOut(cur.id,'yes'),nN=getOut(cur.id,'no');
+      h+=`<div class="story-choices">`;
+      if(yN)h+=`<button class="pc yes" onclick="sPick('${yN.id}')">✅ Yes</button>`;
+      if(nN)h+=`<button class="pc no" onclick="sPick('${nN.id}')">❌ No</button>`;
+      if(!yN&&!nN)h+=`<button class="pc warn" onclick="closePlay()">⚠️ Connect!</button>`;
+      h+=`</div>`;
+    } else if(cur&&cur.type==='input'){
+      h+=`<div class="play-input-wrap"><input type="text" id="sInput" placeholder="Type answer…" onkeydown="if(event.key==='Enter')sSubmit()"><button class="pc next" onclick="sSubmit()">Enter</button></div>`;
+    } else if(cur&&cur.type!=='end'){
+      const next=getOut(cur.id,cur.type.startsWith('loop')?'out':'out')||getOut(cur.id,'loop');
+      h+=`<div class="story-choices">`;
+      if(next)h+=`<button class="pc next" onclick="sPick('${next.id}')">Continue →</button>`;
+      else h+=`<button class="pc warn" onclick="closePlay()">⚠️ Dead end!</button>`;
+      h+=`</div>`;
+    } else if(!cur){
+      h+=`<div class="story-choices"><button class="pc warn" onclick="closePlay()">⚠️ Path ended</button></div>`;
+    }
+
+    h+=`</div>`;sc.innerHTML=h;
+    setTimeout(()=>{const s=document.getElementById('sScroll');if(s)s.scrollTop=s.scrollHeight},100);
+    if(cur&&cur.type==='input')setTimeout(()=>{const inp=document.getElementById('sInput');if(inp)inp.focus()},150);
+  }
+
+  window.sPick=id=>{cur=N.find(n=>n.id===id)||null;if(cur)addAndRender(cur)};
+  window.storyRestart=()=>{initRuntime();entries=[];cur=startNode;addAndRender(cur)};
+  window.sSubmit=()=>{const inp=document.getElementById('sInput');if(!inp)return;const v=inp.value||'';RV[cur.saveAs]=isNaN(Number(v))?v:Number(v);consoleLog.push({type:'in',text:`${cur.prompt} → ${v}`});const next=getOut(cur.id,'out');cur=next;if(cur)addAndRender(cur);else renderStory()};
+
+  addAndRender(cur);
+}
+function typeCol(t){return{start:'var(--green)',action:'var(--blue)',decision:'var(--gold)',end:'var(--red)','loop-repeat':'var(--purple)','loop-while':'var(--purple)','loop-foreach':'var(--purple)',variable:'var(--teal)',constant:'var(--teal)',setvar:'var(--teal)',math:'var(--orange)',compare:'var(--orange)',logic:'var(--orange)',random:'#FBBF24','list-create':'var(--cyan)','list-action':'var(--cyan)',input:'var(--pink)',output:'var(--pink)','output-sprite':'var(--pink)',sound:'var(--pink)',backdrop:'var(--pink)',wait:'#FBBF24',comment:'#94A3B8',function:'#C084FC'}[t]||'#fff'}
+
+updCount();
+</script>
+</body>
+</html>
