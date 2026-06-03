@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const roleCards = [
   {
     icon: "👩‍🏫",
@@ -132,9 +134,9 @@ export default function Home() {
     <main className="min-h-screen bg-[#071120] text-white">
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[#071120]/90 backdrop-blur-md">
         <div className="flex items-center justify-between px-8 py-5">
-          <div className="text-2xl font-black tracking-tight">
+          <Link href="/" className="text-2xl font-black tracking-tight">
             Young<span className="text-amber-300">Foundry</span>
-          </div>
+          </Link>
 
           <nav className="hidden gap-8 text-sm font-semibold text-slate-300 md:flex">
             <a href="#roles" className="hover:text-white">
@@ -146,7 +148,26 @@ export default function Home() {
             <a href="#free-apps" className="hover:text-white">
               Free Apps
             </a>
+            <Link href="/dashboard" className="hover:text-white">
+              Dashboard
+            </Link>
           </nav>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="rounded-full border border-white/20 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/10"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/signup"
+              className="rounded-full bg-amber-300 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-amber-200"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -170,6 +191,29 @@ export default function Home() {
               solving, storytelling, creativity, and interactive learning apps
               into a modern experience for students, parents, and educators.
             </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="/signup"
+                className="rounded-full bg-amber-300 px-7 py-4 text-base font-black text-slate-950 transition hover:bg-amber-200"
+              >
+                Create Free Account
+              </Link>
+
+              <Link
+                href="/login"
+                className="rounded-full border border-white/20 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10"
+              >
+                Login
+              </Link>
+
+              <a
+                href="#apps"
+                className="rounded-full border border-amber-300/30 px-7 py-4 text-base font-bold text-amber-300 transition hover:bg-amber-300/10"
+              >
+                Explore Apps
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -215,6 +259,22 @@ export default function Home() {
                 </ul>
               </div>
             ))}
+          </div>
+
+          <div className="mt-12 flex flex-wrap gap-4">
+            <Link
+              href="/signup"
+              className="rounded-full bg-amber-300 px-6 py-3 font-black text-slate-950 transition hover:bg-amber-200"
+            >
+              Sign Up as Family
+            </Link>
+
+            <Link
+              href="/login"
+              className="rounded-full border border-white/20 px-6 py-3 font-bold text-white transition hover:bg-white/10"
+            >
+              Teacher/Admin Login
+            </Link>
           </div>
         </div>
       </section>
@@ -314,6 +374,42 @@ export default function Home() {
                 </div>
               </a>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-7xl rounded-3xl border border-amber-300/20 bg-amber-300/10 p-10 text-center">
+          <h2 className="text-4xl font-black tracking-tight">
+            Ready to start learning?
+          </h2>
+
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+            Create a family account, add student profiles, and begin building a
+            personalized learning journey.
+          </p>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link
+              href="/signup"
+              className="rounded-full bg-amber-300 px-7 py-4 font-black text-slate-950 transition hover:bg-amber-200"
+            >
+              Get Started
+            </Link>
+
+            <Link
+              href="/login"
+              className="rounded-full border border-white/20 px-7 py-4 font-bold text-white transition hover:bg-white/10"
+            >
+              Login
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="rounded-full border border-amber-300/30 px-7 py-4 font-bold text-amber-300 transition hover:bg-amber-300/10"
+            >
+              Go to Dashboard
+            </Link>
           </div>
         </div>
       </section>
